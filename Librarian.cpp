@@ -29,13 +29,19 @@ return root ;
 node *insert_node(node * root ,char * bname,char*author ,int bnum ,int price){
 if(root==NULL){
     root =add_at_empty( bname,author , bnum , price) ;
+    return root ;
+}
+else if(bnum==root->book_num){
+cout<<endl<<"\nBook number already exists\n";
+return root ;
 }
 else if (bnum <root->book_num){
     root->left =insert_node(root->left , bname,author , bnum , price) ;
 }
-else {
+else if(bnum>root->book_num) {
     root->right = insert_node(root->right , bname,author , bnum , price) ;
 }
+
 return root ;
 }
 void search_node(int bnum ,node*root ){
@@ -59,17 +65,15 @@ else {
 }
 void  add_book_via_user(struct node ** root ){
 char bname[30] ; char author[30] ; int bnum ; int price;
-cout<<"\n enter book's name (note when you fininsh typing the book's name type '&' in the end then press enter same for book's author aswell .) :"<<endl;
-cin.getline(bname,30,'&') ;
+cout<<"\n enter book's name :"<<endl;
+cin>>bname ;
 cout<<endl<<"\n enter author's name :";
-cin.getline(author,30,'&');
+cin>>author;
 cout<<endl<<"\n enter book's number :";
 cin>>bnum ;
 cout<<"\n enter book's price : ";
 cin>>price ;
 (*root) =insert_node((*root),bname,author,bnum,price) ;
-
-
 };
 void category_books_numbers(struct node * root){
 if(root==NULL){
@@ -77,10 +81,8 @@ if(root==NULL){
 }
 category_books_numbers(root->left) ;
 cout<<endl<<"book name : "<<root->book_name ;
-cout<<"book's number : "<<root->book_num <<endl;
+cout<<" book's number : "<<root->book_num <<endl;
 category_books_numbers(root->right ) ;
-
-
 }
 void library();
 void inorder(node *root) ;
@@ -112,7 +114,6 @@ default :cout<<"\n wrong choice"; break;
 case 5:library() ; break;
 }
 library() ;
-
 }
 
 
@@ -139,11 +140,7 @@ case 3 : adjust(&comedy) ;break ;
 case 4 :  adjust(&romance) ;break ;
 case 5 :exit(0) ;
 default :cout<<"wrong input "; library() ;
-
-
 }
-
-
 }
 
 
@@ -153,13 +150,15 @@ int main()
 action = insert_node(action,"max payne","mark",1,3)  ;
 action = insert_node(action,"tomb raider","james",2,5)  ;
 action = insert_node(action,"crank","stathom",3,9)  ;
+
 horror = insert_node(horror,"the ring","belly",4,6) ;
 horror = insert_node(horror,"ring the bell","kermet",5,9) ;
-horror = insert_node(horror,"annabele origins","disney",3,66) ;
+horror = insert_node(horror,"annabele origins","disney",6,66) ;
+
 comedy = insert_node(comedy,"the big short","disney",7,66) ;
 comedy = insert_node(comedy,"the wolf of wall street","harry potter",8,69) ;
-comedy = insert_node(comedy,"money in the bank","wwe raw",8,2) ;
-comedy = insert_node(comedy,"the other guys","good team",9,20) ;
+comedy = insert_node(comedy,"money in the bank","wwe raw",9,2) ;
+comedy = insert_node(comedy,"the other guys","good team",10,20) ;
 romance = insert_node(romance,"me before you","abdelbasset hammoda",10,400) ;
 library();
 
