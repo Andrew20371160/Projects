@@ -1,3 +1,3 @@
 # CPP_projects
 #C++ projects
-#Releases can be found in (All_projects) repository
+#Releases can be found in (C/CPP projects) repository
