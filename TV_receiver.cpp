@@ -57,7 +57,7 @@ if(tail ==NULL){
     return ;
 }
 else if (chcount()>=max_count ){
-    cout<<"\n too man channels in receiver delete a channel to add a new one ";
+    cout<<"\n too many channels in the receiver delete a channel to add a new one ";
     return ;
 }
 
@@ -402,7 +402,7 @@ r1.add_at_end(1,"mbc") ;
 r1.add_at_end(2,"mbc2") ;
 r1.add_at_end(3,"mbc3") ;
 r1.add_at_end(4,"mbc4") ;
-r1.add_at_end(5,"cpc") ;
+r1.add_at_end(5,"cbc") ;
 
 r1.interface() ;
 
