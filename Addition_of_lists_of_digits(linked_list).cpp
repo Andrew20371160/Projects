@@ -1,5 +1,7 @@
 #include <iostream>
+#include<cstring>
 using namespace std;
+#define MAX 100
 struct node{
 int digit;
 node * next ;
@@ -133,13 +135,20 @@ int main(){
 node * n1 = NULL;
 node * n2 = NULL;
 node *sum = NULL;
-str2num("789",&n1,3) ;
-str2num("851",&n2,3) ;
+char str1[MAX] ;
+char str1[MAX] ;
+cout<<"Enter the first number : ";
+cin>>str1 ; 
+cout<<"Enter the second number : ";
+cin>>str2 ; 
+str2num(str1,&n1,strlen(str1)) ;
+str2num(str2,&n2,strlen(str2) ;
 add_num(n1,n2,&sum) ;
 show(n1) ;cout<<" + ";show(n2) ;
 cout<<" = ";show(sum);
 del_num(&n1);
 del_num(&n2);
 del_num(&sum);
+system("pause");
 return 0;
 }
