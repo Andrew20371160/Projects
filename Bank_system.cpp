@@ -2,6 +2,7 @@
 #include<string.h>
 #define MAX 30
 using namespace std ;
+//ACCOUNT NODE STRUCTURE
 struct node {
 int acc_num ,rec ;
 char  *name ;
@@ -57,7 +58,6 @@ if(root==NULL){
 else if (acc_num >root->acc_num){
     root->right = del_node(acc_num,root->right) ;
 }
-
 else if (acc_num <root->acc_num){
     root->left = del_node(acc_num,root->left) ;
 }
@@ -124,8 +124,7 @@ else {
 }
 return root ;
 }
-
-
+//Show all accounts
 void show_nodes(node * root ){
 if(root ==NULL){
     return ;
@@ -135,8 +134,8 @@ cout<<"\n Account number : "<<root->acc_num;
 cout<<endl<<"Full-Name : " <<root->name;
 cout<<endl<<"Record : "<<root->rec<<endl;
 show_nodes(root->right) ;
-
 }
+// 
 void update_account(node ** root){
 int choice , old_num ;
 cout<<"\n specify what to update \n ";
@@ -146,7 +145,6 @@ cout<<"\n enter the account number you want to update " ;
 cin>>old_num;
 (*root)= search_node(old_num,*root) ;
 switch(choice){
-
 case 1 : {
 cout<<"\n enter the new name";
 (*root)->name =(char*)malloc(sizeof(char)*MAX) ;
@@ -159,11 +157,8 @@ cin>>(*root)->rec ;
 }break ;
 case 3 : break ;
 }
-
-
-
 }
-
+//User interface functions
 void enter_acc_via_user(node ** root ){
 int acc_num,rec ;
 char name[MAX] ;
@@ -178,13 +173,10 @@ cin>>rec;
 void interface(node * root ){
 }
 int main (){
-
 node * root = NULL ;
-
 cout<<"\n---BANK-INFORMATION-SYSTEM----\n";
 while(1){
 int n ;
-
 cout<<endl<<"1---Insert an account\n2---Search for an account\n3---Delete an account";
 cout<<endl<<"4---show all accounts\n5---Update account's data\n6---Delete every account\n7---quit\nChoice : ";
 cin>>n ;
