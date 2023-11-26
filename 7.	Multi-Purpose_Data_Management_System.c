@@ -2,11 +2,9 @@
 #include<stdlib.h>
 #include<string.h>
 #define max 20
-//project of everything //Welcome to the POE (project of everything) Yeah stolen from stephen hawking
-//The idea is the user choses how he/she wants to use the software
-//It's like a template of a project that can be used in multiple things
-//Like: Bank system,school/university systems,and other data collecting systems
-//these next 4 strings are for the user to name different variables of the system
+/*Using a binary tree for managing various data types.
+The program can be adapted for different systems like banks or schools.
+*/
 char system_name[max];
 char int_name[max];
 char float_name[max];
