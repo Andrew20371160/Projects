@@ -209,7 +209,7 @@ printf("\nWelcome To POE (project of everything)");
 printf("\nThe idea is that you can use the same software for multiple projects\n");
 printf("\nType the name of the system : ");
 scanf("%s",system_name);
-printf("\nType the Special number name: ");
+printf("\nType the Special number name (for example Unique ID for students)");
 scanf("%s",int_name);
 printf("\nType the Floating point data name : ");
 scanf("%s",float_name);
