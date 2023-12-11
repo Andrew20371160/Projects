@@ -22,6 +22,7 @@ newnode->left = NULL;
 newnode->right = NULL;
 return newnode ;
 }
+//Insertion function
 node * insert_node(node * root , char* number , char * name ){
 if(root==NULL){
     root = get_node(number,name);
@@ -34,6 +35,7 @@ else {
     root->right = insert_node(root->right,number,name) ;
 }
 }
+//abstraction from the main insertion function
 node * insert_via_user(node * root){
 char name[MAX];
 char number[MAX] ;
@@ -52,24 +54,23 @@ return ;
 cout<<endl<<"Name : "<<root->name<<endl;
 cout<<endl<<"Number : "<<root->number<<endl;
 }
-
-
+//search by name function
 void search_by_name(node* root,char *name){
 if(root==NULL){
     return ;
 }
-//this line if user sends a full correct name it's faster that way to find the contact wanted
+//this line if user sends a full correct name
 else if(strcmp(root->name,name)==0){
 show_node(root);
 }
 else {
 //explanation of the following lines of codes is in search_by_number function
 int s = strlen(name);
-char * portion = new char[s];
+char * portion = new char[s+1];
 for(int i = 0 ; i<s;i++){
     *(portion+i) = *(root->name+i);
 }
-*(portion+s)= NULL;
+*(portion+s)= '\0';
 if(strcmp(portion,name)==0){
     show_node(root);
 }
