@@ -10,6 +10,9 @@ int year  ;
 int views ;
 node * right ,*left ;
 };
+#define by_rating 1
+#define by_views 2 
+#define by_year 3
 node * get_node(int year ,int views,float rating,char*movie_name,char * director_name ){
 node * root = new node ;
 root ->year=  year;
@@ -29,7 +32,7 @@ if(root==NULL){
     return root ;
 }
 
-else if(arrange==1){
+else if(arrange==by_rating){
     if(rating<=root->rating){
         root->left = insert_node(root->left,year,views,rating,movie_name,director_name,arrange);
     }
@@ -38,7 +41,7 @@ else if(arrange==1){
 
     }
 }
-else if(arrange==2){
+else if(arrange==by_views){
     if(views<=root->views){
         root->left = insert_node(root->left,year,views,rating,movie_name,director_name,arrange);
     }
@@ -47,7 +50,7 @@ else if(arrange==2){
 
     }
 }
-else if(arrange==3){
+else if(arrange==by_year){
     if(year<=root->year){
         root->left = insert_node(root->left,year,views,rating,movie_name,director_name,arrange);
     }
@@ -55,7 +58,7 @@ else if(arrange==3){
         root->right = insert_node(root->right,year,views,rating,movie_name,director_name,arrange);
 }
 }
-//default
+//default is by_rating 
 else{
      if(rating<=root->rating){
         root->left = insert_node(root->left,year,views,rating,movie_name,director_name,arrange);
@@ -91,11 +94,14 @@ cout<<endl<<"Total views : "<<root->views ;
 cout<<endl<<"Year of production : "<<root->year;
 reverse_order(root->left);
 }
+//create a new bst sorted in different arrangement 
 void copy_tree(node ** dest,node*src,int arrange){
 if(src==NULL){
     return ;
 }
+//inorder traversal of the older BST
 copy_tree(dest,src->left,arrange);
+//Insert into the new bst based on user's needs using @arrange paramter
 (*dest)= insert_node(*dest,src->year,src->views,src->rating,src->movie_name,src->director,arrange);
 copy_tree(dest,src->right,arrange);
 
