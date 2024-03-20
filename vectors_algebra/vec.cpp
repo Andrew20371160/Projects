@@ -42,7 +42,29 @@ matrix::matrix(const matrix&mat){
         }
     }
 }
+void matrix::operator=(const matrix&mat){
+    if(this!=&mat){
+        //then check if they don't have same shape
+        if(!same_shape(mat)){
+            //delete old memeory
+            for(int i =0  ;i<rows;i++){
+                delete[]vec[i] ;
+            }
+            delete vec ;
+            //reallocate for copying
+            rows = mat.rows;
+            cols = mat.cols ;
+            vec= get_vec(mat.get_rows(),mat.get_cols()) ;
+        }
+        //copying mechanism
+        for(int i = 0 ; i <rows;i++){
+            for(int j= 0 ; j<cols ;j++){
+                vec[i][j] = mat.vec[i][j] ;
+            }
+        }
 
+}
+}
 
 int matrix ::get_rows()const{
     return rows ;
