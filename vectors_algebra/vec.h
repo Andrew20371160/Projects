@@ -37,7 +37,12 @@ public:
     matrix(int,int,float);//tested
     //deallocate the memory allocated by the matrix
     ~matrix();//tested
-    matrix(const matrix&);
+    //copy constructor
+    matrix(const matrix&);//tested 
+
+    //allows for overwritting in matrices and resizing it 
+    //reusability of same matrix for expressions like mat = mat*2 
+    void operator=(const matrix&) ;//tested
     int get_rows()const;//tested
 
     int get_cols()const;//tested
