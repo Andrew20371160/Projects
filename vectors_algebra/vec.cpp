@@ -502,7 +502,7 @@ matrix matrix ::inverse(void){
     return error_matrix ;
 }
 
-matrix matrix::operator/(matrix& m)
+matrix matrix::operator/(matrix& m)const
 {
     if(m.det()!=0){
         matrix ret_mat = m.inverse() ;
