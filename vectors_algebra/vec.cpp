@@ -237,7 +237,7 @@ bool matrix ::is_square(void)const{
     return rows==cols;
 }
 
-bool matrix ::is_symmetric(void)const{
+bool matrix ::is_symmetric(void){
     if(vec&&is_square()){
         for(int i = 0 ; i <rows;i++){
             for(int j=i+1;j<cols;j++){
@@ -674,3 +674,28 @@ int matrix ::rank(void){//tested
     cout<<square_error ;
     return -1 ;
 }//tested
+
+// Check if this matrix is skew-symmetric
+bool matrix ::is_skew_symmetric(void){
+    if(vec&&is_square()){
+        for(int i = 0 ; i <rows;i++){
+            for(int j=i+1;j<cols;j++){
+                if(vec[i][j]!=-1*vec[j][i]){
+                    return false ;
+            }
+        }
+
+    }
+    return true ;
+    }
+    return false ;
+
+}
+// Check if this matrix is orthogonal
+bool matrix ::is_orthogonal(void){
+    matrix trans_mat = transpose() ;
+    trans_mat = *this *trans_mat ;
+    return trans_mat.is_identity() ;
+}
+
+
