@@ -93,7 +93,7 @@ public:
     float trace(void)const;//tested
 
     // Calculate the rank of this matrix
-    int rank(void)const;
+    int rank(void);//tested
 
     // Check if this matrix is symmetric
     bool is_symmetric(void)const;//tested
