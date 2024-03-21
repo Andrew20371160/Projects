@@ -648,12 +648,29 @@ bool matrix:: is_scalar(void){//tested
     }
     return false ;
 }
-
-int main(){
-    float arr[9]={5,0,0,0,5,0,0,0,5};
-    matrix mat(3,3,arr,9) ;
-    mat.show() ;
-    cout<<mat.is_scalar() ;
-
-    return 0;
-}
+// Calculate the rank of this matrix
+int matrix ::rank(void){//tested
+//first check if its a square matrix
+    if(is_square()){
+        //first perform gaussian elimination downward
+        matrix temp_mat = utri() ;
+        int counter = 0;
+        //then count number of rows that has atleast one non zero element
+        for(int i = 0 ; i<rows; i++){
+            //since its upper triangular matrix
+            //no need to check for all elements from 0 to cols for each row
+            //so for first row we check from zero
+            //and for 2nd row we check from 1 and so on and so forth
+            //we check for elements from 0 index else from i+1
+            for(int j =i; j<cols ; j++){
+                if(abs(temp_mat.vec[i][j])>tolerance){
+                    counter++;
+                    break  ;
+                }
+            }
+        }
+        return counter ;
+    }
+    cout<<square_error ;
+    return -1 ;
+}//tested
