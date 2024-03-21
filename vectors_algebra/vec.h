@@ -96,13 +96,13 @@ public:
     int rank(void);//tested
 
     // Check if this matrix is symmetric
-    bool is_symmetric(void)const;//tested
+    bool is_symmetric(void);//tested
 
     // Check if this matrix is skew-symmetric
-    bool is_skew_symmetric(void)const;
+    bool is_skew_symmetric(void);
 
     // Check if this matrix is orthogonal
-    bool is_orthogonal(void)const;
+    bool is_orthogonal(void);
     //returns length of the caller
     float norm2(void) ;//tested
     //same as previous but different wrapper
