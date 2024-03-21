@@ -5,8 +5,9 @@
 #include <string.h>
 using namespace std ;
 //feel free to edit this value the way you want
-const float tolerance = 0.0000001 ;
+const float tolerance = 0.000001 ;
 const float M_PI= 3.14159;
+//error messages
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
@@ -17,11 +18,15 @@ string uninit_error = "\nmatrix isn't initialized yet\n";
 //we won't have to do that again
 class matrix{
 private :
+//2d array for holding data
 float  **vec ;
+//dimensions of matrix
 int rows , cols;
-
+//helper function for allocating memory for a 2d array
 float**get_vec(int r ,int c){
+    //check for passed parameters
     if(r>0&&c>0){
+        //memory allocation
         float**ret_vec =new float*[r];
         for(int i= 0  ; i <r ;i++){
             ret_vec[i] = new float[c] ;
@@ -35,55 +40,51 @@ public:
     matrix();//tested
     //by default initializes the matrix with zeroes
     matrix(int,int,float);//tested
+        //initializes a matrix with specified 1d array data
+    matrix(int,int,float*,int) ;
+
     //deallocate the memory allocated by the matrix
     ~matrix();//tested
-    //copy constructor
-    matrix(const matrix&);//tested 
-
-    //allows for overwritting in matrices and resizing it 
-    //reusability of same matrix for expressions like mat = mat*2 
-    void operator=(const matrix&) ;//tested
+    //copy constructor 
+    matrix(const matrix&);//tested
+    //get rows value
     int get_rows()const;//tested
-
+    //get cols value
     int get_cols()const;//tested
-    //returns an element at a specified index
+    //accessing element at a specified index
     float& at(int r_ind,int c_ind);//tested
     //fills a matrix with a certain value
     bool fill(int r ,int c,float value);//tested
     //sets current matrix as identity
     void identity(void);//tested
-
+    //check for same dimensions for 2 matrices
     bool same_shape(const matrix&)const ;//tested
-
+    //display functionality 
     void show(void)const;//tested
-    // Add a matrix to this matrix
+    // Add a matrix to the caller matrix and returns it as a new matrix
     matrix operator+(matrix&)const;//tested
-
-    // Subtract a matrix from this matrix
+    // subtracts a matrix from the caller matrix and returns it as a new matrix
     matrix operator-(matrix&)const;//tested
-
-    float dot(matrix&)const;
-
-    float axpy(float,matrix&)const;
-
-    // Multiply this matrix by another matrix
+    // Multiply caller matrix by another matrix
     matrix operator*(matrix&)const;//tested
-    //returns caller/ sent matrix
+    //returns caller/ sent matrix uses @inverse
     matrix operator/(matrix&)const;//tested
+    //turns a matrix into a string for printing 
+    string mat_to_string(void) const;//tested
     // Multiply this matrix by a scalar
     matrix operator*(float)const;
-
-    // Transpose this matrix
+    //performs dot product of 2 matrices and returns the value
+    float dot(matrix&)const;//tested
+    //performs alpha*x+y and returns the value 
+    float axpy(float,matrix&)const;//tested
+    // Transpose caller matrix and returns it as a new matrix
     matrix transpose(void)const;//tested
-
     // Check if this matrix is square
     bool is_square(void)const;//tested
-
     // Calculate the determinant of this matrix
     // (only for square matrices)
     float det(void);//tested
-
-    // Calculate the inverse of this matrix
+    // Calculate the inverse of this matrix and returns it as a new matrix
     // (only for square matrices)
     matrix inverse(void);//tested
 
@@ -95,28 +96,28 @@ public:
     int rank(void)const;
 
     // Check if this matrix is symmetric
-    bool is_symmetric(void)const;
+    bool is_symmetric(void)const;//tested
 
     // Check if this matrix is skew-symmetric
     bool is_skew_symmetric(void)const;
 
     // Check if this matrix is orthogonal
     bool is_orthogonal(void)const;
-
-    float norm2(void) ;
-
-    float length(void) ;
-
-    float theta(matrix&) ;
-
-    bool is_perp(matrix&) ;
-
-    bool is_parallel(matrix&) ;
-
-    bool operator==(matrix&) const;
+    //returns length of the caller
+    float norm2(void) ;//tested
+    //same as previous but different wrapper
+    float length(void) ;//tested
+    //theta between caller and passed matrix
+    float theta(matrix&) ;//tested
+    //checks if caller is perpindicular on the passed matrix
+    bool is_perp(matrix&) ;//tested
+    //checks if caller is in parallel with the passed matrix
+    bool is_parallel(matrix&) ;//tested
+    //checks if 2 matrices are equal 
+    bool operator==(matrix&) const;//tested
 
     // Check if this matrix is idempotent
-    bool is_idempotent(void)const;
+    bool is_idempotent(void);//tested
 
     // Check if this matrix is nilpotent
     bool is_nilpotent(void)const;
@@ -125,37 +126,37 @@ public:
     bool is_involutory(void)const;
 
     // Check if this matrix is diagonal
-    bool is_diagonal(void)const;
+    bool is_diagonal(void);//tested
 
     // Check if this matrix is scalar
-    bool is_scalar(void)const;
+    bool is_scalar(void);//tested
 
     // Check if this matrix is identity
-    bool is_identity(void)const;
+    bool is_identity(void);//tested
 
     // Check if this matrix is upper triangular
-    bool is_upper_triangular(void)const;
+    bool is_upper_tri(void);//tested
 
     // Check if this matrix is lower triangular
-    bool is_lower_triangular(void)const;
-
-    matrix solve(void);
-
+    bool is_lower_tri(void);//tested
+    //solves appended matrix using @utri and then @back_sub
+    matrix solve(void);//tested
+    //performs axpy operation between 2 rows
     void row_axpy(float,int,int) ;
-
+    //performs gaussian elimination downward
     matrix utri(void) ;//tested
-
-    matrix ltri(void) ;
-
-    float back_substitution(int,matrix&);
-    float forward_substitution(int ,matrix&) ;
+    //performs gaussian elimination upward
+    matrix ltri(void) ;//tested
+    //performs back substitution on a selected row and solution matrix is passed with it
+    float back_sub(int,matrix&);//tested
+    //performs forward substitution on a selected row and solution matrix is passed with it
+    float fwd_sub(int ,matrix&) ;//tested
+    //yeah name is opvious
     bool switch_rows(int,int);//tested
-
+    //under construction
     void lu_fact(matrix**,matrix**) ;
 
-    string mat_to_string(void) const;//tested
-
-    matrix operator/(matrix& m);//tested
+    void operator=(const matrix&) ;//tested
 
 };
 
