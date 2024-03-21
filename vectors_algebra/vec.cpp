@@ -42,30 +42,24 @@ matrix::matrix(const matrix&mat){
         }
     }
 }
-void matrix::operator=(const matrix&mat){
-    if(this!=&mat){
-        //then check if they don't have same shape
-        if(!same_shape(mat)){
-            //delete old memeory
-            for(int i =0  ;i<rows;i++){
-                delete[]vec[i] ;
-            }
-            delete vec ;
-            //reallocate for copying
-            rows = mat.rows;
-            cols = mat.cols ;
-            vec= get_vec(mat.get_rows(),mat.get_cols()) ;
-        }
-        //copying mechanism
-        for(int i = 0 ; i <rows;i++){
-            for(int j= 0 ; j<cols ;j++){
-                vec[i][j] = mat.vec[i][j] ;
+
+matrix ::matrix(int r,int c , float*arr,int size){
+    if(size<=r*c){
+        rows= r;
+        cols= c;
+        vec=get_vec(r,c) ;
+            for(int i =0 ;i<rows; i++){
+                for(int j= 0 ;j<cols ;j++){
+                if((i*c+j)<size){
+                    vec[i][j] = arr[i*c+j];
+                }
+                else{
+                    vec[i][j] = 0;
+                }
             }
         }
-
+    }
 }
-}
-
 int matrix ::get_rows()const{
     return rows ;
 }
@@ -258,7 +252,7 @@ bool matrix ::is_symmetric(void)const{
     return false ;
 }
 
-bool matrix::is_diagonal(void) const{
+bool matrix::is_diagonal(void) {
     if (vec && is_square()) {
         int zero_flag=true ;
         for (int i = 0; i < rows; i++) {
@@ -356,22 +350,22 @@ matrix matrix ::utri(void) {
 }
 
 matrix matrix ::ltri(void){
-        matrix ret_mat = *this ;
-        for(int low_r = rows-1 ; low_r>0;low_r--){
-            for(int up_r = low_r-1;up_r>=0;up_r--){
-                if(ret_mat.vec[low_r][low_r]!=0){
-                    float c = -1 * (ret_mat.vec[up_r][low_r] /ret_mat.vec[low_r][low_r]);
-                        for(int col_c = 0 ; col_c<cols ; col_c++){
-                            ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
-                        }
-                }
-                else{
-                    //switch the rows
-                    ret_mat.switch_rows(up_r,low_r);
-                }
+    matrix ret_mat = *this ;
+    for(int low_r = rows-1 ; low_r>0;low_r--){
+        for(int up_r = low_r-1;up_r>=0;up_r--){
+            if(ret_mat.vec[low_r][low_r]!=0){
+                float c = -1 * (ret_mat.vec[up_r][low_r] /ret_mat.vec[low_r][low_r]);
+                    for(int col_c = 0 ; col_c<cols ; col_c++){
+                        ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
+                    }
+            }
+            else{
+                //switch the rows
+                ret_mat.switch_rows(up_r,low_r);
             }
         }
-        return ret_mat ;
+    }
+    return ret_mat ;
 }
 
 
@@ -481,8 +475,7 @@ float& matrix ::at(int r_ind,int c_ind){
     if(r_ind>=0&&r_ind<rows&&c_ind>=0&&c_ind<cols){
         return vec[r_ind][c_ind] ;
     }
-    cout<<"out of bounds garbage value by default is -1";
-
+    cout<<"out of bounds";
 }
 
 matrix matrix ::inverse(void){
@@ -534,4 +527,133 @@ matrix matrix::operator/(matrix& m)const
         matrix error_matrix(1,1,-1);
         return error_matrix ;
 }
+void matrix::operator=(const matrix&mat){
+    if(this!=&mat){
+        //then check if they don't have same shape
+        if(!same_shape(mat)){
+            //delete old memeory
+            if(vec!=NULL){
+                for(int i =0  ;i<rows;i++){
+                    delete[]vec[i] ;
+                }
+                delete vec ;
+            }
+            //reallocate for copying
+            rows = mat.rows;
+            cols = mat.cols ;
+            vec= get_vec(mat.get_rows(),mat.get_cols()) ;
+        }
+        //copying mechanism
+        for(int i = 0 ; i <rows;i++){
+            for(int j= 0 ; j<cols ;j++){
+                vec[i][j] = mat.vec[i][j] ;
+            }
+        }
 
+    }
+}
+// Check if this matrix is idempotent
+bool matrix:: is_idempotent(void){
+    matrix mat = (*this)*(*this) ;
+    return mat == *this ;
+}
+//tested
+// Check if this matrix is identity
+bool matrix:: is_identity(void){
+        if(is_square()){
+    for(int i = 0 ; i<rows;i++){
+        for(int j= 0 ; j<cols; j++){
+            if(i==j){
+                if(abs(vec[i][j]-1)>tolerance) {
+                    return false ;
+                }
+            }
+            else{
+                if(abs(vec[i][j])>tolerance){
+                    return false ;
+                }
+            }
+    }
+}
+return true ;
+}
+return false ;
+}//tested
+
+bool matrix::is_upper_tri(void) {
+    if(is_square()){
+     bool zero_flag= true ;
+        for(int i =0 ; i <rows;i++){
+            for(int j=  0 ; j<cols; j++){
+                if(j<i){
+                    if(vec[i][j]!=0){
+                        return false ;
+                    }
+                }
+                else{
+                    //check for rest of elements so that they aren't all zeroes
+                    zero_flag&=(vec[i][j]!=0)?false:true ;
+                }
+            }
+        }
+        if(zero_flag!=true){
+            return true ;
+        }
+    }
+    return false ;
+}
+
+bool matrix::is_lower_tri() {
+if(is_square()){
+ bool zero_flag= true ;
+    for(int i =0 ; i <rows;i++){
+        for(int j=  0 ; j<cols; j++){
+            if(j>i){
+                if(vec[i][j]!=0){
+                    return false ;
+                }
+            }
+            else{
+                //check for rest of elements so that they aren't all zeroes
+                zero_flag&=(vec[i][j]!=0)?false:true ;
+            }
+        }
+    }
+    if(zero_flag!=true){
+        return true ;
+    }
+}
+return false ;
+}
+
+// Check if this matrix is scalar
+bool matrix:: is_scalar(void){//tested
+    if(is_square()){
+        int val = vec[0][0] ;
+        for(int i=  0 ; i<rows; i++){
+            for(int j= 0  ;j<cols ; j++){
+                if(i==j){
+                    if(abs(vec[i][j]-val)>tolerance){
+                        return false ;
+                    }
+                }
+                else{
+                    if(abs(vec[i][j])>tolerance){
+                        return false ;
+                    }
+                }
+            }
+        }
+    return true ;
+    }
+    return false ;
+}
+
+int main(){
+    float arr[9]={5,0,0,0,5,0,0,0,5};
+    matrix mat(3,3,arr,9) ;
+    mat.show() ;
+    cout<<mat.is_scalar() ;
+
+    return 0;
+}
