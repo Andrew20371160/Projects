@@ -11,11 +11,7 @@ const float M_PI= 3.14159;
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
-//write efficient matrix multiplication algos aka diagonal ,upper_tri ,lower_tri  ,
-//add some variables to matrices to indicate its properties
-//write a function to test or use is_diag ,is_suare etc etc use them in one big function called
-//extract specifications of matrix for ex and this writes it into the matrix class so that
-//we won't have to do that again
+
 class matrix{
 private :
 //2d array for holding data
@@ -72,7 +68,7 @@ public:
     //turns a matrix into a string for printing 
     string mat_to_string(void) const;//tested
     // Multiply this matrix by a scalar
-    matrix operator*(float)const;
+    matrix operator*(float)const;//tested
     //performs dot product of 2 matrices and returns the value
     float dot(matrix&)const;//tested
     //performs alpha*x+y and returns the value 
@@ -99,10 +95,10 @@ public:
     bool is_symmetric(void);//tested
 
     // Check if this matrix is skew-symmetric
-    bool is_skew_symmetric(void);
+    bool is_skew_symmetric(void);//tested
 
     // Check if this matrix is orthogonal
-    bool is_orthogonal(void);
+    bool is_orthogonal(void);//tested
     //returns length of the caller
     float norm2(void) ;//tested
     //same as previous but different wrapper
@@ -120,10 +116,10 @@ public:
     bool is_idempotent(void);//tested
 
     // Check if this matrix is nilpotent
-    bool is_nilpotent(void)const;
+    bool is_nilpotent(void);//tested
 
     // Check if this matrix is involutory
-    bool is_involutory(void)const;
+    bool is_involutory(void);//tested
 
     // Check if this matrix is diagonal
     bool is_diagonal(void);//tested
@@ -154,7 +150,7 @@ public:
     //yeah name is opvious
     bool switch_rows(int,int);//tested
     //under construction
-    void lu_fact(matrix**,matrix**) ;
+    void lu_fact(matrix&,matrix&) ;//tested
 
     void operator=(const matrix&) ;//tested
 
