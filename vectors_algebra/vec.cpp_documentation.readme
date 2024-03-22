@@ -1,0 +1,45 @@
+Constructors:
+
+matrix(): This is the default constructor that creates an empty matrix.
+matrix(int rows, int cols, float initialization_value): This constructor creates a matrix of given dimensions (rows and columns), initializing all elements to a specified value (initialization_value).
+matrix(int rows, int cols, float* initialization_data, int size_of_array): This constructor creates a matrix of given dimensions, initializing it with data from a 1D array (initialization_data). The size_of_array parameter specifies the size of the initialization array.
+Destructor:
+
+~matrix(): This is the destructor that deallocates the memory allocated by the matrix.
+Copy Constructor:
+
+matrix(const matrix&): This is the copy constructor that creates a new matrix as a copy of an existing one.
+Accessor Functions:
+
+get_rows(): This function returns the number of rows in the matrix.
+get_cols(): This function returns the number of columns in the matrix.
+at(int r_ind, int c_ind): This function returns a reference to the element at a specified index (r_ind, c_ind).
+Matrix Operations:
+
+fill(int r, int c, float value): This function fills a matrix with a certain value (value) at the specified row (r) and column (c).
+identity(): This function sets the current matrix as an identity matrix. An identity matrix is a square matrix in which all the elements of the principal (main) diagonal are ones and all other elements are zeros.
+same_shape(const matrix&): Checks if two matrices have the same dimensions.
+show(): Displays the matrix.
+operator+, operator-, operator*, operator/: Perform addition, subtraction, multiplication, and division of matrices.
+operator*(float): Multiplies the matrix by a scalar.
+mat_to_string(): Converts the matrix to a string for printing.
+dot(matrix&): Performs the dot product of two matrices.
+axpy(float, matrix&): Performs the operation alpha*x + y.
+transpose(): Returns the transpose of the matrix.
+is_square(): Checks if the matrix is square.
+det(): Calculates the determinant of the matrix.
+inverse(): Calculates the inverse of the matrix.
+trace(): Calculates the trace of the matrix.
+rank(): Calculates the rank of the matrix.
+is_symmetric(), is_skew_symmetric(), is_orthogonal(), is_idempotent(), is_nilpotent(), is_involutory(), is_diagonal(), is_scalar(), is_identity(), is_upper_tri(), is_lower_tri(): Check various properties of the matrix.
+norm2(), length(): Return the length (norm) of the matrix.
+theta(matrix&): Calculates the angle between the matrix and another matrix.
+solve(): Solves the matrix equation.
+row_axpy(float alpha, int x_row, int y_row): Performs the operation alpha*x + y on two rows.
+utri(), ltri(): Perform Gaussian elimination downward and upward.
+back_sub(int selected_row, matrix& solution_matrix), fwd_sub(int selected_row, matrix& solution_matrix): Perform back substitution and forward substitution on a selected row.
+switch_rows(int row1, int row2): Switches two rows in the matrix.
+lu_fact(matrix& lower_fact, matrix& upper_fact): Performs LU factorization on the matrix.
+operator=(const matrix&): Assignment operator.
+is_perp(matrix&), is_parallel(matrix&): Check if the matrix is perpendicular or parallel to another matrix.
+operator==(matrix&): Checks if two matrices are equal.
