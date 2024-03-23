@@ -737,9 +737,8 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
             for(int low_r = up_r+1; low_r<rows; low_r++){
             //check first if upper element is not zero
                 if(upper_fact.vec[up_r][up_r]==0){
-                    //partial pivoting will be added later
-                    cout<<"zero encountered at the main diagoanl use partial pivoting";
-                    return  ;
+                    upper_fact.switch_rows(up_r,low_r);
+                    lower_fact.vec[low_r][up_r] = 0;
                 }
                 else{
                     //the constant we calculate
