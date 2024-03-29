@@ -33,7 +33,7 @@ matrix::matrix(const matrix&mat){
     //then do copying mechanism
     for(int i =0 ; i <rows; i++){
         for(int j = 0 ; j<cols ; j++){
-            if(abs(mat.vec[i][j])>=tolerance){
+            if(abs(mat.vec[i][j])>tolerance){
                vec[i][j] = mat.vec[i][j] ;
             }
             else{
@@ -368,58 +368,6 @@ matrix matrix ::ltri(void){
     return ret_mat ;
 }
 
-
-/*
-matrix* matrix::lower_fact(void){
-matrix*ret_mat = new matrix() ;
-ret_mat->identity() ;
-    for(int  = get_rows()-1 ; row_counter>0; row_counter--){
-        //for each row
-        for(int low_row_counter=row_counter-1;low_row_counter>=0;low_row_counter--){
-            //do -1*(arr[i+1,i]/arr[i,i])
-           if(vec[get_index(row_counter,row_counter,get_cols())]!=0){
-            float scalar = (vec[get_index(low_row_counter,row_counter,get_cols())]
-                            /vec[get_index(row_counter,row_counter,get_cols())])*-1;
-            ret_mat->vec[get_index(low_row_counter,)];
-        for(int col_counter =0 ; col_counter<get_cols();col_counter++){
-        vec[get_index(lower_row,col_counter,get_cols())]+= vec[get_index(upper_row,col_counter,get_cols())]*scalar;
-        }
-            }
-
-
-        }
-    }
-}
-matrix* matrix::upper_fact(void){
-matrix*ret_mat = new matrix() ;
-ret_mat->identity() ;
-    for(int col_counter = 0 ; col_counter<get_cols()-1; col_counter++){
-        //for each row
-        for(int low_row_counter=row_counter-1;low_row_counter>=0;low_row_counter--){
-            //do -1*(arr[i+1,i]/arr[i,i])
-           if(vec[get_index(row_counter,row_counter,get_cols())]!=0){
-            float scalar = (vec[get_index(low_row_counter,row_counter,get_cols())]
-                            /vec[get_index(row_counter,row_counter,get_cols())])*-1;
-            ret_mat->vec[get_index(low_row_counter,)];
-        for(int col_counter =0 ; col_counter<get_cols();col_counter++){
-        vec[get_index(lower_row,col_counter,get_cols())]+= vec[get_index(upper_row,col_counter,get_cols())]*scalar;
-            }
-         }
-
-
-    }
-    }
-
-}
-void matrix ::lu_fact(matrix**l,matrix**u){
-//create 2 new matrices
-matrix * ret_l = new matrix();
-matrix * ret_u =new matrix();
-//both are identity
-ret_l->identity(get_rows()) ;
-ret_u->identity(get_rows()) ;
-}
-*/
 bool matrix ::switch_rows(int r1 ,int r2 ){
     if(r1>=0&&r1<get_rows()&&r2>=0&&r2<get_rows()){
     for(int i = 0 ; i <get_cols();i++){
@@ -546,8 +494,13 @@ void matrix::operator=(const matrix&mat){
         //copying mechanism
         for(int i = 0 ; i <rows;i++){
             for(int j= 0 ; j<cols ;j++){
+            if(abs(mat.vec[i][j])>tolerance){
                 vec[i][j] = mat.vec[i][j] ;
             }
+            else{
+                vec[i][j] = 0  ;
+            }
+        }
         }
 
     }
@@ -753,9 +706,108 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
             }
         }
     }
-else{
-    cout<<square_error;
-    lower_fact =  matrix(1,1,-1) ;
-    upper_fact =  matrix(1,1,-1) ;
+    else{
+        cout<<square_error;
+        lower_fact =  matrix(1,1,-1) ;
+        upper_fact =  matrix(1,1,-1) ;
+    }
 }
+//this function checks if an element is a pivot
+//and switches the rows if the original element is not a pivot
+//with the first non zero element it finds
+//used in reduced row echolon form or @rref()
+bool matrix:: is_pivot(int r_ind , int c_ind) {
+    if(r_ind<rows&&c_ind<cols){
+        //find first non zero element in that row
+        int pivot_index = r_ind ;
+        while(pivot_index<rows){
+            if(vec[pivot_index][c_ind]!=0){
+                //if you found a non zero element
+                //if its not the original element
+                //element at r_ind , c_ind rows are switched
+                //and this is the new pivot and the function ends
+                if(pivot_index!=r_ind){
+                    switch_rows(pivot_index,r_ind);
+                }
+                return true ;
+            }
+            //else chec for next element or col
+            pivot_index++;
+        }
+    return false ;
+    }
+    return false ;
 }
+//this function returns reduced row echolon form of the matrix
+//and saves pivots locations in the input pivots matrix for each row containing
+//a pivot it saves that pivot location in that row index
+matrix matrix :: rref(matrix&pivots_indices){
+    pivots_indices = matrix(rows,1) ;
+    //pivots locations will be mapped in this array
+    //so if row zero contains a pivot at col index 1  for ex and so on
+    //it will have the value 1 in that row and so on
+    int *pivots_locations =new int[rows];
+    for(int i = 0 ; i<rows; i++){
+        pivots_locations[i]  = -1 ;
+    }
+    //return matrix
+    matrix ret_mat = *this;
+    for(int up_r = 0;up_r<rows-1; up_r++){
+        //check first if current element is a pivot
+        int pivot_index =up_r ;
+        //if not a pivot then we find next pivot by increasing the pivot index
+        //aka find it in the next column
+        while(pivot_index<cols&&!ret_mat.is_pivot(up_r,pivot_index)){
+            pivot_index++ ;
+        }
+        //make sure you aren't out of bounds
+        if(pivot_index<cols){
+            //since this is pivot we save the location of that pivot in
+            //pivots_locations
+            pivots_locations[up_r]= pivot_index ;
+            for(int low_r = up_r+1; low_r<rows; low_r++){
+                //do gaussian elimination downward
+                if(ret_mat.vec[low_r][pivot_index]!=0){
+                    float c = -1*(ret_mat.vec[low_r][pivot_index]/ret_mat.vec[up_r][pivot_index]);
+                    for(int i =0 ; i<cols;i++){
+                        ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
+                    }
+                }
+            }
+        }
+    }
+    //do gaussian elimination upward using the pivots_locations
+    for(int low_r = rows-1 ; low_r>0;low_r--){
+        int pivot_index = pivots_locations[low_r];
+        if(pivot_index!=-1){
+            for(int up_r = low_r-1;up_r>=0;up_r--){
+                float c = -1 * (ret_mat.vec[up_r][pivot_index] /ret_mat.vec[low_r][pivot_index]);
+                for(int col_c = 0 ; col_c<cols ; col_c++){
+                    ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
+            }
+        }
+   }
+}
+    for(int i = 0 ; i<rows;i++){
+        int pivot_index = pivots_locations[i];
+        if(pivot_index!=-1){
+            float val = ret_mat.vec[i][pivot_index];
+            if(val){
+            //found the pivot
+                for(int j=  0 ; j<cols;j++){
+                    ret_mat.vec[i][j]/=val ;
+                }
+            }
+        }
+    }
+    for(int i  = 0 ; i<rows;  i++){
+        pivots_indices.vec[i][0] = pivots_locations[i] ;
+    }
+    delete []pivots_locations ;
+    pivots_locations=  NULL    ;
+    return ret_mat ;
+}
+
+
+
+
