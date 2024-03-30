@@ -328,19 +328,14 @@ void matrix ::row_axpy(float scalar,int upper_row,int lower_row){
         vec[lower_row][col_counter]+= vec[upper_row][col_counter]*scalar;
     }
 }
-
-matrix matrix ::utri(void) {
+//performs downward gaussian elimination producing an upper triangular matrix
+matrix matrix ::gauss_down(void) {
         matrix ret_mat =*this;
         for(int up_r = 0;up_r<rows-1; up_r++){
             for(int low_r = up_r+1; low_r<rows; low_r++){
-                //check first if upper element is not zero
-                if(ret_mat.vec[up_r][up_r]==0){
-                    //switch the rows
-                    ret_mat.switch_rows(up_r,low_r);
-                }
-                else{
+                if(ret_mat.is_pivot(up_r,up_r)!=not_pivot){
                     float c = -1*(ret_mat.vec[low_r][up_r]/ret_mat.vec[up_r][up_r]);
-                    for(int i =0 ; i<cols;i++){
+                    for(int i =up_r ; i<cols;i++){
                         ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
                     }
                 }
@@ -348,20 +343,16 @@ matrix matrix ::utri(void) {
         }
         return ret_mat ;
 }
-
-matrix matrix ::ltri(void){
+//performs upward gaussian elimination producing a lower triangular matrix
+matrix matrix ::gauss_up(void){
     matrix ret_mat = *this ;
     for(int low_r = rows-1 ; low_r>0;low_r--){
         for(int up_r = low_r-1;up_r>=0;up_r--){
-            if(ret_mat.vec[low_r][low_r]!=0){
+            if(ret_mat.is_pivot(low_r,low_r)!=not_pivot){
                 float c = -1 * (ret_mat.vec[up_r][low_r] /ret_mat.vec[low_r][low_r]);
-                    for(int col_c = 0 ; col_c<cols ; col_c++){
+                    for(int col_c = low_r ; col_c>=0; col_c--){
                         ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
-                    }
-            }
-            else{
-                //switch the rows
-                ret_mat.switch_rows(up_r,low_r);
+                }
             }
         }
     }
@@ -397,7 +388,7 @@ float matrix:: fwd_sub(int row_index,matrix&sol_mat){
 //pass an appended matrix
 matrix matrix:: solve(void) {
     //turns the system into uppertriangular system
-    matrix mat_cpy=utri();
+    matrix mat_cpy=gauss_down();
     //the new matrix in which the answer will be returned
     matrix sol_mat(get_rows(),1,0) ;
     for(int i = get_rows()-1; i>=0;i--){
@@ -408,10 +399,25 @@ matrix matrix:: solve(void) {
 
 float matrix::det(){
     if(is_square()){
-        matrix mat_cpy =utri();
+        matrix mat_cpy =*this ;
         float det_val = 1 ;
-        for(int i =0 ; i <rows; i++){
-            det_val*=mat_cpy.vec[i][i]  ;
+        int pivot_condition  ;
+        for(int up_r = 0;up_r<rows-1; up_r++){
+            for(int low_r = up_r+1; low_r<rows; low_r++){
+                pivot_condition = mat_cpy.is_pivot(up_r,up_r) ;
+                if(pivot_condition!=not_pivot){
+                    if(pivot_condition==pivot_with_switch){
+                        det_val*=-1 ;
+                    }
+                    float c = -1*(mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
+                    for(int i =up_r ; i<cols;i++){
+                        mat_cpy.vec[low_r][i]+=c*mat_cpy.vec[up_r][i] ;
+                    }
+                }
+            }
+        }
+        for(int i= 0  ; i<rows;i++){
+            det_val*=mat_cpy.vec[i][i] ;
         }
         return det_val ;
 }
@@ -427,7 +433,7 @@ float& matrix ::at(int r_ind,int c_ind){
 }
 
 matrix matrix ::inverse(void){
-    if(is_square()&&det()!=0){
+    if(is_square()){
         //copying the m matrix into mat_cpy
         matrix mat_cpy =*this ;
         //creating return matrix which at first will be identity
@@ -436,13 +442,22 @@ matrix matrix ::inverse(void){
         //first do Gaussian elimination downward
         for(int up_r = 0 ; up_r<rows-1;up_r++){
                 for(int low_r = up_r+1;low_r<rows;low_r++){
-                    float c = -1 * (mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
-                    for(int col_c = 0 ; col_c<cols ; col_c++){
-                        mat_cpy.vec[low_r][col_c]+= c*mat_cpy.vec[up_r][col_c] ;
-                        ret_mat.vec[low_r][col_c] += c*ret_mat.vec[up_r][col_c];
+                    if(mat_cpy.is_pivot(up_r,up_r)){
+                        float c = -1 * (mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
+                        for(int col_c = 0 ; col_c<cols ; col_c++){
+                            mat_cpy.vec[low_r][col_c]+= c*mat_cpy.vec[up_r][col_c] ;
+                            ret_mat.vec[low_r][col_c] += c*ret_mat.vec[up_r][col_c];
+                        }
+                    }
+                    else{
+                        cout<<"determinant of the passed matrix is zero or not squre matrix to begin with";
+                        matrix error_matrix(1,1,-1);
+                        return error_matrix ;
                     }
                 }
             }
+            ret_mat.show();
+
         //then do Gaussian elimination upward
             for(int low_r = rows-1 ; low_r>0;low_r--){
                 for(int up_r = low_r-1;up_r>=0;up_r--){
@@ -453,6 +468,7 @@ matrix matrix ::inverse(void){
                     }
                 }
             }
+            mat_cpy.show() ;
             for(int i= 0 ; i<rows;i++){
                 for(int j= 0 ; j<cols ; j++){
                     ret_mat.vec[i][j] /=mat_cpy.vec[i][i] ;
@@ -460,7 +476,7 @@ matrix matrix ::inverse(void){
             }
             return ret_mat ;
 }
-    cout<<"determinant of the passed matrix is zero or not squre matrix to begin with";
+    cout<<"determinant of the passed matrix is zero or not a squre matrix to begin with";
     matrix error_matrix(1,1,-1);
     return error_matrix ;
 }
@@ -606,7 +622,7 @@ int matrix ::rank(void){//tested
 //first check if its a square matrix
     if(is_square()){
         //first perform gaussian elimination downward
-        matrix temp_mat = utri() ;
+        matrix temp_mat = gauss_down() ;
         int counter = 0;
         //then count number of rows that has atleast one non zero element
         for(int i = 0 ; i<rows; i++){
@@ -683,17 +699,14 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
         //the lower_fact matrix is the identity matrix (at first) in which we store
         // the constants during the gaussian elimination of the original matrix
         //after finisning the gaussian elimination the upper_fact is finished
+        lower_fact = matrix(rows,cols,0);
         lower_fact.identity() ;
         //copy original matrix into upper_fact to performa gaussian elimination on it
         upper_fact = *this  ;
         for(int up_r = 0;up_r<rows-1; up_r++){
             for(int low_r = up_r+1; low_r<rows; low_r++){
-            //check first if upper element is not zero
-                if(upper_fact.vec[up_r][up_r]==0){
-                    upper_fact.switch_rows(up_r,low_r);
-                    lower_fact.vec[low_r][up_r] = 0;
-                }
-                else{
+            //check first if upper element is a pivot
+                if(upper_fact.is_pivot(up_r,up_r)){
                     //the constant we calculate
                     float c = -1*(upper_fact.vec[low_r][up_r]/upper_fact.vec[up_r][up_r]);
                     //first record it into the lower_fact matrix at its position
@@ -702,6 +715,9 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
                         //then continue the gaussian elimination
                         upper_fact.vec[low_r][i]+=c*upper_fact.vec[up_r][i] ;
                     }
+                }
+                else{
+                    lower_fact.vec[low_r][up_r] = 0;
                 }
             }
         }
@@ -715,8 +731,7 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
 //this function checks if an element is a pivot
 //and switches the rows if the original element is not a pivot
 //with the first non zero element it finds
-//used in reduced row echolon form or @rref()
-bool matrix:: is_pivot(int r_ind , int c_ind) {
+int matrix:: is_pivot(int r_ind , int c_ind) {
     if(r_ind<rows&&c_ind<cols){
         //find first non zero element in that row
         int pivot_index = r_ind ;
@@ -728,15 +743,16 @@ bool matrix:: is_pivot(int r_ind , int c_ind) {
                 //and this is the new pivot and the function ends
                 if(pivot_index!=r_ind){
                     switch_rows(pivot_index,r_ind);
+                    return pivot_with_switch ;
                 }
-                return true ;
+                return pivot_no_switch ;
             }
             //else chec for next element or col
             pivot_index++;
         }
-    return false ;
+    return not_pivot ;
     }
-    return false ;
+    return not_pivot ;
 }
 //this function returns reduced row echolon form of the matrix
 //and saves pivots locations in the input pivots matrix for each row containing
@@ -752,7 +768,7 @@ matrix matrix :: rref(matrix&pivots_indices){
     }
     //return matrix
     matrix ret_mat = *this;
-    for(int up_r = 0;up_r<rows-1; up_r++){
+    for(int up_r = 0;up_r<rows; up_r++){
         //check first if current element is a pivot
         int pivot_index =up_r ;
         //if not a pivot then we find next pivot by increasing the pivot index
@@ -769,7 +785,7 @@ matrix matrix :: rref(matrix&pivots_indices){
                 //do gaussian elimination downward
                 if(ret_mat.vec[low_r][pivot_index]!=0){
                     float c = -1*(ret_mat.vec[low_r][pivot_index]/ret_mat.vec[up_r][pivot_index]);
-                    for(int i =0 ; i<cols;i++){
+                    for(int i =up_r ; i<cols;i++){
                         ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
                     }
                 }
@@ -807,7 +823,5 @@ matrix matrix :: rref(matrix&pivots_indices){
     pivots_locations=  NULL    ;
     return ret_mat ;
 }
-
-
 
 
