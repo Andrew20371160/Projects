@@ -4,6 +4,10 @@
 #include <math.h>
 #include <string.h>
 using namespace std ;
+//this enum is used as output for functions using @is_pivot
+//its usefull when using the @det function since if you exchange a row
+//the det is muliplied by -1 and so on
+enum {not_pivot=0,pivot_no_switch,pivot_with_switch} ;
 //feel free to edit this value the way you want
 const float tolerance = 0.000001 ;
 const float M_PI= 3.14159;
@@ -41,7 +45,7 @@ public:
     //by default initializes the matrix with zeroes
     matrix(int rows ,int cols ,float initialization_value);//tested
         //initializes a matrix with specified 1d array data
-    matrix(int rows ,int cols ,float* initialization_data,int size_of_array) ;
+    matrix(int rows ,int cols ,float* initialization_array,int size_of_array) ;
 
     //deallocate the memory allocated by the matrix
     ~matrix();//tested
@@ -109,14 +113,14 @@ public:
     float length(void) ;//tested
     //theta between caller and passed matrix
     float theta(matrix&) ;//tested
-    //solves appended matrix using @utri and then @back_sub
+    //solves appended matrix using @gauss_down and then @back_sub
     matrix solve(void);//tested
     //performs axpy operation between 2 rows
     void row_axpy(float alpha,int x_row,int y_row) ;
     //performs gaussian elimination downward
-    matrix utri(void) ;//tested
+    matrix gauss_down(void) ;//tested
     //performs gaussian elimination upward
-    matrix ltri(void) ;//tested
+    matrix gauss_up(void) ;//tested
     //performs back substitution on a selected row and solution matrix is passed with it
     float back_sub(int selected_row,matrix& solution_matrix);//tested
     //performs forward substitution on a selected row and solution matrix is passed with it
@@ -162,7 +166,7 @@ public:
     //this function checks if a current element is a pivot
     //also it switches rows if the pivot is not at same row
     //and returns true
-    bool is_pivot(int r_ind , int col_index);//tested
+    int is_pivot(int row_index , int col_index);//tested
     //this function returns row reduced echolon form of a matrix
     //it mapps for each row the index of its pivot if found
     // if at that row there are no pivots its assigned the value -1
