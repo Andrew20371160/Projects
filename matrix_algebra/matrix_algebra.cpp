@@ -729,8 +729,8 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
     }
 }
 //this function checks if an element is a pivot
-//and switches the rows if the original element is not a pivot
-//with the first non zero element it finds
+//and switches the rows if that element is a zero
+//with the first non zero element at same column if found
 int matrix:: is_pivot(int r_ind , int c_ind) {
     if(r_ind<rows&&c_ind<cols){
         //find first non zero element in that row
@@ -739,29 +739,29 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
             if(vec[pivot_index][c_ind]!=0){
                 //if you found a non zero element
                 //if its not the original element
-                //element at r_ind , c_ind rows are switched
-                //and this is the new pivot and the function ends
+                //row of original element r_ind is switched with row of the new pivot
                 if(pivot_index!=r_ind){
                     switch_rows(pivot_index,r_ind);
+                    //used when calculating the determinant
                     return pivot_with_switch ;
                 }
                 return pivot_no_switch ;
             }
-            //else chec for next element or col
+            //else go to next row and check for another pivot
             pivot_index++;
         }
     return not_pivot ;
     }
     return not_pivot ;
 }
-//this function returns reduced row echolon form of the matrix
-//and saves pivots locations in the input pivots matrix for each row containing
-//a pivot it saves that pivot location in that row index
+//this function returns reduced row Echelon form of the matrix
+//and saves pivots locations in the input pivots_indices matrix for each row containing
+//a pivot it saves the pivot's location in that row index
 matrix matrix :: rref(matrix&pivots_indices){
     pivots_indices = matrix(rows,1) ;
     //pivots locations will be mapped in this array
-    //so if row zero contains a pivot at col index 1  for ex and so on
-    //it will have the value 1 in that row and so on
+    //so if row zero contains a pivot at col index 1 
+    //it will have the value 1 in that row index and so on else its -1
     int *pivots_locations =new int[rows];
     for(int i = 0 ; i<rows; i++){
         pivots_locations[i]  = -1 ;
@@ -794,8 +794,10 @@ matrix matrix :: rref(matrix&pivots_indices){
     }
     //do gaussian elimination upward using the pivots_locations
     for(int low_r = rows-1 ; low_r>0;low_r--){
+        //get pivot index of the corresponding row from pivots_locations
         int pivot_index = pivots_locations[low_r];
         if(pivot_index!=-1){
+        // if found do elimination
             for(int up_r = low_r-1;up_r>=0;up_r--){
                 float c = -1 * (ret_mat.vec[up_r][pivot_index] /ret_mat.vec[low_r][pivot_index]);
                 for(int col_c = 0 ; col_c<cols ; col_c++){
@@ -804,23 +806,27 @@ matrix matrix :: rref(matrix&pivots_indices){
         }
    }
 }
-    for(int i = 0 ; i<rows;i++){
-        int pivot_index = pivots_locations[i];
+    //last step for each row if a pivot is found in that row 
+    // divide each element in that row by that pivot and then gg rref is obtained
+    for(int row_c = 0 ; row_c<rows;row_c++){
+        int pivot_index = pivots_locations[row_c];
         if(pivot_index!=-1){
-            float val = ret_mat.vec[i][pivot_index];
+            float val = ret_mat.vec[row_c][pivot_index];
             if(val){
-            //found the pivot
-                for(int j=  0 ; j<cols;j++){
-                    ret_mat.vec[i][j]/=val ;
+                for(int col_c=  0 ; col_c<cols;col_c++){
+                    ret_mat.vec[row_c][col_c]/=val ;
                 }
             }
         }
     }
+    //copy the indicies of the pivots in the pivots_indices matrix
     for(int i  = 0 ; i<rows;  i++){
         pivots_indices.vec[i][0] = pivots_locations[i] ;
     }
+    //delete the allocated memeory of pivots locations
     delete []pivots_locations ;
     pivots_locations=  NULL    ;
+
     return ret_mat ;
 }
 
