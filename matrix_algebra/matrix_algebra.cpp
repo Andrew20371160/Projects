@@ -847,17 +847,3 @@ matrix matrix :: rref(matrix&pivots_indices){
 }
 
 
-
-int main(){
-    float arr[9] = {5,1,9,
-                    5,7,8,
-                    1,1,1};
-    matrix mat(3,3,arr,9) ;
-matrix mm ;
-    mat.rref(mm) ;
-    mm.show() ;
-    mat.gauss_down().show() ;
-    cout<<mat.rank() ;
-
-    return  0 ;
-}
