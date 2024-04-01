@@ -795,14 +795,10 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
 //and saves pivots locations in the input pivots matrix for each row containing
 //a pivot it saves that pivot location in that row index
 matrix matrix :: rref(matrix&pivots_indices){
-    pivots_indices = matrix(rows,1) ;
     //pivots locations will be mapped in this array
     //so if row zero contains a pivot at col index 1  for ex and so on
     //it will have the value 1 in that row and so on
-    int *pivots_locations =new int[rows];
-    for(int i = 0 ; i<rows; i++){
-        pivots_locations[i]  = -1 ;
-    }
+    pivots_indices = matrix(rows,1,-1) ;
     //return matrix
     matrix ret_mat = *this;
     for(int up_r = 0;up_r<rows; up_r++){
@@ -817,7 +813,7 @@ matrix matrix :: rref(matrix&pivots_indices){
         if(pivot_index<cols){
             //since this is pivot we save the location of that pivot in
             //pivots_locations
-            pivots_locations[up_r]= pivot_index ;
+            pivots_indices.vec[up_r][0]= pivot_index ;
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 if(ret_mat.vec[low_r][pivot_index]!=0){
@@ -831,7 +827,7 @@ matrix matrix :: rref(matrix&pivots_indices){
     }
     //do gaussian elimination upward using the pivots_locations
     for(int low_r = rows-1 ; low_r>0;low_r--){
-        int pivot_index = pivots_locations[low_r];
+        int pivot_index = pivots_indices.vec[low_r][0];
         if(pivot_index!=-1){
             for(int up_r = low_r-1;up_r>=0;up_r--){
                 float c = -1 * (ret_mat.vec[up_r][pivot_index] /ret_mat.vec[low_r][pivot_index]);
@@ -842,7 +838,7 @@ matrix matrix :: rref(matrix&pivots_indices){
    }
 }
     for(int i = 0 ; i<rows;i++){
-        int pivot_index = pivots_locations[i];
+        int pivot_index = pivots_indices.vec[i][0];
         if(pivot_index!=-1){
             float val = ret_mat.vec[i][pivot_index];
             if(val){
@@ -853,12 +849,9 @@ matrix matrix :: rref(matrix&pivots_indices){
             }
         }
     }
-    for(int i  = 0 ; i<rows;  i++){
-        pivots_indices.vec[i][0] = pivots_locations[i] ;
-    }
-    delete []pivots_locations ;
-    pivots_locations=  NULL    ;
+
     return ret_mat ;
 }
+
 
 
