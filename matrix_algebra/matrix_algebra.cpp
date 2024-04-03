@@ -354,7 +354,7 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 //check if lower element is not zero to save processing power
-                if(ret_mat.vec[low_r][pivot_index]<tolerance){
+                if(ret_mat.vec[low_r][pivot_index]>tolerance){
                     float c = -1*(ret_mat.vec[low_r][pivot_index]/ret_mat.vec[up_r][pivot_index]);
                     for(int i =up_r ; i<cols;i++){
                         ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
@@ -394,7 +394,7 @@ matrix matrix ::gauss_up(matrix *pivots_indices = NULL){
            }
         for(int up_r = low_r-1;up_r>=0;up_r--){
 
-            if(ret_mat.vec[up_r][pivot_index]<tolerance){
+            if(ret_mat.vec[up_r][pivot_index]>tolerance){
                 float c = -1 * (ret_mat.vec[up_r][pivot_index]/ret_mat.vec[low_r][pivot_index]);
                     for(int col_c = pivot_index ; col_c>=0; col_c--){
                         ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
@@ -790,7 +790,7 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
         //find first non zero element in that row
         int pivot_index = r_ind ;
         while(pivot_index<rows){
-            if(vec[pivot_index][c_ind]<tolerance){
+            if(vec[pivot_index][c_ind]>tolerance){
                 //if you found a non zero element
                 //if its not the original element
                 //element at r_ind , c_ind rows are switched
@@ -818,7 +818,6 @@ matrix matrix :: rref(matrix&pivots_indices){
     //return matrix
     //do gaussian elemination downward
     matrix ret_mat = gauss_down(&pivots_indices);
-
     //do gaussian elimination upward using the pivots_locations
     for(int low_r = rows-1 ; low_r>0;low_r--){
         int pivot_index = pivots_indices.vec[low_r][0];
@@ -853,13 +852,19 @@ matrix matrix :: rref(matrix&pivots_indices){
 bool matrix ::is_independent(void){
     return rank() ==cols ;
 }
-//dimensino of the column space
-int matrix ::dim_col(void){
+
+// Calculates the dimension of the column space (range) of the matrix.
+// The column space consists of all possible linear combinations of the column vectors in the matrix.
+int matrix ::dim(void){
     return rank() ;
-}
-//returns dimension of the null space
-int matrix ::dim_null(void){
+}//tested
+//returns dimension of the null space of column space
+int matrix ::dim_null_cols(void){
     return cols - rank();
+}
+//returns dimension of the null space of row space
+int matrix ::dim_null_rows(void){
+    return rows - rank() ;
 }
 //checks if a bunch of vectors form basis of a space R^dimension
 bool matrix ::is_basis( int dimension){
@@ -867,7 +872,7 @@ bool matrix ::is_basis( int dimension){
     return cols==dimension&&is_independent() ;
 }
 //returns the set of vectors that forms a basis in a space R^dimension
-matrix matrix ::basis(int dimension) {
+matrix matrix ::basis_cols(void) {
     //return matrix
     matrix ret_mat ;
     //matrix in which we store indicex of each pivot in the correspoinding row
@@ -887,7 +892,6 @@ matrix matrix ::basis(int dimension) {
             break ;
         }
     }
-    if(pivot_count==dimension){
         //we store each column carrying a pivot in this matrix
         ret_mat = matrix(rows,pivot_count);
         //for each element in ret_mat
@@ -900,12 +904,33 @@ matrix matrix ::basis(int dimension) {
                 ret_mat.vec[row_c][col_c] =vec[row_c][pivot_index] ;
             }
         }
-    }
-    else{
-        cout<<"can't find basis for the specified dimension" ;
-        ret_mat = matrix(1,1,-1) ;
-    }
     return ret_mat ;
 }
-
-
+    // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
+    matrix matrix:: basis_rows(void){
+        matrix ret_mat ;
+        matrix pivots_indices(rows,1,-1);
+            //perform gaussian elimination downward
+        matrix mat_rref = rref(pivots_indices) ;
+        //get dimension of the column space
+        int pivot_count = 0 ;
+        //count number of pivots and stop when you find -1
+        //aka no remaining pivots refer to is_pivot and check what it does for
+        //more info
+        for(int i = 0 ;i<rows; i++){
+            if(pivots_indices.vec[i][0]!=-1){
+                pivot_count++ ;
+            }
+            else{
+                break ;
+            }
+        }
+        //copy first rows that are the pivot rows from rref
+        ret_mat = matrix(pivot_count,cols) ;
+        for(int i = 0 ; i<pivot_count;i++){
+            for(int j = 0 ;  j<cols; j++){
+                ret_mat.vec[i][j]  = mat_rref.vec[i][j];
+            }
+        }
+        return ret_mat ;
+    }
