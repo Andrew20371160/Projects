@@ -354,9 +354,9 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 //check if lower element is not zero to save processing power
-                if(ret_mat.vec[low_r][pivot_index]>tolerance){
+                if(abs(ret_mat.vec[low_r][pivot_index])>tolerance){
                     float c = -1*(ret_mat.vec[low_r][pivot_index]/ret_mat.vec[up_r][pivot_index]);
-                    for(int i =up_r ; i<cols;i++){
+                    for(int i =pivot_index ; i<cols;i++){
                         ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
                     }
                 }
@@ -378,14 +378,14 @@ matrix matrix ::gauss_up(matrix *pivots_indices = NULL){
     }
     //same idea as gauss_down but instead of -1 its now rows since we look
     //for pivots from last row till first row
-    int old_pivot =rows;
+    int old_pivot =cols;
     for(int low_r = rows-1 ; low_r>=0;low_r--){
         //pivot_index in first iteration will be rows-1 which is the first location
         //to look for a pivot
         int pivot_index =old_pivot-1 ;
         //if not a pivot then we find next pivot by decreasing the pivot index
         //aka find it in the prev column
-        while(pivot_index>=0&&!ret_mat.is_pivot(low_r,pivot_index)){
+        while(pivot_index>=0&&!ret_mat.is_pivot_up(low_r,pivot_index)){
             pivot_index-- ;
         }
         if(pivot_index>=0){
@@ -393,11 +393,11 @@ matrix matrix ::gauss_up(matrix *pivots_indices = NULL){
                pivots_indices->vec[low_r][0] = pivot_index ;
            }
         for(int up_r = low_r-1;up_r>=0;up_r--){
-
-            if(ret_mat.vec[up_r][pivot_index]>tolerance){
+            if(abs(ret_mat.vec[up_r][pivot_index])>tolerance){
                 float c = -1 * (ret_mat.vec[up_r][pivot_index]/ret_mat.vec[low_r][pivot_index]);
                     for(int col_c = pivot_index ; col_c>=0; col_c--){
                         ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
+
                 }
             }
         }
@@ -465,13 +465,15 @@ float matrix::det(){
                     if(pivot_condition==pivot_with_switch){
                         det_val*=-1 ;
                     }
-                    float c = -1*(mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
-                    for(int i =up_r ; i<cols;i++){
-                        mat_cpy.vec[low_r][i]+=c*mat_cpy.vec[up_r][i] ;
+                    if(abs(mat_cpy.vec[low_r][up_r])>tolerance){
+                        float c = -1*(mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
+                        for(int i =up_r ; i<cols;i++){
+                            mat_cpy.vec[low_r][i]+=c*mat_cpy.vec[up_r][i] ;
+                        }
                     }
                 }
                 else{
-                //one of the elements of the main diagonal is azero so no need
+                //one of the elements of the main diagonal is a zero so no need
                 //to continue the calculations
                     return 0  ;
                 }
@@ -618,13 +620,13 @@ bool matrix::is_upper_tri(void) {
         for(int i =0 ; i <rows;i++){
             for(int j=  0 ; j<cols; j++){
                 if(j<i){
-                    if(vec[i][j]<tolerance){
+                    if(abs(vec[i][j])<tolerance){
                         return false ;
                     }
                 }
                 else{
                     //check for rest of elements so that they aren't all zeroes
-                    zero_flag&=(vec[i][j]<tolerance)?false:true ;
+                    zero_flag&=(abs(vec[i][j])<tolerance)?false:true ;
                 }
             }
         }
@@ -647,7 +649,7 @@ if(is_square()){
             }
             else{
                 //check for rest of elements so that they aren't all zeroes
-                zero_flag&=(vec[i][j]<tolerance)?false:true ;
+                zero_flag&=(abs(vec[i][j])<tolerance)?false:true ;
             }
         }
     }
@@ -703,7 +705,7 @@ bool matrix ::is_skew_symmetric(void){
     if(vec&&is_square()){
         for(int i = 0 ; i <rows;i++){
             for(int j=i+1;j<cols;j++){
-                if(vec[i][j]!=-1*vec[j][i]){
+                if(abs(vec[i][j]-vec[j][i])>tolerance){
                     return false ;
             }
         }
@@ -808,6 +810,32 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
     }
     return not_pivot ;
 }
+//this function checks if an element is a pivot
+//and switches the rows if the original element is not a pivot
+//with the first non zero element it finds
+int matrix:: is_pivot_up(int r_ind , int c_ind) {
+    if(r_ind<rows&&c_ind<cols){
+        //find first non zero element in that row
+        int pivot_index = r_ind ;
+        while(pivot_index>0){
+            if(abs(vec[pivot_index][c_ind])>tolerance){
+                //if you found a non zero element
+                //if its not the original element
+                //element at r_ind , c_ind rows are switched
+                //and this is the new pivot and the function ends
+                if(pivot_index!=r_ind){
+                    switch_rows(pivot_index,r_ind);
+                    return pivot_with_switch ;
+                }
+                return pivot_no_switch ;
+            }
+            //else chec for next element or col
+            pivot_index--;
+        }
+    return not_pivot ;
+    }
+    return not_pivot ;
+}
 //this function returns reduced row echolon form of the matrix
 //and saves pivots locations in the input pivots matrix for each row containing
 //a pivot it saves that pivot location in that row index
@@ -840,7 +868,7 @@ matrix matrix :: rref(matrix&pivots_indices){
                 for(int j=  0 ; j<cols;j++){
                     ret_mat.vec[i][j]/=val ;
                     //tolerance
-                    ret_mat.vec[i][j] = (ret_mat.vec[i][j]<tolerance)?0:ret_mat.vec[i][j];
+                    ret_mat.vec[i][j] = (abs(ret_mat.vec[i][j])<tolerance)?0:ret_mat.vec[i][j];
                 }
             }
         }
@@ -929,9 +957,8 @@ matrix matrix ::basis_cols(void) {
         ret_mat = matrix(pivot_count,cols) ;
         for(int i = 0 ; i<pivot_count;i++){
             for(int j = 0 ;  j<cols; j++){
-                ret_mat.vec[i][j]  = mat_rref.vec[i][j];
+                ret_mat.vec[i][j]  = abs(mat_rref.vec[i][j])>tolerance?mat_rref.vec[i][j]:0;
             }
         }
         return ret_mat ;
     }
-
