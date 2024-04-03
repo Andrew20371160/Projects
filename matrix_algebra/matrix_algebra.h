@@ -9,7 +9,7 @@ using namespace std ;
 //the det is muliplied by -1 and so on
 enum {not_pivot=0,pivot_no_switch,pivot_with_switch} ;
 //feel free to edit this value the way you want
-const float tolerance = 0.0001 ;
+const float tolerance = 0.000001 ;
 const float M_PI= 3.14159;
 //error messages
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
@@ -190,7 +190,7 @@ public:
     matrix basis_cols(void);//tested
     // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
     matrix basis_rows(void);
-
+    int is_pivot_up(int,int) ;
 };
 
 #endif // VEC_H_INCLUDED
