@@ -117,7 +117,11 @@ public:
     matrix solve(void);//tested
     //performs axpy operation between 2 rows
     void row_axpy(float alpha,int x_row,int y_row) ;
+
     //performs gaussian elimination downward
+    //added an optional input if you want to see where are the pivots
+    //for each row just pass and address of the matrix and if you don't want
+    //just leave it empty i use this functionality in other pieces of code
     matrix gauss_down(matrix *) ;//tested
     //performs gaussian elimination upward
     matrix gauss_up(matrix *) ;//tested
@@ -139,7 +143,6 @@ public:
     bool is_parallel(matrix&) ;//tested
     //checks if 2 matrices are equal
     bool operator==(matrix&) const;//tested
-
     // Check if this matrix is idempotent
     bool is_idempotent(void);//tested
 
@@ -172,22 +175,21 @@ public:
     // if at that row there are no pivots its assigned the value -1
     matrix rref(matrix & pivots_indices);//tested
     // Checks if the set of vectors (columns of the matrix) is linearly independent.
-    bool is_independent(void);
-
+    bool is_independent(void);//tested
     // Calculates the dimension of the null space (kernel) of the matrix.
     // The null space consists of all vectors that are mapped to the zero vector by the linear transformation represented by the matrix.
-    int dim_null(void);
-
+    int dim_null_cols(void);//tested
+    int dim_null_rows(void);
     // Calculates the dimension of the column space (range) of the matrix.
     // The column space consists of all possible linear combinations of the column vectors in the matrix.
-    int dim_col(void);
-
+    int dim(void);//tested
     // Checks if the set of vectors (columns of the matrix) forms a basis for the vector space of the given dimension.
     // A set of vectors forms a basis if they are linearly independent and span the vector space.
-    bool is_basis(int dimension);
-
+    bool is_basis(int dimension);//tested
     // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
-    matrix basis(int dimension);
+    matrix basis_cols(void);//tested
+    // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
+    matrix basis_rows(void);
 
 };
 
