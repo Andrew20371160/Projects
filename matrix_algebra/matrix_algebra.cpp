@@ -28,9 +28,7 @@ matrix::matrix(const matrix&mat){
     rows= mat.get_rows();
     cols= mat.get_cols();
     vec = get_vec(rows,cols) ;
-    //mat.copy(mat_src) ->mat = mat_src
-    //we only fix vector and its void
-    //then do copying mechanism
+
     for(int i =0 ; i <rows; i++){
         for(int j = 0 ; j<cols ; j++){
             if(abs(mat.vec[i][j])>tolerance){
@@ -329,14 +327,19 @@ void matrix ::row_axpy(float scalar,int upper_row,int lower_row){
     }
 }
 //performs downward gaussian elimination producing an upper triangular matrix
-matrix matrix ::gauss_down(void) {
+//optional if you want to know the indices of the pivots for each row
+//pass in a matrix aka pivots_indices
+matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
     matrix ret_mat = *this;
-    //when getting pivot indices we have to keep track of old pivot since 
+    if(pivots_indices){
+        *pivots_indices = matrix(rows,1,-1) ;
+    }
+    //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
     int old_pivot = -1 ;
     for(int up_r = 0;up_r<rows; up_r++){
-        //check for pivot in the next column 
-            //at first iteration we check for sure for first col hence 1-1 = 0 
+        //check for pivot in the next column
+            //at first iteration we check for sure for first col hence 1-1 = 0
         int pivot_index =old_pivot+1  ;
         //if not a pivot then we find next pivot by increasing the pivot index
         //aka find it in the next column
@@ -345,10 +348,13 @@ matrix matrix ::gauss_down(void) {
         }
         //make sure you aren't out of bounds
         if(pivot_index<cols){
+            if(pivots_indices){
+                    pivots_indices->vec[up_r][0] = pivot_index ;
+                }
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 //check if lower element is not zero to save processing power
-                if(ret_mat.vec[low_r][pivot_index]!=0){
+                if(ret_mat.vec[low_r][pivot_index]<tolerance){
                     float c = -1*(ret_mat.vec[low_r][pivot_index]/ret_mat.vec[up_r][pivot_index]);
                     for(int i =up_r ; i<cols;i++){
                         ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
@@ -363,14 +369,19 @@ matrix matrix ::gauss_down(void) {
     return ret_mat ;
 }
 //performs upward gaussian elimination producing a lower triangular matrix
-matrix matrix ::gauss_up(void){
+//optional if you want to know the indices of the pivots for each row
+//pass in a matrix aka pivots_indices
+matrix matrix ::gauss_up(matrix *pivots_indices = NULL){
     matrix ret_mat = *this ;
-    //same idea as gauss_down but instead of -1 its now rows since we look 
+    if(pivots_indices){
+        *pivots_indices = matrix(rows,1,-1) ;
+    }
+    //same idea as gauss_down but instead of -1 its now rows since we look
     //for pivots from last row till first row
     int old_pivot =rows;
     for(int low_r = rows-1 ; low_r>=0;low_r--){
         //pivot_index in first iteration will be rows-1 which is the first location
-        //to look for a pivot 
+        //to look for a pivot
         int pivot_index =old_pivot-1 ;
         //if not a pivot then we find next pivot by decreasing the pivot index
         //aka find it in the prev column
@@ -378,8 +389,12 @@ matrix matrix ::gauss_up(void){
             pivot_index-- ;
         }
         if(pivot_index>=0){
+            if(pivots_indices){
+               pivots_indices->vec[low_r][0] = pivot_index ;
+           }
         for(int up_r = low_r-1;up_r>=0;up_r--){
-            if(ret_mat.vec[up_r][pivot_index]!=0){
+
+            if(ret_mat.vec[up_r][pivot_index]<tolerance){
                 float c = -1 * (ret_mat.vec[up_r][pivot_index]/ret_mat.vec[low_r][pivot_index]);
                     for(int col_c = pivot_index ; col_c>=0; col_c--){
                         ret_mat.vec[up_r][col_c]+= c*ret_mat.vec[low_r][col_c];
@@ -433,11 +448,11 @@ matrix matrix:: solve(void) {
 }
 //calculate determinant of a matrix
 float matrix::det(){
-//determinant is for square matrices 
+//determinant is for square matrices
     if(is_square()){
-        //copy the matrix into mat_cpy and do gaussian eliminatino downward 
-        //notice when we switch a row to fix a pivot position the determinant is 
-            //multiplied by -1 each time 
+        //copy the matrix into mat_cpy and do gaussian eliminatino downward
+        //notice when we switch a row to fix a pivot position the determinant is
+            //multiplied by -1 each time
         matrix mat_cpy =*this ;
         float det_val = 1 ;
         //checks pivot condition and if its a pivot it records if its switched rows or not
@@ -456,7 +471,7 @@ float matrix::det(){
                     }
                 }
                 else{
-                //one of the elements of the main diagonal is azero so no need 
+                //one of the elements of the main diagonal is azero so no need
                 //to continue the calculations
                     return 0  ;
                 }
@@ -477,7 +492,7 @@ float& matrix ::at(int r_ind,int c_ind){
     }
     cout<<"out of bounds";
 }
-//calculates inverse of a square matrix if available 
+//calculates inverse of a square matrix if available
 matrix matrix ::inverse(void){
     if(is_square()){
         //copying the m matrix into mat_cpy
@@ -496,7 +511,7 @@ matrix matrix ::inverse(void){
                         }
                     }
                     else{
-                        //if the pivot is zero then its not invertible matrix 
+                        //if the pivot is zero then its not invertible matrix
                         cout<<"determinant of the passed matrix is zero or not squre matrix to begin with";
                         matrix error_matrix(1,1,-1);
                         return error_matrix ;
@@ -504,7 +519,7 @@ matrix matrix ::inverse(void){
                 }
             }
         //then do Gaussian elimination upward
-            //here we don't need to check if its a pivot since its shown clearly 
+            //here we don't need to check if its a pivot since its shown clearly
             //from first elemination that it contains pivots at each row
             for(int low_r = rows-1 ; low_r>0;low_r--){
                 for(int up_r = low_r-1;up_r>=0;up_r--){
@@ -526,7 +541,7 @@ matrix matrix ::inverse(void){
     matrix error_matrix(1,1,-1);
     return error_matrix ;
 }
-//calculates A/B where A is left side and B is right 
+//calculates A/B where A is left side and B is right
 matrix matrix::operator/(matrix& m)const
 {
         matrix ret_mat = m.inverse() ;
@@ -534,11 +549,11 @@ matrix matrix::operator/(matrix& m)const
         {
         cout<<"determinant of the denum is zero";
         matrix error_matrix(1,1,-1);
-        return error_matrix ; 
+        return error_matrix ;
         }
         return *this * ret_mat;
 }
-//this allows for multiple functions reuse old matrices , copy 
+//this allows for multiple functions reuse old matrices , copy
 void matrix::operator=(const matrix&mat){
     if(this!=&mat){
         //then check if they don't have same shape
@@ -603,13 +618,13 @@ bool matrix::is_upper_tri(void) {
         for(int i =0 ; i <rows;i++){
             for(int j=  0 ; j<cols; j++){
                 if(j<i){
-                    if(vec[i][j]!=0){
+                    if(vec[i][j]<tolerance){
                         return false ;
                     }
                 }
                 else{
                     //check for rest of elements so that they aren't all zeroes
-                    zero_flag&=(vec[i][j]!=0)?false:true ;
+                    zero_flag&=(vec[i][j]<tolerance)?false:true ;
                 }
             }
         }
@@ -626,13 +641,13 @@ if(is_square()){
     for(int i =0 ; i <rows;i++){
         for(int j=  0 ; j<cols; j++){
             if(j>i){
-                if(vec[i][j]!=0){
+                if(vec[i][j]<tolerance){
                     return false ;
                 }
             }
             else{
                 //check for rest of elements so that they aren't all zeroes
-                zero_flag&=(vec[i][j]!=0)?false:true ;
+                zero_flag&=(vec[i][j]<tolerance)?false:true ;
             }
         }
     }
@@ -667,15 +682,17 @@ bool matrix:: is_scalar(void){//tested
 }
 // Calculate the rank of this matrix
 int matrix ::rank(void){//tested
+    matrix pivots_indices ;
     //first perform gaussian elimination downward
-        matrix temp_mat = gauss_down() ;
+        gauss_down(&pivots_indices) ;
         int counter = 0;
         //then count number of pivots
-        int row_c = 0 ;
-        for(int col_c = 0 ; col_c<cols; col_c++){
-            if(temp_mat.is_pivot(row_c,col_c)){
-                counter++ ;
-                row_c++  ;
+        for(int i = 0 ;i<rows ; i++){
+            if(pivots_indices.vec[i][0]!=-1){
+                counter ++ ;
+            }
+            else{
+                break  ;
             }
         }
         return counter ;
@@ -773,7 +790,7 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
         //find first non zero element in that row
         int pivot_index = r_ind ;
         while(pivot_index<rows){
-            if(vec[pivot_index][c_ind]!=0){
+            if(vec[pivot_index][c_ind]<tolerance){
                 //if you found a non zero element
                 //if its not the original element
                 //element at r_ind , c_ind rows are switched
@@ -798,33 +815,10 @@ matrix matrix :: rref(matrix&pivots_indices){
     //pivots locations will be mapped in this array
     //so if row zero contains a pivot at col index 1  for ex and so on
     //it will have the value 1 in that row and so on
-    pivots_indices = matrix(rows,1,-1) ;
     //return matrix
-    matrix ret_mat = *this;
-    for(int up_r = 0;up_r<rows; up_r++){
-        //check first if current element is a pivot
-        int pivot_index =up_r ;
-        //if not a pivot then we find next pivot by increasing the pivot index
-        //aka find it in the next column
-        while(pivot_index<cols&&!ret_mat.is_pivot(up_r,pivot_index)){
-            pivot_index++ ;
-        }
-        //make sure you aren't out of bounds
-        if(pivot_index<cols){
-            //since this is pivot we save the location of that pivot in
-            //pivots_locations
-            pivots_indices.vec[up_r][0]= pivot_index ;
-            for(int low_r = up_r+1; low_r<rows; low_r++){
-                //do gaussian elimination downward
-                if(ret_mat.vec[low_r][pivot_index]!=0){
-                    float c = -1*(ret_mat.vec[low_r][pivot_index]/ret_mat.vec[up_r][pivot_index]);
-                    for(int i =up_r ; i<cols;i++){
-                        ret_mat.vec[low_r][i]+=c*ret_mat.vec[up_r][i] ;
-                    }
-                }
-            }
-        }
-    }
+    //do gaussian elemination downward
+    matrix ret_mat = gauss_down(&pivots_indices);
+
     //do gaussian elimination upward using the pivots_locations
     for(int low_r = rows-1 ; low_r>0;low_r--){
         int pivot_index = pivots_indices.vec[low_r][0];
@@ -837,14 +831,17 @@ matrix matrix :: rref(matrix&pivots_indices){
         }
    }
 }
+    //go in each row and if that row contains a pivot divid each element by
+    //by the pivot
     for(int i = 0 ; i<rows;i++){
         int pivot_index = pivots_indices.vec[i][0];
         if(pivot_index!=-1){
             float val = ret_mat.vec[i][pivot_index];
             if(val){
-            //found the pivot
                 for(int j=  0 ; j<cols;j++){
                     ret_mat.vec[i][j]/=val ;
+                    //tolerance
+                    ret_mat.vec[i][j] = (ret_mat.vec[i][j]<tolerance)?0:ret_mat.vec[i][j];
                 }
             }
         }
@@ -852,6 +849,63 @@ matrix matrix :: rref(matrix&pivots_indices){
 
     return ret_mat ;
 }
-
+//checks if a set of vectors in a column space are independent
+bool matrix ::is_independent(void){
+    return rank() ==cols ;
+}
+//dimensino of the column space
+int matrix ::dim_col(void){
+    return rank() ;
+}
+//returns dimension of the null space
+int matrix ::dim_null(void){
+    return cols - rank();
+}
+//checks if a bunch of vectors form basis of a space R^dimension
+bool matrix ::is_basis( int dimension){
+    //check if they are independent and they span the column space of R^dimension
+    return cols==dimension&&is_independent() ;
+}
+//returns the set of vectors that forms a basis in a space R^dimension
+matrix matrix ::basis(int dimension) {
+    //return matrix
+    matrix ret_mat ;
+    //matrix in which we store indicex of each pivot in the correspoinding row
+    matrix pivots_indices ;
+    //perform gaussian elimination downward
+    matrix mat_cpy = gauss_down(&pivots_indices) ;
+    //get dimension of the column space
+    int pivot_count = 0 ;
+    //count number of pivots and stop when you find -1
+    //aka no remaining pivots refer to is_pivot and check what it does for
+    //more info
+    for(int i = 0 ;i<rows; i++){
+        if(pivots_indices.vec[i][0]!=-1){
+            pivot_count++ ;
+        }
+        else{
+            break ;
+        }
+    }
+    if(pivot_count==dimension){
+        //we store each column carrying a pivot in this matrix
+        ret_mat = matrix(rows,pivot_count);
+        //for each element in ret_mat
+        for(int row_c = 0 ; row_c<rows ; row_c++){
+            for(int col_c =0 ; col_c<pivot_count; col_c++){
+                //get the pivot index in that row
+                int pivot_index=pivots_indices.vec[col_c][0] ;
+                //store the correspoinding element in the pivot's column
+                //in ret_mat
+                ret_mat.vec[row_c][col_c] =vec[row_c][pivot_index] ;
+            }
+        }
+    }
+    else{
+        cout<<"can't find basis for the specified dimension" ;
+        ret_mat = matrix(1,1,-1) ;
+    }
+    return ret_mat ;
+}
 
 
