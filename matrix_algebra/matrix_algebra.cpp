@@ -255,12 +255,12 @@ bool matrix::is_diagonal(void) {
         int zero_flag=true ;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j <cols; j++) {
-                if (i != j &&vec[i][j]!= 0) {
+                if (i != j &&abs(vec[i][j])>tolerance) {
                     return false;
                 }
             else{
                 //zero flag checks for diagonal elements so that it makes sure they aren't all zeroes
-                zero_flag &=vec[i][j]==0;
+                zero_flag &=abs(vec[i][j])<tolerance;
             }
         }
     }
@@ -310,7 +310,7 @@ bool matrix ::operator == (matrix&mat)const{
     if(same_shape(mat)){
        for (int i = 0; i < rows; i++){
             for (int j = 0; j <cols; j++) {
-             if(vec[i][j]!=mat.vec[i][j]){
+             if(abs(vec[i][j]-mat.vec[i][j])>tolerance){
                 return false ;
             }
         }
@@ -641,7 +641,7 @@ if(is_square()){
     for(int i =0 ; i <rows;i++){
         for(int j=  0 ; j<cols; j++){
             if(j>i){
-                if(vec[i][j]<tolerance){
+                if(abs(vec[i][j])<tolerance){
                     return false ;
                 }
             }
@@ -790,7 +790,7 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
         //find first non zero element in that row
         int pivot_index = r_ind ;
         while(pivot_index<rows){
-            if(vec[pivot_index][c_ind]>tolerance){
+            if(abs(vec[pivot_index][c_ind])>tolerance){
                 //if you found a non zero element
                 //if its not the original element
                 //element at r_ind , c_ind rows are switched
@@ -934,3 +934,4 @@ matrix matrix ::basis_cols(void) {
         }
         return ret_mat ;
     }
+
