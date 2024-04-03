@@ -9,7 +9,7 @@ using namespace std ;
 //the det is muliplied by -1 and so on
 enum {not_pivot=0,pivot_no_switch,pivot_with_switch} ;
 //feel free to edit this value the way you want
-const float tolerance = 0.000001 ;
+const float tolerance = 0.0001 ;
 const float M_PI= 3.14159;
 //error messages
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
@@ -118,9 +118,9 @@ public:
     //performs axpy operation between 2 rows
     void row_axpy(float alpha,int x_row,int y_row) ;
     //performs gaussian elimination downward
-    matrix gauss_down(void) ;//tested
+    matrix gauss_down(matrix *) ;//tested
     //performs gaussian elimination upward
-    matrix gauss_up(void) ;//tested
+    matrix gauss_up(matrix *) ;//tested
     //performs back substitution on a selected row and solution matrix is passed with it
     float back_sub(int selected_row,matrix& solution_matrix);//tested
     //performs forward substitution on a selected row and solution matrix is passed with it
@@ -171,6 +171,24 @@ public:
     //it mapps for each row the index of its pivot if found
     // if at that row there are no pivots its assigned the value -1
     matrix rref(matrix & pivots_indices);//tested
+    // Checks if the set of vectors (columns of the matrix) is linearly independent.
+    bool is_independent(void);
+
+    // Calculates the dimension of the null space (kernel) of the matrix.
+    // The null space consists of all vectors that are mapped to the zero vector by the linear transformation represented by the matrix.
+    int dim_null(void);
+
+    // Calculates the dimension of the column space (range) of the matrix.
+    // The column space consists of all possible linear combinations of the column vectors in the matrix.
+    int dim_col(void);
+
+    // Checks if the set of vectors (columns of the matrix) forms a basis for the vector space of the given dimension.
+    // A set of vectors forms a basis if they are linearly independent and span the vector space.
+    bool is_basis(int dimension);
+
+    // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
+    matrix basis(int dimension);
+
 };
 
 #endif // VEC_H_INCLUDED
