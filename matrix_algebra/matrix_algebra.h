@@ -7,7 +7,6 @@ using namespace std ;
 //this enum is used as output for functions using @is_pivot
 //its usefull when using the @det function since if you exchange a row
 //the det is muliplied by -1 and so on
-enum {not_pivot=0,pivot_no_switch,pivot_with_switch} ;
 //feel free to edit this value the way you want
 const float tolerance = 0.000001 ;
 const float M_PI= 3.14159;
@@ -133,7 +132,11 @@ public:
     bool switch_rows(int row1,int row2);//tested
     //performs lu factorization on a matrix
     //lower_fact and upper_fact have the results
-    void lu_fact(matrix& lower_fact,matrix& upper_fact) ;//tested
+    //added permutatino matrix since during lu factorization if the rows are switched
+    //if the pivot is not in its position it will be switched we have to keep track of this
+    //using permutation matrix its set first as identity but if rows are switched
+    //the rows of the identity are switched aswell 
+    void lu_fact(matrix& lower_fact,matrix&permutation,matrix& upper_fact) ;//tested
     //assignment function
     //allows for matrix reuse
     void operator=(const matrix&) ;//tested
@@ -170,6 +173,9 @@ public:
     //also it switches rows if the pivot is not at same row
     //and returns true
     int is_pivot(int row_index , int col_index);//tested
+    //same as is_pivot but used in gauss_up
+    int is_pivot_up(int,int) ;
+
     //this function returns row reduced echolon form of a matrix
     //it mapps for each row the index of its pivot if found
     // if at that row there are no pivots its assigned the value -1
@@ -190,7 +196,10 @@ public:
     matrix basis_cols(void);//tested
     // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
     matrix basis_rows(void);
-    int is_pivot_up(int,int) ;
+    matrix null_rows(void) ;
+    matrix null_cols(void) ;
+
+
 };
 
 #endif // VEC_H_INCLUDED
