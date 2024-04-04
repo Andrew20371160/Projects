@@ -188,7 +188,7 @@ matrix matrix::operator*(float scalar)const{
     return error_mat ;
 }
 matrix matrix:: operator * (matrix&mat)const{
-    if(rows ==mat.cols){
+    if(cols ==mat.rows){
         matrix ret_mat(rows,mat.cols,0) ;
         for(int row_counter=  0 ;  row_counter<rows; row_counter++){
             for(int col_counter = 0  ; col_counter<mat.cols;col_counter++){
@@ -343,7 +343,7 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
         int pivot_index =old_pivot+1  ;
         //if not a pivot then we find next pivot by increasing the pivot index
         //aka find it in the next column
-        while(pivot_index<cols&&!ret_mat.is_pivot(up_r,pivot_index)){
+        while(pivot_index<cols&&ret_mat.is_pivot(up_r,pivot_index)==-1){
             pivot_index++ ;
         }
         //make sure you aren't out of bounds
@@ -385,7 +385,7 @@ matrix matrix ::gauss_up(matrix *pivots_indices = NULL){
         int pivot_index =old_pivot-1 ;
         //if not a pivot then we find next pivot by decreasing the pivot index
         //aka find it in the prev column
-        while(pivot_index>=0&&!ret_mat.is_pivot_up(low_r,pivot_index)){
+        while(pivot_index>=0&&ret_mat.is_pivot_up(low_r,pivot_index)==-1){
             pivot_index-- ;
         }
         if(pivot_index>=0){
@@ -461,8 +461,8 @@ float matrix::det(){
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 pivot_condition = mat_cpy.is_pivot(up_r,up_r) ;
                 //if its a pivot we do calculation
-                if(pivot_condition!=not_pivot){
-                    if(pivot_condition==pivot_with_switch){
+                if(pivot_condition!=-1){
+                    if(pivot_condition!=up_r){
                         det_val*=-1 ;
                     }
                     if(abs(mat_cpy.vec[low_r][up_r])>tolerance){
@@ -505,7 +505,7 @@ matrix matrix ::inverse(void){
         //first do Gaussian elimination downward
         for(int up_r = 0 ; up_r<rows-1;up_r++){
                 for(int low_r = up_r+1;low_r<rows;low_r++){
-                    if(mat_cpy.is_pivot(up_r,up_r)){
+                    if(mat_cpy.is_pivot(up_r,up_r)!=-1){
                         float c = -1 * (mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
                         for(int col_c = 0 ; col_c<cols ; col_c++){
                             mat_cpy.vec[low_r][col_c]+= c*mat_cpy.vec[up_r][col_c] ;
@@ -748,8 +748,11 @@ bool matrix :: is_involutory(void){
     }
     return false ;
 }
-
-void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
+//added permutatino matrix since during lu factorization if the rows are switched
+//if the pivot is not in its position it will be switched we have to keep track of this
+//using permutation matrix its set first as identity but if rows are switched
+//the rows of the identity are switched aswell
+void matrix:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&upper_fact) {
     //first check if its square matrix
     if(is_square()){
         //the lower_fact matrix is the identity matrix (at first) in which we store
@@ -757,12 +760,19 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
         //after finisning the gaussian elimination the upper_fact is finished
         lower_fact = matrix(rows,cols,0);
         lower_fact.identity() ;
+        //if permutations happen its recorded in this matrix
+        permutation = matrix(rows,cols,0);
+        permutation.identity() ;
         //copy original matrix into upper_fact to performa gaussian elimination on it
         upper_fact = *this  ;
         for(int up_r = 0;up_r<rows-1; up_r++){
+            int pivot_condition =upper_fact.is_pivot(up_r,up_r);
+            if(pivot_condition!=-1){
+                //aka its a pivot
+            if(pivot_condition==up_r){
+                //no switch happened
             for(int low_r = up_r+1; low_r<rows; low_r++){
-            //check first if upper element is a pivot
-                if(upper_fact.is_pivot(up_r,up_r)){
+                    //check first if upper element is a pivot
                     //the constant we calculate
                     float c = -1*(upper_fact.vec[low_r][up_r]/upper_fact.vec[up_r][up_r]);
                     //first record it into the lower_fact matrix at its position
@@ -772,12 +782,19 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
                         upper_fact.vec[low_r][i]+=c*upper_fact.vec[up_r][i] ;
                     }
                 }
+            }
+                else {
+                    permutation.switch_rows(up_r,pivot_condition);
+                }
+ }
                 else{
-                    lower_fact.vec[low_r][up_r] = 0;
+                cout<<"matrix doesn't have an inverese" ;
+                lower_fact =  matrix(1,1,-1) ;
+                upper_fact =  matrix(1,1,-1) ;
+                return ;
                 }
             }
         }
-    }
     else{
         cout<<square_error;
         lower_fact =  matrix(1,1,-1) ;
@@ -787,6 +804,8 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&upper_fact) {
 //this function checks if an element is a pivot
 //and switches the rows if the original element is not a pivot
 //with the first non zero element it finds
+//now updated to return the row of the pivot to keep record of the rows
+//if rows are switched used in lu_fact
 int matrix:: is_pivot(int r_ind , int c_ind) {
     if(r_ind<rows&&c_ind<cols){
         //find first non zero element in that row
@@ -799,16 +818,18 @@ int matrix:: is_pivot(int r_ind , int c_ind) {
                 //and this is the new pivot and the function ends
                 if(pivot_index!=r_ind){
                     switch_rows(pivot_index,r_ind);
-                    return pivot_with_switch ;
+                    //notice we returned pivot_index not r_ind since the rows
+                    //were switched
+                    return pivot_index ;
                 }
-                return pivot_no_switch ;
+                return r_ind ;
             }
-            //else chec for next element or col
+            //else check for next element or col
             pivot_index++;
         }
-    return not_pivot ;
+    return -1 ;
     }
-    return not_pivot ;
+    return -1 ;
 }
 //this function checks if an element is a pivot
 //and switches the rows if the original element is not a pivot
@@ -825,16 +846,16 @@ int matrix:: is_pivot_up(int r_ind , int c_ind) {
                 //and this is the new pivot and the function ends
                 if(pivot_index!=r_ind){
                     switch_rows(pivot_index,r_ind);
-                    return pivot_with_switch ;
+                    return pivot_index ;
                 }
-                return pivot_no_switch ;
+                return r_ind ;
             }
             //else chec for next element or col
             pivot_index--;
         }
-    return not_pivot ;
+    return -1 ;
     }
-    return not_pivot ;
+    return -1 ;
 }
 //this function returns reduced row echolon form of the matrix
 //and saves pivots locations in the input pivots matrix for each row containing
