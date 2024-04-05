@@ -132,10 +132,6 @@ public:
     bool switch_rows(int row1,int row2);//tested
     //performs lu factorization on a matrix
     //lower_fact and upper_fact have the results
-    //added permutatino matrix since during lu factorization if the rows are switched
-    //if the pivot is not in its position it will be switched we have to keep track of this
-    //using permutation matrix its set first as identity but if rows are switched
-    //the rows of the identity are switched aswell 
     void lu_fact(matrix& lower_fact,matrix&permutation,matrix& upper_fact) ;//tested
     //assignment function
     //allows for matrix reuse
@@ -196,7 +192,7 @@ public:
     matrix basis_cols(void);//tested
     // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
     matrix basis_rows(void);//tested
-    matrix null_rows(void) ;
+    matrix null_rows(matrix*) ;
     matrix null_cols(void) ;
 
 
