@@ -408,7 +408,6 @@ matrix matrix ::gauss_up(matrix *pivots_indices = NULL){
     return ret_mat ;
 }
 //this function switches 2 rows and returns state of switching meaning the rows are valid
-//idecies
 bool matrix ::switch_rows(int r1 ,int r2 ){
     if(r1>=0&&r1<get_rows()&&r2>=0&&r2<get_rows()&&r1!=r2){
     for(int i = 0 ; i <get_cols();i++){
@@ -567,6 +566,7 @@ void matrix::operator=(const matrix&mat){
                 }
                 delete vec ;
             }
+            vec= NULL  ;
             //reallocate for copying
             rows = mat.rows;
             cols = mat.cols ;
@@ -765,13 +765,16 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&upper_fact) {
         permutation.identity() ;
         //copy original matrix into upper_fact to performa gaussian elimination on it
         upper_fact = *this  ;
-        for(int up_r = 0;up_r<rows-1; up_r++){
+        for(int up_r = 0;up_r<rows; up_r++){
             int pivot_condition =upper_fact.is_pivot(up_r,up_r);
             if(pivot_condition!=-1){
                 //aka its a pivot
-            if(pivot_condition==up_r){
+                //if a switch happened
+            if(pivot_condition!=up_r){
+                  permutation.switch_rows(up_r,pivot_condition);
+            }
                 //no switch happened
-            for(int low_r = up_r+1; low_r<rows; low_r++){
+            for(int low_r = up_r+1; low_r<rows-1; low_r++){
                     //check first if upper element is a pivot
                     //the constant we calculate
                     float c = -1*(upper_fact.vec[low_r][up_r]/upper_fact.vec[up_r][up_r]);
@@ -781,10 +784,6 @@ void matrix:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&upper_fact) {
                         //then continue the gaussian elimination
                         upper_fact.vec[low_r][i]+=c*upper_fact.vec[up_r][i] ;
                     }
-                }
-            }
-                else {
-                    permutation.switch_rows(up_r,pivot_condition);
                 }
  }
                 else{
@@ -983,6 +982,7 @@ matrix matrix ::basis_cols(void) {
         }
         return ret_mat ;
     }
+
 //where e*A = rref(A)
 //matrix e is optional if you want to use it if you pass a matrix as an input
 //this matrix returns the null space of row space
@@ -1075,12 +1075,85 @@ matrix matrix:: null_rows(matrix*e= NULL) {
     }
 }
 else{
-    cout<<"the matrix doesn't have a null space in the row space";
-     ret_mat= matrix(1,1,0);
+     ret_mat= matrix(1,rows,0);
 }
     if(e){
         //if the user wants the elementary matrix then do the copying into e
         *e= elementary ;
     }
 return ret_mat ;
+}
+matrix matrix ::null_cols(void) {
+    //here the pivots indices are stored along with indices of free variables
+    matrix pivots_indices =matrix(cols,1,-1);;
+    //here the pivots indices are stored
+    matrix p_cpy ;
+    matrix mat_rref = rref(p_cpy) ;
+    //solution matrix with all speacial solutions
+    matrix ret_mat;
+    //copy the content from p_cpu into pivots indices
+    int c=  cols<rows?cols:rows ;
+    for(int i = 0 ; i<c;i++){
+        pivots_indices.vec[i][0] = p_cpy.vec[i][0]  ;
+    }
+    //counting number of pivots to check if there are special solutions
+    int pivot_c  =0   ;
+    while(pivot_c<cols&&pivots_indices.vec[pivot_c][0]!=-1){
+        pivot_c++;
+    }
+    if(pivot_c<cols){
+        int counter=0 ;
+        //fill rest of pivots_indices with free vars indices
+        for(int i = 0 ; i<cols;i++){
+            //for each index that is not a pivot put it in
+            //the rest of the pivots_indices
+            bool flag=  false ;
+            for(int j= 0 ; j<pivot_c ; j++){
+                if(i==pivots_indices.vec[j][0]){
+                    flag=true ;
+                    break;
+                }
+            }
+            if(!flag){
+                //if its not a pivot put it
+                pivots_indices.vec[pivot_c+counter][0] =i ;
+                counter++;
+            }
+        }
+        //cols -pivot_c = number of free variables
+        ret_mat = matrix(cols,(cols-pivot_c),0) ;
+        //when calculating special solutions
+        //the pattern 0 0 1 , 0 1 0 , 1 0 0
+        //for x5 ,x4 x3 respectively where they are free variables
+        //for example
+        int one_pos = cols-1;
+        //for each column of the special solution
+        for(int i = 0;i<(cols-pivot_c);i++){
+            //put the one in its postion for the new special solution
+            ret_mat.vec[one_pos][i] =1 ;
+            //for the current pivot we are calculating the value for
+            //"index of the pivot in special solution matrix"
+            for(int curr_piv= pivot_c-1 ; curr_piv>=0; curr_piv--){
+                //extract that pivot index from the in the rref
+                //rref indeces are mapped into pivot_indices
+                //so that for row 1 if it has a pivot it returns
+                //the column where the pivot lies
+                int pivot_index = pivots_indices.vec[curr_piv][0];
+                //x1 = (-x3*2-x2*2)/3
+                //x0 = (-x3*2-x2*2-x1*3)/4
+                for(int j= cols-1  ; j>curr_piv;j--){
+                    int free_v_index= pivots_indices.vec[j][0];
+                    ret_mat.vec[curr_piv][i]
+                    -=mat_rref.vec[pivot_index][free_v_index]*ret_mat.vec[j][i];
+                }
+            }
+            //0 0 1 ->0 1 0
+            one_pos--;
+            }
+    return ret_mat ;
+        }
+    //else there is only the zero solution to this matrix
+    //aka number of pivots equal number of cols
+    ret_mat = matrix(cols,1,0);
+    return ret_mat ;
 }
