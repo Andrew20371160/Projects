@@ -4,12 +4,9 @@
 #include <math.h>
 #include <string.h>
 using namespace std ;
-//this enum is used as output for functions using @is_pivot
-//its usefull when using the @det function since if you exchange a row
-//the det is muliplied by -1 and so on
 //feel free to edit this value the way you want
 const float tolerance = 0.000001 ;
-const float M_PI= 3.14159;
+const float M_PI = 3.14159 ;
 //error messages
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
@@ -48,7 +45,7 @@ public:
 
     //deallocate the memory allocated by the matrix
     ~matrix();//tested
-    //copy constructor 
+    //copy constructor
     matrix(const matrix&);//tested
     //get rows value
     int get_rows()const;//tested
@@ -62,7 +59,7 @@ public:
     void identity(void);//tested
     //check for same dimensions for 2 matrices
     bool same_shape(const matrix&)const ;//tested
-    //display functionality 
+    //display functionality
     void show(void)const;//tested
     // Add a matrix to the caller matrix and returns it as a new matrix
     matrix operator+(matrix&)const;//tested
@@ -78,7 +75,7 @@ public:
     string mat_to_string(void) const;//tested
     //performs dot product of 2 matrices and returns the value
     float dot(matrix&)const;//tested
-    //performs alpha*x+y and returns the value 
+    //performs alpha*x+y and returns the value
     float axpy(float,matrix&)const;//tested
     // Transpose caller matrix and returns it as a new matrix
     matrix transpose(void)const;//tested
@@ -142,6 +139,14 @@ public:
     bool is_parallel(matrix&) ;//tested
     //checks if 2 matrices are equal
     bool operator==(matrix&) const;//tested
+    // Check if this matrix is identity
+    bool is_identity(void);//tested
+
+    // Check if this matrix is upper triangular
+    bool is_upper_tri(void);//tested
+
+    // Check if this matrix is lower triangular
+    bool is_lower_tri(void);//tested
     // Check if this matrix is idempotent
     bool is_idempotent(void);//tested
 
@@ -157,14 +162,6 @@ public:
     // Check if this matrix is scalar
     bool is_scalar(void);//tested
 
-    // Check if this matrix is identity
-    bool is_identity(void);//tested
-
-    // Check if this matrix is upper triangular
-    bool is_upper_tri(void);//tested
-
-    // Check if this matrix is lower triangular
-    bool is_lower_tri(void);//tested
     //this function checks if a current element is a pivot
     //also it switches rows if the pivot is not at same row
     //and returns true
@@ -188,12 +185,14 @@ public:
     // Checks if the set of vectors (columns of the matrix) forms a basis for the vector space of the given dimension.
     // A set of vectors forms a basis if they are linearly independent and span the vector space.
     bool is_basis(int dimension);//tested
-    // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
+    // Returns a set of vectors (as a matrix) that forms a basis column space
     matrix basis_cols(void);//tested
-    // Returns a set of vectors (as a matrix) that forms a basis for the vector space of the given dimension.
+    // Returns a set of vectors (as a matrix) that forms a basis for the row space
     matrix basis_rows(void);//tested
+    //returns Null space or row space
     matrix null_rows(matrix*) ;
-    matrix null_cols(void) ;
+    //returns null space of column space
+    matrix null_cols(void) ;//tested
 
 
 };
