@@ -748,7 +748,7 @@ bool matrix :: is_involutory(void){
     }
     return false ;
 }
-//added permutatino matrix since during lu factorization if the rows are switched
+//added permutation matrix since during lu factorization if the rows are switched
 //if the pivot is not in its position it will be switched we have to keep track of this
 //using permutation matrix its set first as identity but if rows are switched
 //the rows of the identity are switched aswell
@@ -919,7 +919,7 @@ bool matrix ::is_basis( int dimension){
     //check if they are independent and they span the column space of R^dimension
     return cols==dimension&&is_independent() ;
 }
-//returns the set of vectors that forms a basis in a space R^dimension
+//returns the set of vectors that forms a basis of the column space
 matrix matrix ::basis_cols(void) {
     //return matrix
     matrix ret_mat ;
