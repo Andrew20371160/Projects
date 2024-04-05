@@ -983,3 +983,104 @@ matrix matrix ::basis_cols(void) {
         }
         return ret_mat ;
     }
+//where e*A = rref(A)
+//matrix e is optional if you want to use it if you pass a matrix as an input
+//this matrix returns the null space of row space
+matrix matrix:: null_rows(matrix*e= NULL) {
+    //pivots indices are stored here
+    matrix pivots_indices(rows,1,-1) ;
+    matrix elementary=matrix(rows,rows);
+    elementary.identity() ;
+    matrix mat_cpy = *this ;
+    //when getting pivot indices we have to keep track of old pivot since
+    //the new pivot won't exist in the same column so we go to next column each iteration
+    int old_pivot = -1 ;
+    for(int up_r = 0;up_r<rows; up_r++){
+        //check for pivot in the next column
+            //at first iteration we check for sure for first col hence 1-1 = 0
+        int pivot_index =old_pivot+1  ;
+        //if not a pivot then we find next pivot by increasing the pivot index
+        //aka find it in the next column
+        while(pivot_index<cols&&mat_cpy.is_pivot(up_r,pivot_index)==-1){
+            pivot_index++ ;
+        }
+        //make sure you aren't out of bounds
+        if(pivot_index<cols){
+            pivots_indices.vec[up_r][0] = pivot_index ;
+            for(int low_r = up_r+1; low_r<rows; low_r++){
+                //do gaussian elimination downward
+                //check if lower element is not zero to save processing power
+                if(abs(mat_cpy.vec[low_r][pivot_index])>tolerance){
+                    float c = -1*(mat_cpy.vec[low_r][pivot_index]/mat_cpy.vec[up_r][pivot_index]);
+                    for(int i =pivot_index ; i<cols;i++){
+                        mat_cpy.vec[low_r][i]+=c*mat_cpy.vec[up_r][i] ;
+                    }
+                    for(int i =0 ; i<rows;i++){
+                        elementary.vec[low_r][i] +=c*elementary.vec[up_r][i] ;
+                    }
+                }
+            }
+            //record that pivot to search for next pivot in the next column not in same column
+                //as mentioned above
+            old_pivot = pivot_index ;
+        }
+    }
+    //do gaussian elimination upward using the pivots_locations
+    for(int low_r = rows-1 ; low_r>0;low_r--){
+        int pivot_index = pivots_indices.vec[low_r][0];
+        if(pivot_index!=-1){
+            for(int up_r = low_r-1;up_r>=0;up_r--){
+                float c = -1 * (mat_cpy.vec[up_r][pivot_index] /mat_cpy.vec[low_r][pivot_index]);
+                for(int col_c = 0 ; col_c<cols ; col_c++){
+                    mat_cpy.vec[up_r][col_c]+=c*mat_cpy.vec[low_r][col_c] ;
+                }
+                for(int col_c = 0 ; col_c<rows ; col_c++){
+                    elementary.vec[up_r][col_c]+= c*elementary.vec[low_r][col_c];
+                }
+        }
+   }
+}
+    //go in each row and if that row contains a pivot divide each element by
+    //by the pivot
+    int pivot_c = 0 ;
+    for(; pivot_c<rows;pivot_c++){
+        int pivot_index = pivots_indices.vec[pivot_c][0];
+        //if the following row contains a pivot then we divide the whole row by that pivot
+        if(pivot_index!=-1){
+            float val = mat_cpy.vec[pivot_c][pivot_index];
+            if(val){
+                //do that for each element in the row
+                for(int j=  0 ; j<rows;j++){
+                    elementary.vec[pivot_c][j]/=val ;
+                    //tolerance
+                    elementary.vec[pivot_c][j] = (abs(elementary.vec[pivot_c][j])<tolerance)?0:elementary.vec[pivot_c][j];
+                }
+            }
+        }
+        //if there is no more pivots then break and head for null space of row space matrix
+        else{
+            break ;
+        }
+    }
+    //make sure the matrix has dimension in the null space of the row space
+    matrix ret_mat;
+    if(rows-pivot_c>0){
+        ret_mat=matrix(rows-pivot_c,rows);
+    int c= 0  ;//counter for rows of return matrix
+    for(; pivot_c<rows;pivot_c++){
+        for(int j = 0 ; j<rows; j++){
+            ret_mat.vec[c][j] = elementary.vec[pivot_c][j] ;
+        }
+        c++;
+    }
+}
+else{
+    cout<<"the matrix doesn't have a null space in the row space";
+     ret_mat= matrix(1,1,0);
+}
+    if(e){
+        //if the user wants the elementary matrix then do the copying into e
+        *e= elementary ;
+    }
+return ret_mat ;
+}
