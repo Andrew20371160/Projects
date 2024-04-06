@@ -11,11 +11,6 @@ const float M_PI = 3.14159 ;
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
-//write efficient matrix multiplication algos aka diagonal ,upper_tri ,lower_tri  ,
-//add some variables to matrices to indicate its properties
-//write a function to test or use is_diag ,is_suare etc etc use them in one big function called
-//extract specifications of matrix for ex and this writes it into the matrix class so that
-//we won't have to do that again
 class matrix{
 private :
 //2d array for holding data
