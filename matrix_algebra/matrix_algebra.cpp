@@ -1,9 +1,9 @@
 #include "matrix_algebra.h"
-/*-update : added fix_pivots() this function rearranges the matrix rows 
-so that the rows contatining the pivotsare on top and the rest of rows at bottom 
+/*-update : added fix_pivots() this function rearranges the matrix rows
+so that the rows contatining the pivotsare on top and the rest of rows at bottom
 its crucial when using functions like lu_fact not really since i added permutation matrix earlier
 but if you use elementary matrix from null_rows() and tried to test if elementary * matrix euqals
-rref(matrix) this sometimes isn't true since elementary matrix doesn't record the switches 
+rref(matrix) this sometimes isn't true since elementary matrix doesn't record the switches
 in rows that happens during the rref of the matrix its advisable to use after you initialize the matrix
 but i wouldn't force that its on you :) .
 */
@@ -357,6 +357,7 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL,matrix *original_pivots
         int pivot_condition = ret_mat.is_pivot(up_r,pivot_index) ;
         while(pivot_index<cols&&pivot_condition==-1){
             pivot_index++ ;
+            pivot_condition = ret_mat.is_pivot(up_r,pivot_index);
         }
         //make sure you aren't out of bounds
         if(pivot_index<cols){
@@ -1197,3 +1198,4 @@ void matrix ::fix_pivots(void) {
         pivot_c++;
     }
 }
+
