@@ -1,5 +1,13 @@
 #ifndef VEC_H_INCLUDED
 #define VEC_H_INCLUDED
+/*-update : added fix_pivots() this function rearranges the matrix rows 
+so that the rows contatining the pivotsare on top and the rest of rows at bottom 
+its crucial when using functions like lu_fact not really since i added permutation matrix earlier
+but if you use elementary matrix from null_rows() and tried to test if elementary * matrix euqals
+rref(matrix) this sometimes isn't true since elementary matrix doesn't record the switches 
+in rows that happens during the rref of the matrix its advisable to use after you initialize the matrix
+but i wouldn't force that its on you :) .
+*/
 #include <iostream>
 #include <math.h>
 #include <string.h>
