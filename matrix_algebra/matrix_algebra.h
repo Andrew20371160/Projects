@@ -184,9 +184,9 @@ public:
     matrix basis_cols(void);//tested
     // Returns a set of vectors (as a matrix) that forms a basis for the row space
     matrix basis_rows(void);//tested
-    //returns Null space or row space
+    //returns Null space of the row space
     matrix null_rows(matrix*) ;
-    //returns null space of column space
+    //returns null space of the column space
     matrix null_cols(void) ;//tested
 
 
