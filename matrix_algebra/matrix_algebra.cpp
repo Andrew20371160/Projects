@@ -329,10 +329,13 @@ void matrix ::row_axpy(float scalar,int upper_row,int lower_row){
 //performs downward gaussian elimination producing an upper triangular matrix
 //optional if you want to know the indices of the pivots for each row
 //pass in a matrix aka pivots_indices
-matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
+matrix matrix ::gauss_down(matrix *pivots_indices = NULL,matrix *original_pivots_indices = NULL) {
     matrix ret_mat = *this;
     if(pivots_indices){
         *pivots_indices = matrix(rows,1,-1) ;
+    }
+    if(original_pivots_indices){
+        *original_pivots_indices = matrix(rows,1,-1)  ;
     }
     //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
@@ -343,7 +346,8 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
         int pivot_index =old_pivot+1  ;
         //if not a pivot then we find next pivot by increasing the pivot index
         //aka find it in the next column
-        while(pivot_index<cols&&ret_mat.is_pivot(up_r,pivot_index)==-1){
+        int pivot_condition = ret_mat.is_pivot(up_r,pivot_index) ;
+        while(pivot_index<cols&&pivot_condition==-1){
             pivot_index++ ;
         }
         //make sure you aren't out of bounds
@@ -351,6 +355,9 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL) {
             if(pivots_indices){
                     pivots_indices->vec[up_r][0] = pivot_index ;
                 }
+            if(original_pivots_indices){
+                original_pivots_indices->vec[pivot_condition][0] = pivot_index;
+            }
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 //check if lower element is not zero to save processing power
@@ -1156,4 +1163,29 @@ matrix matrix ::null_cols(void) {
     //aka number of pivots equal number of cols
     ret_mat = matrix(cols,1,0);
     return ret_mat ;
+}
+//it fixes a matrix by putting rows that corresponds to pivots first
+//then rist of rows at th every end this fixes an issue at rref
+//where if a row switch occurs it won't be recorded in elementary matrix
+//or you will need extra permutation matrix fixes the caller itself
+void matrix ::fix_pivots(void) {
+    matrix  original_pivots_indices ;
+    matrix  new_pivots_indices;
+    gauss_down(&new_pivots_indices,&original_pivots_indices) ;
+    int pivot_c = 0;
+    while(pivot_c<rows){
+        if(original_pivots_indices.vec[pivot_c][0]==-1){
+            int finder =pivot_c ;
+            while(finder <rows &&original_pivots_indices.vec[finder][0]==-1){
+                finder++;
+            }
+            if(finder<rows){
+                switch_rows(finder,pivot_c);
+            }
+            else{
+                return ;
+            }
+        }
+        pivot_c++;
+    }
 }
