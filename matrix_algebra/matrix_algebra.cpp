@@ -995,6 +995,7 @@ matrix matrix:: null_rows(matrix*e= NULL) {
     matrix elementary=matrix(rows,rows);
     elementary.identity() ;
     matrix mat_cpy = *this ;
+    mat_cpy.fix_pivots();
     //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
     int old_pivot = -1 ;
@@ -1131,7 +1132,7 @@ matrix matrix ::null_cols(void) {
         //for example
         int one_pos = cols-1;
         //for each column of the special solution
-        for(int i = 0;i<(cols-pivot_c);i++){
+        for(int i = (cols-pivot_c)-1;i>=0;i--){
             //put the one in its postion for the new special solution
             ret_mat.vec[one_pos][i] =1 ;
             //for the current pivot we are calculating the value for
