@@ -337,13 +337,10 @@ void matrix ::row_axpy(float scalar,int upper_row,int lower_row){
 //performs downward gaussian elimination producing an upper triangular matrix
 //optional if you want to know the indices of the pivots for each row
 //pass in a matrix aka pivots_indices
-matrix matrix ::gauss_down(matrix *pivots_indices = NULL,matrix *original_pivots_indices = NULL) {
+matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_locations) {
     matrix ret_mat = *this;
     if(pivots_indices){
         *pivots_indices = matrix(rows,1,-1) ;
-    }
-    if(original_pivots_indices){
-        *original_pivots_indices = matrix(rows,1,-1)  ;
     }
     //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
@@ -361,11 +358,13 @@ matrix matrix ::gauss_down(matrix *pivots_indices = NULL,matrix *original_pivots
         }
         //make sure you aren't out of bounds
         if(pivot_index<cols){
-            if(pivots_indices){
+            //if user wants new locations after switching rows
+            if(pivots_locations==new_locations){
                     pivots_indices->vec[up_r][0] = pivot_index ;
                 }
-            if(original_pivots_indices){
-                original_pivots_indices->vec[pivot_condition][0] = pivot_index;
+            //else user wants the locations of pivots lying in original rows
+            else if(pivots_locations==old_locations){
+                pivots_indices->vec[pivot_condition][0] = pivot_index;
             }
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
@@ -465,36 +464,24 @@ matrix matrix:: solve(void) {
 float matrix::det(){
 //determinant is for square matrices
     if(is_square()){
-        //copy the matrix into mat_cpy and do gaussian eliminatino downward
-        //notice when we switch a row to fix a pivot position the determinant is
-            //multiplied by -1 each time
-        matrix mat_cpy =*this ;
+        //here we store place of original pivots
+        //we walk through the matrix from 0 to row -1
+        //if you are at first row and the pivot location is originally
+        //in the 3rd row then we multiply the determinant by -1
+        //if there is no pivot we return 0 easy as that
+        matrix original_pivots_indices(rows,1,-1)  ;
+        matrix mat_cpy =gauss_down(&original_pivots_indices,old_locations) ;
         float det_val = 1 ;
-        //checks pivot condition and if its a pivot it records if its switched rows or not
-        int pivot_condition  ;
-        for(int up_r = 0;up_r<rows-1; up_r++){
-            for(int low_r = up_r+1; low_r<rows; low_r++){
-                pivot_condition = mat_cpy.is_pivot(up_r,up_r) ;
-                //if its a pivot we do calculation
-                if(pivot_condition!=-1){
-                    if(pivot_condition!=up_r){
-                        det_val*=-1 ;
-                    }
-                    if(abs(mat_cpy.vec[low_r][up_r])>tolerance){
-                        float c = -1*(mat_cpy.vec[low_r][up_r]/mat_cpy.vec[up_r][up_r]);
-                        for(int i =up_r ; i<cols;i++){
-                            mat_cpy.vec[low_r][i]+=c*mat_cpy.vec[up_r][i] ;
-                        }
-                    }
+        for(int i= 0  ; i<rows;i++){
+            //detect if a switch happen or if there is no pivot in the first place
+            if(original_pivots_indices.vec[i][0]!=i){
+                if(original_pivots_indices.vec[i][0]==-1){
+                    return 0 ;
                 }
                 else{
-                //one of the elements of the main diagonal is a zero so no need
-                //to continue the calculations
-                    return 0  ;
+                    det_val*=-1 ;
                 }
             }
-        }
-        for(int i= 0  ; i<rows;i++){
             det_val*=mat_cpy.vec[i][i] ;
         }
         return det_val ;
@@ -942,7 +929,7 @@ matrix matrix ::basis_cols(void) {
     //matrix in which we store indicex of each pivot in the correspoinding row
     matrix pivots_indices ;
     //perform gaussian elimination downward
-    matrix mat_cpy = gauss_down(&pivots_indices) ;
+    gauss_down(&pivots_indices) ;
     //get dimension of the column space
     int pivot_count = 0 ;
     //count number of pivots and stop when you find -1
@@ -1008,7 +995,6 @@ matrix matrix:: null_rows(matrix*e= NULL) {
     matrix elementary=matrix(rows,rows);
     elementary.identity() ;
     matrix mat_cpy = *this ;
-    mat_cpy.fix_pivots();
     //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
     int old_pivot = -1 ;
@@ -1180,8 +1166,7 @@ matrix matrix ::null_cols(void) {
 //or you will need extra permutation matrix fixes the caller itself
 void matrix ::fix_pivots(void) {
     matrix  original_pivots_indices ;
-    matrix  new_pivots_indices;
-    gauss_down(&new_pivots_indices,&original_pivots_indices) ;
+    gauss_down(&original_pivots_indices,old_locations) ;
     int pivot_c = 0;
     while(pivot_c<rows){
         if(original_pivots_indices.vec[pivot_c][0]==-1){
