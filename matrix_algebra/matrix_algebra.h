@@ -1,10 +1,10 @@
 #ifndef VEC_H_INCLUDED
 #define VEC_H_INCLUDED
-/*-update : added fix_pivots() this function rearranges the matrix rows 
-so that the rows contatining the pivotsare on top and the rest of rows at bottom 
+/*-update : added fix_pivots() this function rearranges the matrix rows
+so that the rows contatining the pivotsare on top and the rest of rows at bottom
 its crucial when using functions like lu_fact not really since i added permutation matrix earlier
 but if you use elementary matrix from null_rows() and tried to test if elementary * matrix euqals
-rref(matrix) this sometimes isn't true since elementary matrix doesn't record the switches 
+rref(matrix) this sometimes isn't true since elementary matrix doesn't record the switches
 in rows that happens during the rref of the matrix its advisable to use after you initialize the matrix
 but i wouldn't force that its on you :) .
 */
@@ -19,11 +19,6 @@ const float M_PI = 3.14159 ;
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
-//write efficient matrix multiplication algos aka diagonal ,upper_tri ,lower_tri  ,
-//add some variables to matrices to indicate its properties
-//write a function to test or use is_diag ,is_suare etc etc use them in one big function called
-//extract specifications of matrix for ex and this writes it into the matrix class so that
-//we won't have to do that again
 class matrix{
 private :
 //2d array for holding data
@@ -126,7 +121,10 @@ public:
     //added an optional input if you want to see where are the pivots
     //for each row just pass and address of the matrix and if you don't want
     //just leave it empty i use this functionality in other pieces of code
-    matrix gauss_down(matrix *,matrix*original_pivots_locations) ;//tested
+    //if you want to store new pivots locations in the matrix
+    //pass new_locations else old locations by default it returns new locations
+    enum {old_locations =0,new_locations=1};
+    matrix gauss_down(matrix*pivots_indices,int pivots_locations);//tested
     //performs gaussian elimination upward
     matrix gauss_up(matrix *) ;//tested
     //performs back substitution on a selected row and solution matrix is passed with it
