@@ -1008,6 +1008,7 @@ matrix matrix:: null_rows(matrix*e= NULL) {
     matrix elementary=matrix(rows,rows);
     elementary.identity() ;
     matrix mat_cpy = *this ;
+    mat_cpy.fix_pivots();
     //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
     int old_pivot = -1 ;
@@ -1081,7 +1082,7 @@ matrix matrix:: null_rows(matrix*e= NULL) {
     //make sure the matrix has dimension in the null space of the row space
     matrix ret_mat;
     if(rows-pivot_c>0){
-        ret_mat=matrix(rows-pivot_c,rows);
+    ret_mat=matrix(rows-pivot_c,rows);
     int c= 0  ;//counter for rows of return matrix
     for(; pivot_c<rows;pivot_c++){
         for(int j = 0 ; j<rows; j++){
@@ -1124,7 +1125,7 @@ matrix matrix ::null_cols(void) {
             //for each index that is not a pivot put it in
             //the rest of the pivots_indices
             bool flag=  false ;
-            for(int j= 0 ; j<pivot_c ; j++){
+            for(int j= 0 ; j<pivot_c; j++){
                 if(i==pivots_indices.vec[j][0]){
                     flag=true ;
                     break;
@@ -1150,7 +1151,7 @@ matrix matrix ::null_cols(void) {
             //for the current pivot we are calculating the value for
             //"index of the pivot in special solution matrix"
             for(int curr_piv= pivot_c-1 ; curr_piv>=0; curr_piv--){
-                //extract that pivot index from the in the rref
+                //extract that pivot index from the rref
                 //rref indeces are mapped into pivot_indices
                 //so that for row 1 if it has a pivot it returns
                 //the column where the pivot lies
@@ -1160,7 +1161,7 @@ matrix matrix ::null_cols(void) {
                 for(int j= cols-1  ; j>curr_piv;j--){
                     int free_v_index= pivots_indices.vec[j][0];
                     ret_mat.vec[curr_piv][i]
-                    -=mat_rref.vec[pivot_index][free_v_index]*ret_mat.vec[j][i];
+                    -=mat_rref.vec[curr_piv][free_v_index]*ret_mat.vec[j][i];
                 }
             }
             //0 0 1 ->0 1 0
@@ -1198,4 +1199,3 @@ void matrix ::fix_pivots(void) {
         pivot_c++;
     }
 }
-
