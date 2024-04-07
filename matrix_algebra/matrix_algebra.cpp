@@ -358,14 +358,15 @@ matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_l
         }
         //make sure you aren't out of bounds
         if(pivot_index<cols){
-            //if user wants new locations after switching rows
-            if(pivots_locations==new_locations){
-                    pivots_indices->vec[up_r][0] = pivot_index ;
+            if(pivots_indices){
+                //if user wants new locations after switching rows
+                if(pivots_locations==new_locations){
+                        pivots_indices->vec[up_r][0] = pivot_index ;
+                    }
+                //else user wants the locations of pivots lying in original rows
+                else if(pivots_locations==old_locations){
+                    pivots_indices->vec[pivot_condition][0] = pivot_index;
                 }
-            //else user wants the locations of pivots lying in original rows
-            else if(pivots_locations==old_locations){
-                pivots_indices->vec[pivot_condition][0] = pivot_index;
-            }
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 //check if lower element is not zero to save processing power
