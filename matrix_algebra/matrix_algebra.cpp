@@ -305,9 +305,20 @@ float matrix ::theta(matrix&mat) {
     cout<<shape_error ;
     return -1 ;
 }
-
-bool matrix ::is_perp(matrix&mat) {
-    return abs(theta(mat)-90)<=tolerance ;
+// Check if this matrix is orthogonal
+bool matrix ::is_orthogonal(void){
+    matrix trans_mat = transpose() ;
+    trans_mat = *this *trans_mat ;
+    return trans_mat.is_identity() ;
+}
+//check if this matrix is orthogonal with matrix mat
+bool matrix ::is_orthogonal(matrix&mat) {
+    if(cols ==mat.rows){
+       matrix temp_mat= *this*mat;
+       return temp_mat.is_zero() ;
+    }
+    cout<<shape_error;
+    return -1 ;
 }
 
 bool matrix :: is_parallel(matrix&mat){
@@ -367,6 +378,7 @@ matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_l
                 else if(pivots_locations==old_locations){
                     pivots_indices->vec[pivot_condition][0] = pivot_index;
                 }
+            }
             for(int low_r = up_r+1; low_r<rows; low_r++){
                 //do gaussian elimination downward
                 //check if lower element is not zero to save processing power
@@ -617,6 +629,17 @@ return true ;
 }
 return false ;
 }//tested
+    // Check if this matrix is the zero matrix
+bool matrix ::is_zero(void){
+    for(int i = 0; i<rows;i++){
+        for(int j= 0 ;j<cols ;j++){
+            if(abs(vec[i][j])>tolerance){
+                return false ;
+            }
+        }
+    }
+    return true ;
+}
 
 bool matrix::is_upper_tri(void) {
     if(is_square()){
@@ -720,12 +743,7 @@ bool matrix ::is_skew_symmetric(void){
     return false ;
 
 }
-// Check if this matrix is orthogonal
-bool matrix ::is_orthogonal(void){
-    matrix trans_mat = transpose() ;
-    trans_mat = *this *trans_mat ;
-    return trans_mat.is_identity() ;
-}
+
 // Check if this matrix is nilpotent
 bool matrix :: is_nilpotent(void){
     if(is_square()){
@@ -1186,3 +1204,4 @@ void matrix ::fix_pivots(void) {
         pivot_c++;
     }
 }
+
