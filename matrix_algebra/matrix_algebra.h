@@ -19,6 +19,7 @@ const float M_PI = 3.14159 ;
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
+
 class matrix{
 private :
 //2d array for holding data
@@ -144,13 +145,15 @@ public:
     //allows for matrix reuse
     void operator=(const matrix&) ;//tested
         //checks if caller is perpindicular on the passed matrix
-    bool is_perp(matrix&) ;//tested
+    bool is_orthogonal(matrix&) ;//tested
     //checks if caller is in parallel with the passed matrix
     bool is_parallel(matrix&) ;//tested
     //checks if 2 matrices are equal
     bool operator==(matrix&) const;//tested
     // Check if this matrix is identity
     bool is_identity(void);//tested
+    // Check if this matrix is the zero matrix
+    bool is_zero(void);
 
     // Check if this matrix is upper triangular
     bool is_upper_tri(void);//tested
