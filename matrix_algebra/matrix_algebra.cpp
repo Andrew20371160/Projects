@@ -313,9 +313,8 @@ bool matrix ::is_orthogonal(void){
 }
 //check if this matrix is orthogonal with matrix mat
 bool matrix ::is_orthogonal(matrix&mat) {
-    if(cols ==mat.rows){
-       matrix temp_mat= *this*mat;
-       return temp_mat.is_zero() ;
+    if(same_shape(mat)){
+       return dot(mat)<=tolerance;
     }
     cout<<shape_error;
     return -1 ;
@@ -1204,4 +1203,3 @@ void matrix ::fix_pivots(void) {
         pivot_c++;
     }
 }
-
