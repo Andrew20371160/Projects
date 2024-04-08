@@ -463,12 +463,21 @@ float matrix:: fwd_sub(int row_index,matrix&sol_mat){
 
 //pass an appended matrix
 matrix matrix:: solve(void) {
+    matrix pivots_indices;
     //turns the system into uppertriangular system
-    matrix mat_cpy=gauss_down();
+    matrix mat_cpy=gauss_down(&pivots_indices,new_locations);
+    //check for number of pivots first
+    for(int i = 0 ; i<cols;i++){
+        if(mat_cpy.vec[i][0]==-1){
+            cout<<"Number of pivots is insufficient default garbage value is -1" ;
+            matrix ret_mat = matrix(1,1,-1);
+            return ret_mat ;
+        }
+    }
     //the new matrix in which the answer will be returned
     matrix sol_mat(get_rows(),1,0) ;
-    for(int i = get_rows()-1; i>=0;i--){
-        sol_mat.vec[i][0] = mat_cpy.back_sub(i,sol_mat) ;
+    for(int row_c = get_rows()-1; row_c>=0;row_c--){
+        sol_mat.vec[row_c][0] = mat_cpy.back_sub(row_c,sol_mat) ;
     }
     return sol_mat ;
 }
