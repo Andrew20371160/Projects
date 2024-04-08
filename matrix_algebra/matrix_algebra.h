@@ -144,7 +144,12 @@ public:
     //assignment function
     //allows for matrix reuse
     void operator=(const matrix&) ;//tested
-        //checks if caller is perpindicular on the passed matrix
+    //append 2 matrices by cols aka return matrix =[mat1 mat2]
+    matrix append_cols(matrix&src) ;
+    //append 2 matrices by rows aka return matrix =[mat1]
+    //                                             [mat2]
+    matrix append_rows(matrix&src) ;
+    //checks if caller is perpindicular on the passed matrix
     bool is_orthogonal(matrix&) ;//tested
     //checks if caller is in parallel with the passed matrix
     bool is_parallel(matrix&) ;//tested
