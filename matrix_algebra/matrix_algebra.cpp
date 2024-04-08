@@ -59,6 +59,7 @@ matrix ::matrix(int r,int c , float*arr,int size){
                 if((i*c+j)<size){
                     vec[i][j] = arr[i*c+j];
                 }
+                //fill rest of elements with zeroes
                 else{
                     vec[i][j] = 0;
                 }
@@ -73,7 +74,50 @@ int matrix ::get_rows()const{
 int matrix ::get_cols()const{
     return cols ;
 }
-
+//append cols of 2 matrices and return the new matrix
+matrix matrix::append_cols(matrix&src){
+    matrix ret_mat ;
+    if(src.rows==rows){
+        ret_mat = matrix(rows,cols+src.cols);
+        for(int row_c = 0;row_c<rows;row_c++){
+            for(int j= 0 ; j<cols;j++){
+                ret_mat.vec[row_c][j] =vec[row_c][j] ;
+            }
+            for(int j= 0 ; j<src.cols;j++){
+                ret_mat.vec[row_c][j+cols] =src.vec[row_c][j] ;
+            }
+        }
+    }
+    else{
+        cout<<"can't append 2 matrices with different number of rows default garbage value is -1" ;
+        ret_mat = matrix(1,1,-1) ;
+    }
+    return ret_mat ;
+}
+matrix matrix::append_rows(matrix&src){
+    matrix ret_mat ;
+    if(src.cols==cols){
+        ret_mat = matrix(rows+src.rows,cols);
+        for(int row_c = 0;row_c<rows+src.rows;row_c++){
+            if(row_c<rows){
+                for(int j= 0 ; j<cols;j++){
+                    ret_mat.vec[row_c][j] =vec[row_c][j] ;
+                }
+            }
+            else{
+                for(int j= 0 ; j<cols;j++){
+                    ret_mat.vec[row_c][j] =src.vec[row_c-rows][j] ;
+                }
+            }
+        }
+    }
+    else{
+        cout<<"can't append 2 matrices with different number of rows default garbage value is -1" ;
+        ret_mat = matrix(1,1,-1) ;
+    }
+    return ret_mat ;
+}
+//append rows of 2 matrices and return the new matrix
 float matrix::dot(matrix&mat)const{
     if(same_shape(mat)){
         float res = 0;
@@ -389,7 +433,7 @@ matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_l
                 }
             }
             //record that pivot to search for next pivot in the next column not in same column
-                //as mentioned above
+            //as mentioned above
             old_pivot = pivot_index ;
         }
     }
@@ -774,8 +818,10 @@ bool matrix :: is_nilpotent(void){
 // Check if this matrix is involutory
 bool matrix :: is_involutory(void){
     if(is_square()){
-        return inverse() ==*this  ;
+        matrix temp =(*this)*(*this)  ;
+        return temp.is_identity();
     }
+    cout<<square_error ;
     return false ;
 }
 //added permutation matrix since during lu factorization if the rows are switched
@@ -921,6 +967,10 @@ matrix matrix :: rref(matrix&pivots_indices){
                     ret_mat.vec[i][j] = (abs(ret_mat.vec[i][j])<tolerance)?0:ret_mat.vec[i][j];
                 }
             }
+        }
+        else{
+            //no more pivots
+            break ;
         }
     }
 
@@ -1165,11 +1215,6 @@ matrix matrix ::null_cols(void) {
             //for the current pivot we are calculating the value for
             //"index of the pivot in special solution matrix"
             for(int curr_piv= pivot_c-1 ; curr_piv>=0; curr_piv--){
-                //extract that pivot index from the rref
-                //rref indeces are mapped into pivot_indices
-                //so that for row 1 if it has a pivot it returns
-                //the column where the pivot lies
-                int pivot_index = pivots_indices.vec[curr_piv][0];
                 //x1 = (-x3*2-x2*2)/3
                 //x0 = (-x3*2-x2*2-x1*3)/4
                 for(int j= cols-1  ; j>curr_piv;j--){
