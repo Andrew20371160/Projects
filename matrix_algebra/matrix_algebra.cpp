@@ -357,11 +357,12 @@ bool matrix ::is_orthogonal(void){
 }
 //check if this matrix is orthogonal with matrix mat
 bool matrix ::is_orthogonal(matrix&mat) {
-    if(same_shape(mat)){
-       return dot(mat)<=tolerance;
+    if(rows==mat.rows){
+       matrix trans= transpose() ;
+       trans = trans*mat ;
+       return trans.is_zero() ;
     }
-    cout<<shape_error;
-    return -1 ;
+    return false ;
 }
 
 bool matrix :: is_parallel(matrix&mat){
