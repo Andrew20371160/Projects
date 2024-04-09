@@ -1,1 +1,6 @@
+older upadtes :
+very important update : fix_pivots that rearranges matrix rows so that rows containing pivots are put on top and rest at the bottom function is really essintial if some functions that use gaussian elimination since some outputs might be wrong I'm not gonna force it but just so you know.
+
+gaussian elimination downward or gauss_down now has an enum if you want the new pivots indices you just passa matrix and no need to pass extra values, if you want the old pivots indices then pass old_locations.
+
 4/9/2024 update : added quality functions that allow for appending of 2 matrices one for appending by cols and the other for appending by rows and optimized some functions have fun
