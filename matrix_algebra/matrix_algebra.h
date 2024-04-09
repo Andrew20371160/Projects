@@ -215,7 +215,17 @@ public:
     //where if a row switch occurs it won't be recorded in elementary matrix
     //or you will need extra permutation matrix fixes the caller itself
     void fix_pivots(void) ;
-
+    //returns projection matrix of a linear system
+    /*
+    Ax=b has no solution
+    AT*A x* =AT*b
+    x* = (AT*A )^-1 *AT b
+    p = Ax* so P = A*(AT*A)^-1 * AT *b
+    so projection matrix where p =projection b
+    projection = A*(AT*A)^-1 *AT
+    */
+    matrix projection(void);
+    matrix fit_least_squares(matrix&data_set) ;
 };
 
 #endif // VEC_H_INCLUDED
