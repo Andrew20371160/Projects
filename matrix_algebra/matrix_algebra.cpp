@@ -84,7 +84,7 @@ matrix matrix::append_cols(matrix&src){
                 ret_mat.vec[row_c][j] =vec[row_c][j] ;
             }
             for(int j= 0 ; j<src.cols;j++){
-                ret_mat.vec[row_c][j+cols] =src.vec[row_c][j] ;
+                ret_mat.vec[row_c][j+cols]=src.vec[row_c][j] ;
             }
         }
     }
@@ -511,8 +511,8 @@ matrix matrix:: solve(void) {
     //turns the system into uppertriangular system
     matrix mat_cpy=gauss_down(&pivots_indices,new_locations);
     //check for number of pivots first
-    for(int i = 0 ; i<cols;i++){
-        if(mat_cpy.vec[i][0]==-1){
+    for(int i = 0 ; i<rows;i++){
+        if(pivots_indices.vec[i][0]==-1){
             cout<<"Number of pivots is insufficient default garbage value is -1" ;
             matrix ret_mat = matrix(1,1,-1);
             return ret_mat ;
@@ -1256,4 +1256,35 @@ void matrix ::fix_pivots(void) {
         }
         pivot_c++;
     }
+}
+
+matrix matrix::projection(void){
+/*
+    Ax=b has no solution
+    AT*A x* =AT*b
+    x* = (AT*A )^-1 *AT b
+    p = Ax* so P = A*(AT*A)^-1 * AT *b
+    so projection matrix where p =projection b
+    projection = A*(AT*A)^-1 *AT
+*/
+    matrix Atrans = transpose() ;
+    matrix AtransA = Atrans *(*this) ;
+    //get inverse
+    AtransA = AtransA.inverse() ;
+    //projection matrix for a system A
+    //p  = A (AT A)^-1 AT
+    return *this *AtransA* Atrans ;
+}
+//fit a data set into a linear system
+//Ax=b can't be solved
+//AT*A* x* = AT*b
+//now solvable
+matrix matrix ::fit_least_squares(matrix &data_set) {
+    matrix Atrans = transpose() ;
+    //AT *A
+    matrix ret_mat = Atrans*(*this);
+    //append and solve [AT*A|AT*b]
+    Atrans= Atrans*data_set;
+    ret_mat = ret_mat.append_cols(Atrans) ;
+    return ret_mat.solve();
 }
