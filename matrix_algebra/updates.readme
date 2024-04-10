@@ -8,3 +8,7 @@ gaussian elimination downward or gauss_down now has an enum if you want the new 
 1-added quality functions that allow for appending of 2 matrices one for appending by cols and the other for appending by rows and optimized some functions have fun.
 2-added projection which returns projection matrix for a system of equations.
 3-added fit_least_squares which performs a least squares fit to a given set of data points and returns the matrix .
+
+4/10/2024 update:
+1-added extract_col which allows you to extract a column at an index and put it in a matrix
+2-added gram_shmidt which returns orthonormal vectors in a form of a matrix from a bunch (matrix) of independent columns 
