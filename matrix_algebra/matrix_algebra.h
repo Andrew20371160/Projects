@@ -225,8 +225,12 @@ public:
     projection = A*(AT*A)^-1 *AT
     */
     matrix projection(void);
+    //fit a set of data into a linear system of equations 
+    //(works for parabola and any n dimensional system btw maybe i will update the name later)
     matrix fit_least_squares(matrix&data_set) ;
+    //extracts a column at an index and returns it as a form of a matrix 
     matrix extract_col(int index);
+    //performs gram-shmidt algorithm on a set of independent vectors and returns the orthonormal set of vectors for the system of vectors
     matrix gram_shmidt(void);
 
 };
