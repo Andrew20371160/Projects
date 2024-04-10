@@ -1289,3 +1289,60 @@ matrix matrix ::fit_least_squares(matrix &data_set) {
     ret_mat = ret_mat.append_cols(Atrans) ;
     return ret_mat.solve();
 }
+
+matrix matrix ::extract_col(int index){
+    matrix ret_mat ;
+    if(index>=0&&index<cols){
+        ret_mat= matrix(rows,1);
+        for(int i =0;i<rows;i++){
+            ret_mat.vec[i][0] = vec[i][index] ;
+        }
+    }
+    else{
+        ret_mat = matrix(1,1,-1) ;
+        cout<<"out of bounds default garbage value is -1";
+    }
+    return ret_mat  ;
+}
+//this function takes a bunch of vectors in a matrix and returns
+//the orthonormal vectors in a form of matrix (performs gram-shmidt algorithm)
+matrix matrix ::gram_shmidt(void){
+    //array of projections for each vector from 0 to n-1
+    //no need for the nth
+    matrix projections_arr[cols-1];
+    //here we store each orthonormal vector
+    matrix ret_mat(rows,cols);
+    //temporary storage for the resultant vector
+    matrix res ;
+    //here we store projection[i]*vec
+    matrix p;
+
+    matrix temp ;
+    //length of a vector variable
+    float len = 0;
+    //for each vector
+    for(int vec_c =0; vec_c <cols;vec_c++){
+        //Vn = v- P0*v-P1*v
+        //these projections are projections of the new obtained
+        //orthogonal vectors
+        //res=  v
+        res = extract_col(vec_c) ;
+        //temp storage for the column itself
+        temp = res;
+        for(int proj_c = 0;proj_c<vec_c ;proj_c++){
+            //get projection of each vector * same vector
+            //while subtracting it from the result
+            p   = projections_arr[proj_c]*temp;
+            res = res -p;
+        }
+        //get the length
+        len=res.length();
+        for(int row_c = 0 ; row_c<rows;row_c++){
+            //while filling the result column divide by the length
+            ret_mat.vec[row_c][vec_c] =res.vec[row_c][0]/len;
+        }
+        //get the projection of the newly created vector
+        projections_arr[vec_c] = res.projection();
+    }
+    return ret_mat ;
+}
