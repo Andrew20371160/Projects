@@ -13,7 +13,7 @@ but i wouldn't force that its on you :) .
 #include <string.h>
 using namespace std ;
 //feel free to edit this value the way you want
-const float tolerance = 0.0001 ;
+const float tolerance = 0.000001 ;
 const float M_PI = 3.14159 ;
 //error messages
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
@@ -226,6 +226,9 @@ public:
     */
     matrix projection(void);
     matrix fit_least_squares(matrix&data_set) ;
+    matrix extract_col(int index);
+    matrix gram_shmidt(void);
+
 };
 
 #endif // VEC_H_INCLUDED
