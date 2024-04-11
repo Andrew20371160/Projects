@@ -395,7 +395,13 @@ void matrix ::row_axpy(float scalar,int upper_row,int lower_row){
 matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_locations) {
     matrix ret_mat = *this;
     if(pivots_indices){
-        *pivots_indices = matrix(rows,1,-1) ;
+        if(pivots_locations==new_locations){
+            *pivots_indices = matrix(rows,1,-1) ;
+        }
+        else{
+            *pivots_indices = matrix(rows,rows);
+             pivots_indices->identity();
+        }
     }
     //when getting pivot indices we have to keep track of old pivot since
     //the new pivot won't exist in the same column so we go to next column each iteration
@@ -420,7 +426,7 @@ matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_l
                     }
                 //else user wants the locations of pivots lying in original rows
                 else if(pivots_locations==old_locations){
-                    pivots_indices->vec[pivot_condition][0] = pivot_index;
+                    pivots_indices->switch_rows(up_r,pivot_condition) ;
                 }
             }
             for(int low_r = up_r+1; low_r<rows; low_r++){
@@ -535,22 +541,21 @@ float matrix::det(){
         //if you are at first row and the pivot location is originally
         //in the 3rd row then we multiply the determinant by -1
         //if there is no pivot we return 0 easy as that
-        matrix original_pivots_indices(rows,1,-1)  ;
+        matrix original_pivots_indices ;
         matrix mat_cpy =gauss_down(&original_pivots_indices,old_locations) ;
         float det_val = 1 ;
+        unsigned int sign_change = 0   ;
         for(int i= 0  ; i<rows;i++){
-            //detect if a switch happen or if there is no pivot in the first place
-            if(original_pivots_indices.vec[i][0]!=i){
-                if(original_pivots_indices.vec[i][0]==-1){
-                    return 0 ;
-                }
-                else{
-                    det_val*=-1 ;
-                }
+            if(original_pivots_indices.vec[i][i]!=1){
+                sign_change++;
             }
             det_val*=mat_cpy.vec[i][i] ;
         }
-        return det_val ;
+        if(sign_change>0){
+                return(sign_change%2==0)?det_val*-1:det_val ;
+        }
+        return det_val;
+
 }
     cout<<square_error ;
     return -1 ;
@@ -1241,24 +1246,8 @@ matrix matrix ::null_cols(void) {
 void matrix ::fix_pivots(void) {
     matrix  original_pivots_indices ;
     gauss_down(&original_pivots_indices,old_locations) ;
-    int pivot_c = 0;
-    while(pivot_c<rows){
-        if(original_pivots_indices.vec[pivot_c][0]==-1){
-            int finder =pivot_c ;
-            while(finder <rows &&original_pivots_indices.vec[finder][0]==-1){
-                finder++;
-            }
-            if(finder<rows){
-                switch_rows(finder,pivot_c);
-            }
-            else{
-                return ;
-            }
-        }
-        pivot_c++;
-    }
+    *this = original_pivots_indices*(*this) ;
 }
-
 matrix matrix::projection(void){
 /*
     Ax=b has no solution
