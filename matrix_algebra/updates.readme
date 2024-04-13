@@ -1,3 +1,7 @@
+4/13/2024 update:
+fixed an issue that affected null space calculation if pivot positions were not in the left of rref now 
+works properly for both cases for [0 1] & [1 0] it was a stupid mistake :)
+                                  [0 0]   [0 0] 
 4/11/2024 update:
 very important!!!
 1-fixed original pivots loctions recording when passing a matrix with old_locations parameter to gauss_down 
