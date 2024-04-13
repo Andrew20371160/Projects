@@ -1217,9 +1217,9 @@ matrix matrix ::null_cols(void) {
         //for example
         //put the one at the position where the first free variable
         //locates
-        int one_pos = pivots_indices.vec[cols-1][0];
         //for each column of the special solution
         for(int i = (cols-pivot_c)-1;i>=0;i--){
+            int one_pos = pivots_indices.vec[cols-i-1][0] ;
             //put the one in its postion for the new special solution
             ret_mat.vec[one_pos][i] =1 ;
             //for the current pivot we are calculating the value for
@@ -1227,14 +1227,13 @@ matrix matrix ::null_cols(void) {
             for(int curr_piv= pivot_c-1 ; curr_piv>=0; curr_piv--){
                 //x1 = (-x3*2-x2*2)/3
                 //x0 = (-x3*2-x2*2-x1*3)/4
+                int pivot_index = pivots_indices.vec[curr_piv][0];
                 for(int j= cols-1  ; j>curr_piv;j--){
                     int free_v_index= pivots_indices.vec[j][0];
-                    ret_mat.vec[curr_piv][i]
+                    ret_mat.vec[pivot_index][i]
                     -=mat_rref.vec[curr_piv][free_v_index]*ret_mat.vec[j][i];
                 }
             }
-            //0 0 1 ->0 1 0
-            one_pos--;
             }
     return ret_mat ;
         }
