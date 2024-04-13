@@ -399,6 +399,8 @@ matrix matrix ::gauss_down(matrix*pivots_indices=NULL,int pivots_locations=new_l
             *pivots_indices = matrix(rows,1,-1) ;
         }
         else{
+            //here it will be permutaions matrix
+            //to record each row exchange happening
             *pivots_indices = matrix(rows,rows);
              pivots_indices->identity();
         }
@@ -1172,7 +1174,7 @@ return ret_mat ;
 }
 matrix matrix ::null_cols(void) {
     //here the pivots indices are stored along with indices of free variables
-    matrix pivots_indices =matrix(cols,1,-1);;
+    matrix pivots_indices =matrix(cols,1,-1);
     //here the pivots indices are stored
     matrix p_cpy ;
     matrix mat_rref = rref(p_cpy) ;
@@ -1213,7 +1215,9 @@ matrix matrix ::null_cols(void) {
         //the pattern 0 0 1 , 0 1 0 , 1 0 0
         //for x5 ,x4 x3 respectively where they are free variables
         //for example
-        int one_pos = cols-1;
+        //put the one at the position where the first free variable
+        //locates
+        int one_pos = pivots_indices.vec[cols-1][0];
         //for each column of the special solution
         for(int i = (cols-pivot_c)-1;i>=0;i--){
             //put the one in its postion for the new special solution
