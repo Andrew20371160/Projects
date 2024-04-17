@@ -1,3 +1,10 @@
+4/18/2024 small update:
+1-added SubLambdaI which performs A-lambda *I and returns the result in more efficent manner
+2-added eigen_vectors which returns eigen vectors of a system using eigen 
+ values passed as an input as a column matrix 
+3-Announcement :will try to add eigen_values in the near future since it
+requires a lot of thought and work will try my best :)
+
 4/13/2024 update:
 fixed an issue that affected null space calculation if pivot positions were not in the left of rref now 
 works properly for both cases for [0 1] & [1 0] it was a stupid mistake :)
@@ -27,7 +34,3 @@ elimination since some outputs might be wrong I'm not gonna force it but just so
 
 gaussian elimination downward or gauss_down now has an enum if you want the new pivots indices 
 you just passa matrix and no need to pass extra values, if you want the old pivots indices then pass old_locations.
-
-
-
-
