@@ -75,7 +75,7 @@ int matrix ::get_cols()const{
     return cols ;
 }
 //append cols of 2 matrices and return the new matrix
-matrix matrix::append_cols(matrix&src){
+matrix matrix::append_cols(const matrix&src){
     matrix ret_mat ;
     if(src.rows==rows){
         ret_mat = matrix(rows,cols+src.cols);
@@ -94,7 +94,7 @@ matrix matrix::append_cols(matrix&src){
     }
     return ret_mat ;
 }
-matrix matrix::append_rows(matrix&src){
+matrix matrix::append_rows(const matrix&src){
     matrix ret_mat ;
     if(src.cols==cols){
         ret_mat = matrix(rows+src.rows,cols);
@@ -1338,3 +1338,23 @@ matrix matrix ::gram_shmidt(void){
     }
     return ret_mat ;
 }
+    //performs A -lambda * I where I is the identity
+    //then returns the solution
+    matrix matrix ::SubLambdaI(float lambda){
+        matrix ret_mat =*this ;
+        for(int i = 0 ;i<rows;i++){
+            ret_mat.vec[i][i]-=lambda ;
+        }
+        return ret_mat ;
+    }
+    //returns eigen vectors of a system using eigen values
+    //calculate null space for each A-lambda *I
+    //and append it to eigen vectors matrix
+    matrix matrix ::eigen_vectors(matrix&eigen_values){
+        matrix ret_mat =SubLambdaI(eigen_values.vec[0][0]).null_cols() ;
+        for(int i = 1;i<rows;i++){
+           ret_mat= ret_mat.append_cols(SubLambdaI(eigen_values.vec[i][0]).null_cols());
+        }
+        return ret_mat ;
+    }
+
