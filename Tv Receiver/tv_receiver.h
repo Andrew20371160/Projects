@@ -1,66 +1,67 @@
+// Include necessary libraries
 #include <iostream>
 #include <string>
 #include <iomanip>
 #include <conio.h>
 
+// Use the standard namespace
 using namespace std;
 
-
+// Define a struct for the nodes in the doubly linked list
 struct node {
-    unsigned int ch_num ;
-    string ch_name ;
-    node * prev ;
-    node * next  ;
+    unsigned int ch_num; // Channel number
+    string ch_name; // Channel name
+    node * prev; // Pointer to the previous node
+    node * next; // Pointer to the next node
 };
+
+// Define a class for the doubly linked list
 class doubly_list{
 private:
-    node * tail ;
-    unsigned int ch_count ;
-    friend class receiver ;
+    node * tail; // Pointer to the last node in the list
+    unsigned int ch_count; // Count of channels in the list
+    friend class receiver; // Declare receiver as a friend class
 public:
-    //updated
-    node*get_tail(void) ;
-    unsigned int get_count() ;
-    doubly_list();
-    doubly_list(node*data_set,unsigned int size) ;
-    ~doubly_list();
-    node * get_node(unsigned int,string&);
-    void add_at_end(string & name );
-    void add_at_beg(string & name ) ;
-    //increments from a selected pointer the channel number
-    //untill the end used when inserting data
-    void inc_from(node*starting_ptr,bool decrement) ;
-    void show() ;
-    void add_at_pos(unsigned int pos , string & name   ) ;
-    void del_at_beg() ;
-    void del_at_end() ;
-    void del_at_pos(unsigned int pos ) ;
-    void del_all() ;
-    void sort ();
-    node* search(unsigned int ch_num) ;
-
-    void switch_nodes(node * ptr1 ,node * ptr2) ;
+    node* get_tail(void); // Function to get the tail of the list
+    unsigned int get_count(); // Function to get the count of channels
+    doubly_list(); // Default constructor
+    doubly_list(node* data_set, unsigned int size); // Constructor with parameters
+    ~doubly_list(); // Destructor
+    node * get_node(unsigned int, string&); // Function to get a node
+    void add_at_end(string & name); // Function to add a node at the end of the list
+    void add_at_beg(string & name); // Function to add a node at the beginning of the list
+    void inc_from(node* starting_ptr, bool decrement); // Function to increment or decrement from a starting pointer
+    void show(); // Function to display the list
+    void add_at_pos(unsigned int pos, string & name); // Function to add a node at a specific position
+    void del_at_beg(); // Function to delete a node at the beginning of the list
+    void del_at_end(); // Function to delete a node at the end of the list
+    void del_at_pos(unsigned int pos); // Function to delete a node at a specific position
+    void del_all(); // Function to delete all nodes
+    void sort(); // Function to sort the list
+    node* search(unsigned int ch_num); // Function to search for a node
+    void switch_nodes(node * ptr1, node * ptr2); // Function to switch two nodes
 };
-class receiver:public doubly_list{
-    private:
-        node *channel_ptr ;
-        bool empty_receiver ;
-    public:
-        receiver();
-        receiver(node*data_set,unsigned int size);
-        ~receiver(void) ;
-        bool is_empty(void) ;
-        void operator ++(void);
-        void operator --(void);
-        void add(void) ;
-        void show_cur(void) ;
-        void change_location(void);
-        void helper(void);
-        void get_to(void) ;
-        void del_cur(void) ;
-        void del_all(void) ;
-        void del_at_pos(void) ;
-        void sort(void) ;
-        void show(void) ;
 
+// Define a class for the receiver, which inherits from doubly_list
+class receiver: public doubly_list{
+private:
+    node *channel_ptr; // Pointer to the current channel
+    bool empty_receiver; // Flag to check if the receiver is empty
+public:
+    receiver(); // Default constructor
+    receiver(node* data_set, unsigned int size); // Constructor with parameters
+    ~receiver(void); // Destructor
+    bool is_empty(void); // Function to check if the receiver is empty
+    void operator ++(void); // Overloaded increment operator to go to the next channel
+    void operator --(void); // Overloaded decrement operator to go to the previous channel
+    void add(void); // Function to add a channel
+    void show_cur(void); // Function to display the current channel
+    void change_location(void); // Function to change the location of the current channel
+    void helper(void); // Helper function
+    void get_to(void); // Function to get to a specific channel
+    void del_cur(void); // Function to delete the current channel
+    void del_all(void); // Function to delete all channels
+    void del_at_pos(void); // Function to delete a channel at a specific position
+    void sort(void); // Function to sort the channels
+    void show(void); // Function to display all channels
 };
