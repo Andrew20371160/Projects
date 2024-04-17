@@ -19,7 +19,11 @@ const float M_PI = 3.14159 ;
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
-
+//write efficient matrix multiplication algos aka diagonal ,upper_tri ,lower_tri  ,
+//add some variables to matrices to indicate its properties
+//write a function to test or use is_diag ,is_suare etc etc use them in one big function called
+//extract specifications of matrix for ex and this writes it into the matrix class so that
+//we won't have to do that again
 class matrix{
 private :
 //2d array for holding data
@@ -145,10 +149,10 @@ public:
     //allows for matrix reuse
     void operator=(const matrix&) ;//tested
     //append 2 matrices by cols aka return matrix =[mat1 mat2]
-    matrix append_cols(matrix&src) ;
+    matrix append_cols(const matrix&src) ;
     //append 2 matrices by rows aka return matrix =[mat1]
     //                                             [mat2]
-    matrix append_rows(matrix&src) ;
+    matrix append_rows(const matrix&src) ;
     //checks if caller is perpindicular on the passed matrix
     bool is_orthogonal(matrix&) ;//tested
     //checks if caller is in parallel with the passed matrix
@@ -225,13 +229,23 @@ public:
     projection = A*(AT*A)^-1 *AT
     */
     matrix projection(void);
-    //fit a set of data into a linear system of equations 
-    //(works for parabola and any n dimensional system btw maybe i will update the name later)
+    //fit a data set into a linear system
+    //Ax=b can't be solved
+    //AT*A* x* = AT*b
+    //now solvable
     matrix fit_least_squares(matrix&data_set) ;
-    //extracts a column at an index and returns it as a form of a matrix 
+    //extract a column of the caller and returns it as a column matrix
     matrix extract_col(int index);
-    //performs gram-shmidt algorithm on a set of independent vectors and returns the orthonormal set of vectors for the system of vectors
+    //this function takes a bunch of vectors in a matrix and returns
+    //the orthonormal vectors in a form of matrix (performs gram-shmidt algorithm)
     matrix gram_shmidt(void);
+    //performs A -lambda * I where I is the identity
+    //then returns the matrix(more efficent than the normal A-lambda*I)
+    matrix SubLambdaI(float lambda);
+    //returns eigen vectors of a system using eigen values
+    //calculate null space for each A-lambda*I
+    //and append it to eigen vectors matrix
+    matrix eigen_vectors(matrix&eigen_values);
 
 };
 
