@@ -246,6 +246,10 @@ public:
     //calculate null space for each A-lambda*I
     //and append it to eigen vectors matrix
     matrix eigen_vectors(matrix&eigen_values);
+    //returns cofactor of an element at position row_i,col_i
+    float cofactor(int row_i, int col_i) ;
+    //returns matrix of cofactors of all elements of the matrix
+    matrix cofactors(void) ;
 
 };
 
