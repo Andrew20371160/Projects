@@ -1357,4 +1357,46 @@ matrix matrix ::gram_shmidt(void){
         }
         return ret_mat ;
     }
+    //returns cofactor of an element at position row_i,col_i
+    float matrix ::cofactor(int row_i, int col_i){
+        if(is_square()&&row_i>=0&&row_i<rows&&col_i>=0&&col_i<cols){
+            matrix temp(rows-1,cols-1);
+            int tr=0,tc= 0;//counters for temp matrix
 
+            for(int i = 0 ; i<rows;i++){
+                tc=0;
+                //don't include the row where we want to get its cofacotr
+                if(i!=row_i){
+                    for(int j=  0 ;  j<cols; j++){
+                        //same for col
+                        if(j!=col_i){
+                            temp.vec[tr][tc]=vec[i][j];
+                            tc++;
+                        }
+                    }
+                tr++;
+            }
+        }
+            //if row_i+col_i is even then its a positive cofactor
+            //else its negative cofactor
+            return temp.det()*pow(-1,row_i+col_i) ;
+        }
+        cout<<"invalid index default garbage value is -1";
+        return -1;
+    }
+    //returns matrix of cofactors of all elements of the matrix
+    matrix matrix:: cofactors(void){
+        if(is_square()){
+            matrix ret_mat(rows,cols) ;
+            for(int i= 0  ; i<rows;i++){
+                for(int j=  0 ;j<cols;j++){
+                    //get cofactor of each element
+                    ret_mat.vec[i][j] =cofactor(i,j);
+                }
+            }
+            return ret_mat  ;
+        }
+        cout<<square_error;
+        matrix err_mat(1,1,-1) ;
+        return err_mat ;
+    }
