@@ -1,3 +1,7 @@
+4/22/2024 small updates:
+added cofactor which returns cofactor related to an element at the matrix 
+added cofactors which returns cofactors matrix 
+
 4/18/2024 small update:
 1-added SubLambdaI which performs A-lambda *I and returns the result in more efficent manner
 2-added eigen_vectors which returns eigen vectors of a system using eigen 
