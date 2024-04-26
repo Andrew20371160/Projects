@@ -1334,7 +1334,9 @@ matrix matrix ::gram_shmidt(void){
             ret_mat.vec[row_c][vec_c] =res.vec[row_c][0]/len;
         }
         //get the projection of the newly created vector
-        projections_arr[vec_c] = res.projection();
+        if(vec_c<cols-1){
+                projections_arr[vec_c] = res.projection();
+        }    
     }
     return ret_mat ;
 }
