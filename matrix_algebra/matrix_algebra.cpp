@@ -173,6 +173,17 @@ void matrix<DataType>:: identity(){
     cout<<square_error;
     }
 }
+    template <typename DataType>
+    void matrix<DataType>::fill(DataType value){
+        if(vec){
+            for(int i= 0 ; i <rows;i++){
+                for(int j =0 ; j<cols;j++){
+                    at(i,j) = value;
+                }
+            }
+        }
+    }
+
 //shows the matrix<DataType>:)
 template <typename DataType>
 void matrix<DataType>:: show(void)const {
@@ -677,7 +688,7 @@ template <typename DataType>
 void matrix<DataType>::operator=(const matrix<DataType>&mat){
     if(this!=&mat){
         //then check if they don't have same shape
-        if(rows*cols<mat.rows*mat.cols){
+        if(rows*cols!=mat.rows*mat.cols){
             //delete[] old memeory
             if(vec!=NULL){
                 delete[]vec ;
@@ -689,7 +700,7 @@ void matrix<DataType>::operator=(const matrix<DataType>&mat){
             vec= get_vec(mat.get_rows(),mat.get_cols()) ;
         }
         else{
-            rows=mat.rows;
+            rows = mat.rows;
             cols = mat.cols;
         }
         //copying mechanism
@@ -1500,7 +1511,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
     template <typename DataType>
     matrix<DataType> matrix<DataType> ::arrange(const matrix<int>&seq){
         matrix<DataType> ret_mat;
-        if(rows==seq.rows){
+        if(rows==seq.get_rows()){
             ret_mat = matrix<DataType>(rows,cols);
             for(int i =0 ; i<rows;i++){
                 int row_ind  = seq.at(i,0) ;
@@ -1542,7 +1553,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
     //returns a square matrix representing forier transform
     matrix<complex> forier_mat(int dimension){
         if(dimension>0){
-            complex w(cos(to_rad*(360/dimension)),sin(to_rad*(360/dimension)));
+            complex w(cos((2*M_PI)/dimension),sin((2*M_PI)/dimension));
             matrix<complex> ret_mat(dimension,dimension);
             for(int i=0  ; i<dimension;i++){
                 for(int j= i ; j<dimension;j++){
@@ -1557,12 +1568,13 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         matrix<complex> err_mat(1,1,-1) ;
         return err_mat;
     }
+
     matrix<complex> forier_diagonal(int dimension){
         if(dimension>0){
-            complex w(cos(to_rad*(360/dimension)),sin(to_rad*(360/dimension)));
+            complex w(cos((2*M_PI)/dimension),sin((2*M_PI)/dimension));
             matrix <complex>ret_mat(dimension,1) ;
             for(int i = 0 ; i<dimension;i++){
-                ret_mat.at(i,0) =w^(i*i) ;
+                ret_mat.at(i,0) =w^i ;
             }
             return ret_mat ;
         }
@@ -1570,18 +1582,27 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         cout<<"invalid dimension default garbage value is -1";
         return err_mat;
     }
+    /*template <typename DataType>
+    matrix<DataType> matrix<DataType>:: fft(void)const{
 
-#include <chrono>
+    }
 
-int main() {
-    auto start = chrono::high_resolution_clock::now();
+*/
+    template <typename DataType>
+    matrix<DataType> identity(const int&dimension){
+        matrix<DataType> ret_mat ;
+        if(dimension>0){
+            ret_mat=matrix<DataType>(dimension,dimension,0);
+            for(int i =0 ; i<dimension;i++){
+                ret_mat.at(i,i) = 1 ;
+            }
+        }
+        else{
+            cout<<"sent dimension is less than 1";
+            ret_mat = matrix<DataType>(1,1,-1) ;
+        }
+        return ret_mat ;
+    }
 
-    matrix<complex> f1  = forier_mat(10000);
 
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> diff = end - start;
 
-    cout << "Time taken : " << diff.count() << " s\n";
-
-    return 0;
-}
