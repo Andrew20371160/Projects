@@ -1,3 +1,46 @@
+4/27/2024 huge updates after I slept:
+
+1-performance boost I changed the data structure to be 1d array instead of 
+2d array (cache utilization) now the most important function is at(int row_i,int col_i)
+
+2-updated the class to be working with any standard data types (template class) and non standard 
+data type (complex matrices and their results are tested but if there is any issue please let me 
+know)
+
+3-added complex class which performs all the essintial operations on complex numbers 
+
+4-I didn't add complex class for the sake of complex matrices im working on adding 
+fast forier transform 
+
+5-updated transpose, dot, is_symmetric ,and others to work seamelessy with both 
+standard and non standardtypes all thanks to overloaded conjugate that 
+i added so that if the passed type is standard then it does nothing else 
+if its complex then it produces the conjugate 
+
+6-there are some new functions related to forier :-
+  -forier_mat which returns forier matrix when passing a certain dimension
+  -forier_diagonal which returns the main diagonal of forier in the form of a column matrix (i will use it in fft)
+  -added some functions like arrange which arranges matrix rows at a certain sequnce you pass as an input
+  and returns the matrix (will be used in fft)
+  -at_quarter which puts a matrix at upper_left,lower_left,upper_right,lower_right quarters of a matrix
+  of the caller the passed function must be less than or equal to quarter size of the caller matrix
+  aka : if caller has 4x4 then the maximum size of passed matrix is 2x2 
+
+7-updated other functions like fix_pivots to be more efficient in terms of memory usage and performance
+now it utilizes a simple column of sequence that is obtained from gauss_down 
+
+8-any functions that returns pivot indices aka gauss_down,rref,and others returns it in an <int> column matrix
+also its optional aka pass an address of a matrix if you want the extra info.
+
+9-matrix<int> ,matrix<complex> is how you initialize a matrix and that's probably all i have to say
+
+10-feel free to use any code :)
+
+11-now it doesn't crash at 500x5000 matrix matrix multiplication i'm currently running a 
+10000x10000 matrix matrix multiplication and didn't crash as i'm writing these updates.
+
+have fun!
+
 4/27/2024 huge updates:
 untill i declare it when you use the class
 just do this -> matrix<data_type> mat instead of matrix
