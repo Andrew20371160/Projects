@@ -1568,12 +1568,13 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         matrix<complex> err_mat(1,1,-1) ;
         return err_mat;
     }
-
-    matrix<complex> forier_diagonal(int dimension){
+    //if w is at some dimension k then this function generates a column 
+    //of powers of w from 0 to n-1 its used in fft still under construction
+    matrix<complex> forier_diagonal(int dimension,int n){
         if(dimension>0){
             complex w(cos((2*M_PI)/dimension),sin((2*M_PI)/dimension));
-            matrix <complex>ret_mat(dimension,1) ;
-            for(int i = 0 ; i<dimension;i++){
+            matrix <complex>ret_mat(n,1) ;
+            for(int i = 0 ; i<n;i++){
                 ret_mat.at(i,0) =w^i ;
             }
             return ret_mat ;
