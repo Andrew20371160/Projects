@@ -1570,7 +1570,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         cout<<"invalid dimension default garbage value is -1";
         return err_mat;
     }
-//fix for complex tomorrow
+
 #include <chrono>
 
 int main() {
