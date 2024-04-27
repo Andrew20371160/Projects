@@ -63,7 +63,7 @@ public:
         //accessing element at a specified index
     DataType& at(int r_ind,int c_ind)const;//tested
     //fills a matrix with a certain value
-    bool fill(int r ,int c,DataType value);//tested
+    void fill(DataType value);//tested
     //sets current matrix as identity
     void identity(void);//tested
     //check for same dimensions for 2 matrices
@@ -246,7 +246,15 @@ public:
     matrix eigen_vectors(const matrix&eigen_values)const ;
 
     matrix arrange(const matrix<int>&seq) ;
+
     void at_quarter(int,const matrix&) ;
+
+    matrix fft(void)const ;
 };
+    //when calling do this
+    //identity<DataType>
+    template <typename DataType>
+    matrix<DataType> identity(const int&);
+
 
 #endif // VEC_H_INCLUDED
