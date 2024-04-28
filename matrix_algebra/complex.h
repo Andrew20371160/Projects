@@ -5,35 +5,35 @@
 #include <string.h>
 using namespace std ;
 //feel free to edit this value the way you want
-const float tolerance = 0.00001 ;
-const float to_deg =180/M_PI;
-const float to_rad = M_PI/180 ;
+const double tolerance = 0.0001 ;
+const double to_deg =180/M_PI;
+const double to_rad = M_PI/180 ;
 class complex{
 private:
-    float re,im ;
+    double re,im ;
 public:
-    complex(float _re=0,float _im=0);
+    complex(double _re=0,double _im=0);
     complex(const complex&);
-    float get_re(void)const;
-    float get_im(void)const;
+    double get_re(void)const;
+    double get_im(void)const;
     ~complex();
     complex operator+(const complex&)const ;
     complex operator-(const complex&)const ;
     complex operator*(const complex&)const ;
     complex operator/(const complex&)const ;
-    void operator=(const float& val);
+    void operator=(const double & val);
 
     void operator+=(const complex&) ;
     void operator-=(const complex&) ;
     void operator*=(const complex&) ;
     void operator/=(const complex&) ;
-    void operator^=(const float&power);
-    complex operator*(const float&)const ;
-    complex operator/(const float&)const ;
-    void operator*=(const float&) ;
-    void operator/=(const float&) ;
-    complex operator^(const float&) const ;
-    float theta(void)const;
+    void operator^=(const double &power);
+    complex operator*(const double &)const ;
+    complex operator/(const double &)const ;
+    void operator*=(const double &) ;
+    void operator/=(const double &) ;
+    complex operator^(const double &) const ;
+    double theta(void)const;
     bool operator>(const complex&)const;
     bool operator<(const complex&)const;
     bool operator==(const complex&)const;
@@ -43,7 +43,7 @@ public:
 
 };
     string to_string(complex&);
-    float abs(const complex&);
+    double abs(const complex&);
     // General template function for all non-complex types
     complex conjugate(const complex& val);
     unsigned char conjugate(const unsigned char &val);
@@ -52,12 +52,14 @@ public:
     int conjugate(const int &val);
 
     float conjugate(const float &val);
-     double conjugate(const double &val);
+
+    double conjugate(const double &val);
     unsigned long conjugate(const unsigned long &val);
     long conjugate(const long &val);
     long long conjugate(const long long &val);
     unsigned long long conjugate(const unsigned long long &val);
     long double conjugate(const long double&val);
+
     // Template specialization for your complex type
 
 #endif
