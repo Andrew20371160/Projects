@@ -25,6 +25,8 @@ string uninit_error = "\nmatrix isn't initialized yet\n";
 //we won't have to do that again
 enum{upper_left=0,lower_left,lower_right,upper_right};
 
+enum{lower_half=0,upper_half};
+
 template<typename DataType>
 class matrix{
 private :
@@ -245,16 +247,23 @@ public:
     matrix SubLambdaI(DataType lambda)const ;
     matrix eigen_vectors(const matrix&eigen_values)const ;
 
-    matrix arrange(const matrix<int>&seq) ;
+    matrix arrange(const matrix<int>&seq)const;
 
     void at_quarter(int,const matrix&) ;
 
-    matrix fft(void)const ;
+    //performs fast fourier transform on one column
+    //dimension is just the number of rows or size of column
+    matrix fft_col(int dimension)const ;
+
+    //performs fast fourier transform on the whole matrix
+    matrix fft(void)const;
+
+    matrix split(int half )const;
 };
     //when calling do this
     //identity<DataType>
     template <typename DataType>
-    matrix<DataType> identity(const int&);
+    matrix<DataType> identity(int);
 
 
 #endif // VEC_H_INCLUDED
