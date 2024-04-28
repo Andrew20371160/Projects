@@ -1,3 +1,19 @@
+4/28/2024 great news :
+-FFT is officially added into the library and 
+I've put it under a lot of tests with normal fourier transform
+(aka the fourier matrix multiplied by the data set) 
+
+-Also updated the complex class to work with double instead of float because of tolerance issue
+
+-I didn't add a padding function to make the algorithm work with non-powers of 2 
+maybe later.
+
+-note : the fft/fourier_mat are clock wise not counter clock wise 
+(thought it would be important to mention it)
+
+-It didn't crash at 2^30 data set but almost burnt my pc so don't do it 
+Have fun :)
+
 4/27/2024 huge updates after I slept:
 
 1-performance boost I changed the data structure to be 1d array instead of 
