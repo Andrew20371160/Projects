@@ -1508,11 +1508,15 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         matrix<DataType>err_mat(1,1,-1) ;
         return err_mat ;
     }
+    // Function to rearrange the rows of the matrix according to a sequence
     template <typename DataType>
-    matrix<DataType> matrix<DataType> ::arrange(const matrix<int>&seq){
+    matrix<DataType> matrix<DataType>::arrange(const matrix<int>&seq)const{
         matrix<DataType> ret_mat;
+        // Check if the sequence has the same number of rows as the matrix
         if(rows==seq.get_rows()){
+            // Create a new matrix with the same dimensions
             ret_mat = matrix<DataType>(rows,cols);
+            // Copy the rows from the original matrix to the new matrix in the order specified by the sequence
             for(int i =0 ; i<rows;i++){
                 int row_ind  = seq.at(i,0) ;
                 for(int j = 0; j<cols;j++){
@@ -1527,17 +1531,23 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         }
         return ret_mat ;
     }
+
+    // Function to replace a quarter of the matrix with another matrix
     template <typename DataType>
-    void matrix<DataType>:: at_quarter(int quarter,const matrix<DataType>&src){
+    void matrix<DataType>::at_quarter(int quarter,const matrix<DataType>&src){
+        // Check if the quarter is valid
         if(quarter>=0&&quarter<4){
+            // Check if the source matrix fits into a quarter of the original matrix
             if(src.rows<=rows/2&&src.cols<=cols/2){
                 int row_offset,col_offset ;
+                // Determine the offset based on the quarter
                 switch(quarter){
                     case upper_left:{row_offset=0;col_offset=0;}break;
                     case lower_left:{row_offset=rows/2;col_offset=0;}break;
                     case upper_right:{row_offset=0;col_offset=cols/2;}break;
                     case lower_right:{row_offset=rows/2;col_offset=cols/2;}break;
                 }
+                // Copy the elements from the source matrix to the specified quarter of the original matrix
                 for(int i = 0 ; i<src.rows;i++){
                     for(int j= 0 ; j<src.cols;j++){
                         at(row_offset+i,j+col_offset) = src.at(i,j) ;
@@ -1549,12 +1559,15 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
             cout<<"\ndenied\n";
         }
     }
-
-    //returns a square matrix representing forier transform
+    // Function to create a Fourier transform matrix
     matrix<complex> forier_mat(int dimension){
+        // Check if the dimension is valid
         if(dimension>0){
+            // Calculate the complex exponential
             complex w(cos((2*M_PI)/dimension),sin((2*M_PI)/dimension));
+            // Create a new matrix with the specified dimension
             matrix<complex> ret_mat(dimension,dimension);
+            // Fill the matrix with powers of the complex exponential
             for(int i=0  ; i<dimension;i++){
                 for(int j= i ; j<dimension;j++){
                    complex temp =  w^(i*j) ;
@@ -1568,32 +1581,53 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         matrix<complex> err_mat(1,1,-1) ;
         return err_mat;
     }
-    //if w is at some dimension k then this function generates a column 
-    //of powers of w from 0 to n-1 its used in fft still under construction
+
+    // Function to split the matrix into two halves
+    template <typename DataType>
+    matrix<DataType> matrix<DataType>::split(int half )const{
+        // Create a new matrix with half the rows
+        matrix<DataType>ret_mat(rows/2,cols) ;
+        int row_c = (half==lower_half)?(rows/2):0;
+        int rt=0;
+        // Copy the elements from the original matrix to the new matrix
+        for(;rt<rows/2;rt++){
+            for(int col_c= 0;col_c<cols;col_c++){
+                ret_mat.at(rt,col_c)=at(row_c,col_c) ;
+            }
+            row_c++;
+        }
+        // Return the new matrix
+        return ret_mat;
+    }
+    // Function to create a diagonal matrix for Fourier transform
     matrix<complex> forier_diagonal(int dimension,int n){
+        // Check if the dimension is valid
         if(dimension>0){
+            // Calculate the complex exponential
             complex w(cos((2*M_PI)/dimension),sin((2*M_PI)/dimension));
+            // Create a new matrix with n rows and 1 column
             matrix <complex>ret_mat(n,1) ;
+            // Fill the matrix with powers of the complex exponential
             for(int i = 0 ; i<n;i++){
                 ret_mat.at(i,0) =w^i ;
             }
             return ret_mat ;
         }
+        // If the dimension is not valid, return an error matrix
         matrix<complex> err_mat(1,1,-1);
         cout<<"invalid dimension default garbage value is -1";
         return err_mat;
     }
-    /*template <typename DataType>
-    matrix<DataType> matrix<DataType>:: fft(void)const{
 
-    }
-
-*/
+    // Function to create an identity matrix
     template <typename DataType>
-    matrix<DataType> identity(const int&dimension){
+    matrix<DataType> identity( int dimension){
         matrix<DataType> ret_mat ;
+        // Check if the dimension is valid
         if(dimension>0){
+            // Create a matrix with all elements 0
             ret_mat=matrix<DataType>(dimension,dimension,0);
+            // Set the diagonal elements to 1
             for(int i =0 ; i<dimension;i++){
                 ret_mat.at(i,i) = 1 ;
             }
@@ -1605,5 +1639,56 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         return ret_mat ;
     }
 
+    // Function to compute the Fast Fourier Transform (FFT) of a column
+    template <typename DataType>
+    matrix<DataType> matrix<DataType>::fft_col(int dimension)const{
+        // Base case: if the matrix has only one row, return the matrix itself
+        if(rows==1){
+            return (*this) ;
+        }
+        // Create a sequence of even and odd indices
+        matrix<int>seq(rows,1);
+        for(int i = 0 ; i<rows/2;i++){
+            seq.at(i,0) = 2*i ;
+            seq.at(i+rows/2,0)=2*i+1;
+        }
+        // Create a diagonal matrix for Fourier transform
+        matrix<complex>diag=forier_diagonal(dimension,rows/2);
 
+        // Rearrange the matrix according to the sequence
+        matrix<complex>temp_vec = (*this).arrange(seq) ;
 
+        // Split the rearranged matrix into even and odd halves and compute the FFT of each half
+        matrix<complex>even_half=temp_vec.split(upper_half).fft_col(dimension/2);
+        matrix<complex>odd_half=temp_vec.split(lower_half).fft_col(dimension/2);
+        complex d;
+        // Combine the FFTs of the halves
+        for(int i = 0 ; i<(dimension/2);i++){
+            d=odd_half.at(i,0)*diag.at(i,0);
+            temp_vec.at(i,0) = even_half.at(i,0) +d ;
+            temp_vec.at((i+dimension/2),0)= even_half.at(i,0)-d;
+        }
+        // Return the FFT of the matrix
+        return temp_vec;
+    }
+    template<typename DataType>
+    matrix<DataType> matrix<DataType>:: fft(void)const{
+        matrix<DataType> ret_mat(rows,cols);
+
+        matrix<DataType> col(rows,1);
+
+        for(int col_c =0 ; col_c<cols;col_c++){
+
+            //copy content of the column into a new column
+            for(int k = 0; k<rows;k++){
+                col.at(k,0) = at(k,col_c) ;
+            }
+            //perform the fourier transform on that col
+            col = col.fft_col(rows) ;
+            //copy it into the resultant matrix
+            for(int j= 0 ; j<rows;j++){
+                ret_mat.at(j,col_c)=col.at(j,0);
+            }
+        }
+        return ret_mat ;
+    }
