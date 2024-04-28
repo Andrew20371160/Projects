@@ -1,6 +1,6 @@
 #include "complex.h"
 
-    complex::complex(float _re,float _im){
+    complex::complex(double _re,double _im){
         re =_re ;
         im = _im   ;
     }
@@ -10,10 +10,10 @@
     }
     complex::~complex(){
     }
-    float complex::get_re(void)const{
+    double complex::get_re(void)const{
         return re ;
     }
-    float complex::get_im(void)const{
+    double complex::get_im(void)const{
         return im ;
     }
     void complex:: operator=(const complex&src){
@@ -32,10 +32,10 @@
     complex complex:: operator/(const complex&c2)const{
         return (*this*conjugate(c2))/(abs(c2)*abs(c2)) ;
     }
-    complex complex:: operator*(const float&scalar)const{
+    complex complex:: operator*(const double &scalar)const{
         return complex(scalar*re,scalar*im);
     }
-    complex complex::operator/(const float&scalar)const{
+    complex complex::operator/(const double &scalar)const{
         return complex(re/scalar,im/scalar);
     }
     void complex:: operator+=(const complex&c2){
@@ -50,42 +50,26 @@
     void complex::operator/=(const complex&c2){
         *this = *this/c2 ;
     }
-    void complex::operator^=(const float&power){
+    void complex::operator^=(const double &power){
         *this = *this^power;
     }
-    void complex::operator*=(const float&scalar){
+    void complex::operator*=(const double &scalar){
         *this = *this*scalar;
     }
-    void complex::operator/=(const float&scalar){
+    void complex::operator/=(const double &scalar){
         *this = *this/scalar;
     }
-    complex complex:: operator^(const float&power) const{
-        float rad = pow(abs(*this),power) ;
-        float the = power*theta() ;
-        return complex(rad*cos(the*to_rad),rad*sin(the*to_rad)) ;
+    complex complex:: operator^(const double &power) const{
+        double rad = pow(abs(*this),power) ;
+        double the = power*theta() ;
+
+        return complex(rad*cos(the),rad*sin(the)) ;
     }
 
-    float complex::theta(void)const{
-        if(abs(re)>tolerance){
-            float val =atan(abs(im)/abs(re))*to_deg;
-            if(re>0&&im>0){
-                return val ;
-            }
-            else if(re<0&&im>0){
-                return 180-val ;
-            }
-            else if(re<0&&im<0){
-                return 270 - val ;
-            }
-            else{
-                return 360-val ;
-            }
-        }
-        else{
-            return(im>0)?90:180 ;
-        }
+    double complex::theta(void)const{
+        return atan2(im,re);
     }
-    float abs(const complex&c){
+    double abs(const complex&c){
         return sqrt(c.get_re()*c.get_re()+c.get_im()*c.get_im()) ;
     }
     bool complex::operator>(const complex&c2)const{
@@ -95,7 +79,7 @@
         return abs(*this)<abs(c2) ;
     }
     bool complex::operator==(const complex&c2)const{
-        return abs(abs(*this)-abs(c2))<=tolerance ;
+         return (abs(re-c2.re)<tolerance&&abs(im-c2.im)<tolerance);
     }
     bool complex::operator!=(const complex&c2)const{
         return !(*this==c2) ;
@@ -131,6 +115,7 @@
     char conjugate(const char &val){
         return val ;
     }
+
     unsigned int conjugate(const unsigned int &val){
         return val ;
     }
@@ -156,11 +141,8 @@
     unsigned long long conjugate(const unsigned long long &val){
         return val ;
     }
-    long double conjugate(const long double&val){
-        return val ;
-    }
-    void complex ::operator=(const float& val) {
+
+    void complex ::operator=(const double & val) {
         re = val ;
         im = 0;
     }
-
