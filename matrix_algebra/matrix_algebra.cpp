@@ -1560,7 +1560,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         }
     }
     // Function to create a Fourier transform matrix
-    matrix<complex> forier_mat(int dimension){
+    matrix<complex> fourier_mat(int dimension){
         // Check if the dimension is valid
         if(dimension>0){
             // Calculate the complex exponential
@@ -1600,7 +1600,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         return ret_mat;
     }
     // Function to create a diagonal matrix for Fourier transform
-    matrix<complex> forier_diagonal(int dimension,int n){
+    matrix<complex> fourier_diagonal(int dimension,int n){
         // Check if the dimension is valid
         if(dimension>0){
             // Calculate the complex exponential
@@ -1653,7 +1653,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
             seq.at(i+rows/2,0)=2*i+1;
         }
         // Create a diagonal matrix for Fourier transform
-        matrix<complex>diag=forier_diagonal(dimension,rows/2);
+        matrix<complex>diag=fourier_diagonal(dimension,rows/2);
 
         // Rearrange the matrix according to the sequence
         matrix<complex>temp_vec = (*this).arrange(seq) ;
@@ -1671,24 +1671,58 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         // Return the FFT of the matrix
         return temp_vec;
     }
+
     template<typename DataType>
     matrix<DataType> matrix<DataType>:: fft(void)const{
-        matrix<DataType> ret_mat(rows,cols);
+        matrix<DataType> ret_mat;
+        float val = log2(rows);//check if powers of 2
+        if((val-float(int(val)))!=0){
+            //int(val) removes fraction
+            //float(int(val)) turns the integer into a float for no errors
+            //resize to higher power of 2 and pad rest of elements with zeroes
+            ret_mat= resize(pow(2,(int(val)+1)),cols,DataType(0)) ;
+        }
+        else{
+            ret_mat = *this;
+        }
+        matrix<DataType> col(ret_mat.get_rows(),1,0);
 
-        matrix<DataType> col(rows,1);
-
-        for(int col_c =0 ; col_c<cols;col_c++){
-
+        for(int col_c =0 ; col_c<ret_mat.cols;col_c++){
             //copy content of the column into a new column
-            for(int k = 0; k<rows;k++){
-                col.at(k,0) = at(k,col_c) ;
+            for(int k = 0; k<ret_mat.rows;k++){
+                col.at(k,0) = ret_mat.at(k,col_c) ;
             }
             //perform the fourier transform on that col
-            col = col.fft_col(rows) ;
+            col = col.fft_col(col.rows) ;
             //copy it into the resultant matrix
-            for(int j= 0 ; j<rows;j++){
+            for(int j= 0 ; j<ret_mat.rows;j++){
                 ret_mat.at(j,col_c)=col.at(j,0);
             }
         }
         return ret_mat ;
     }
+
+
+
+    //resize a matrix to wanted dimensions if the new total size is less
+    //then it copies that equal chunk of the older matrix into the new one
+    //if its more then the rest are by default equal to the value of zero
+    template <typename DataType>//by defaults it operates as equality operator
+    matrix<DataType> matrix<DataType>::resize(int wanted_rows ,int wanted_cols,DataType padding_value)const{
+       if(wanted_rows>0&&wanted_cols>0){
+           matrix<DataType> ret_mat= matrix<DataType>(wanted_rows,wanted_cols,padding_value) ;
+            int end_rows = (wanted_rows<rows)?wanted_rows:rows ;
+            int end_cols = (wanted_cols<cols)?wanted_cols:cols ;
+            for(int i = 0 ; i<end_rows;i++){
+                for(int j=0;j<end_cols;j++){
+                    ret_mat.at(i,j)=at(i,j) ;
+                }
+            }
+            return ret_mat ;
+        }
+        cout<<"Can't have dimensions less than 1 default garbage value is -1";
+        return matrix<DataType>(1,1,-1) ;
+    }
+
+
+
