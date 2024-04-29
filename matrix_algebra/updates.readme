@@ -1,3 +1,9 @@
+4/29/2024 small update :
+added resize which takes 3 parameters row size ,col size ,padding value (by default is zero)
+and returns the wanted matrix with the new dimensions i've integerated into the fft but the 
+results aren't correct when testing it next to matlab results though the padding is correct ,fft is correct 
+it just doesn't make any sense for me if you have suggestions please let me know maybe i missunderstodd the padding concept
+but the fft works fine when passing matrices with rows value that is a power of 2 
 4/28/2024 great news :
 -FFT is officially added into the library and 
 I've put it under a lot of tests with normal fourier transform
@@ -105,7 +111,3 @@ elimination since some outputs might be wrong I'm not gonna force it but just so
 
 gaussian elimination downward or gauss_down now has an enum if you want the new pivots indices 
 you just passa matrix and no need to pass extra values, if you want the old pivots indices then pass old_locations.
-
-
-
-
