@@ -245,6 +245,7 @@ public:
     matrix cofactors(void)const  ;
 
     matrix SubLambdaI(DataType lambda)const ;
+
     matrix eigen_vectors(const matrix&eigen_values)const ;
 
     matrix arrange(const matrix<int>&seq)const;
@@ -259,11 +260,21 @@ public:
     matrix fft(void)const;
 
     matrix split(int half )const;
+
+    //resize the matrix into wanted dimensions
+    //and pad rest of it with certain padding value
+    //by default the dimensions are same as caller
+    //and padding value by default is zero
+    matrix resize(int wanted_rows = get_rows(),int wanted_cols=get_cols(),DataType padding_value=0)const ;
+
 };
     //when calling do this
     //identity<DataType>
     template <typename DataType>
     matrix<DataType> identity(int);
 
+    matrix<complex> fourier_diagonal(int dimension,int n);
+
+    matrix<complex> fourier_mat(int dimension);
 
 #endif // VEC_H_INCLUDED
