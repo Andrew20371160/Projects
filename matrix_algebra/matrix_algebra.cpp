@@ -1646,30 +1646,36 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         if(rows==1){
             return (*this) ;
         }
-        // Create a sequence of even and odd indices
-        matrix<int>seq(rows,1);
-        for(int i = 0 ; i<rows/2;i++){
-            seq.at(i,0) = 2*i ;
-            seq.at(i+rows/2,0)=2*i+1;
-        }
-        // Create a diagonal matrix for Fourier transform
-        matrix<complex>diag=fourier_diagonal(dimension,rows/2);
+        if(dimension<=rows){
+            // Create a sequence of even and odd indices
+            matrix<int>seq(rows,1);
+            for(int i = 0 ; i<rows/2;i++){
+                seq.at(i,0) = 2*i ;
+                seq.at(i+rows/2,0)=2*i+1;
+            }
+            // Create a diagonal matrix for Fourier transform
+            matrix<complex>diag=fourier_diagonal(dimension,rows/2);
 
-        // Rearrange the matrix according to the sequence
-        matrix<complex>temp_vec = (*this).arrange(seq) ;
+            // Rearrange the matrix according to the sequence
+            matrix<complex>temp_vec = (*this).arrange(seq) ;
 
-        // Split the rearranged matrix into even and odd halves and compute the FFT of each half
-        matrix<complex>even_half=temp_vec.split(upper_half).fft_col(dimension/2);
-        matrix<complex>odd_half=temp_vec.split(lower_half).fft_col(dimension/2);
-        complex d;
-        // Combine the FFTs of the halves
-        for(int i = 0 ; i<(dimension/2);i++){
-            d=odd_half.at(i,0)*diag.at(i,0);
-            temp_vec.at(i,0) = even_half.at(i,0) +d ;
-            temp_vec.at((i+dimension/2),0)= even_half.at(i,0)-d;
+            // Split the rearranged matrix into even and odd halves and compute the FFT of each half
+            matrix<complex>even_half=temp_vec.split(upper_half).fft_col(dimension/2);
+            matrix<complex>odd_half=temp_vec.split(lower_half).fft_col(dimension/2);
+            complex d;
+            // Combine the FFTs of the halves
+            for(int i = 0 ; i<(dimension/2);i++){
+                d=odd_half.at(i,0)*diag.at(i,0);
+                temp_vec.at(i,0) = even_half.at(i,0) +d ;
+                temp_vec.at((i+dimension/2),0)= even_half.at(i,0)-d;
+            }
+            // Return the FFT of the matrix
+            return temp_vec;
         }
-        // Return the FFT of the matrix
-        return temp_vec;
+        else{
+            cout<<"Dimension is bigger than size of the column default garbage value is -1";
+            return matrix(1,1,-1);
+        }
     }
 
     template<typename DataType>
@@ -1693,7 +1699,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
                 col.at(k,0) = ret_mat.at(k,col_c) ;
             }
             //perform the fourier transform on that col
-            col = col.fft_col(col.rows) ;
+            col = col.fft_col(ret_mat.rows) ;
             //copy it into the resultant matrix
             for(int j= 0 ; j<ret_mat.rows;j++){
                 ret_mat.at(j,col_c)=col.at(j,0);
@@ -1723,6 +1729,5 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         cout<<"Can't have dimensions less than 1 default garbage value is -1";
         return matrix<DataType>(1,1,-1) ;
     }
-
 
 
