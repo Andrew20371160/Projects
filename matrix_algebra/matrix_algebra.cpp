@@ -1677,29 +1677,35 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
             return matrix(1,1,-1);
         }
     }
+        //fft for a matrix or a column the fft_col is just a helper function
 
     template<typename DataType>
     matrix<DataType> matrix<DataType>:: fft(void)const{
-        matrix<DataType> ret_mat;
+        matrix<DataType> ret_mat(rows,cols);
+        matrix<DataType> col ;
         float val = log2(rows);//check if powers of 2
         if((val-float(int(val)))!=0){
             //int(val) removes fraction
             //float(int(val)) turns the integer into a float for no errors
             //resize to higher power of 2 and pad rest of elements with zeroes
-            ret_mat= resize(pow(2,(int(val)+1)),cols,DataType(0)) ;
+            col= matrix<DataType>(pow(2,(int(val)+1)),1,0) ;
         }
         else{
-            ret_mat = *this;
+            col = matrix<DataType>(rows,1,0);
         }
-        matrix<DataType> col(ret_mat.get_rows(),1,0);
-
-        for(int col_c =0 ; col_c<ret_mat.cols;col_c++){
+        for(int col_c =0 ; col_c<cols;col_c++){
             //copy content of the column into a new column
-            for(int k = 0; k<ret_mat.rows;k++){
-                col.at(k,0) = ret_mat.at(k,col_c) ;
+            for(int k = 0; k<col.rows;k++){
+                if(k<ret_mat.rows){
+                    col.at(k,0) = at(k,col_c) ;
+                }
+                //fill rest col elements with zeroes
+                else{
+                    col.at(k,0)= 0 ;
+                }
             }
             //perform the fourier transform on that col
-            col = col.fft_col(ret_mat.rows) ;
+            col = col.fft_col(col.rows) ;
             //copy it into the resultant matrix
             for(int j= 0 ; j<ret_mat.rows;j++){
                 ret_mat.at(j,col_c)=col.at(j,0);
@@ -1729,5 +1735,3 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         cout<<"Can't have dimensions less than 1 default garbage value is -1";
         return matrix<DataType>(1,1,-1) ;
     }
-
-
