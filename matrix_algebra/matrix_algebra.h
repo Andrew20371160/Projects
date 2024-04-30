@@ -12,6 +12,8 @@ but i wouldn't force that its on you :) .
 #include <math.h>
 #include <string.h>
 #include "complex.h"
+#include <random>
+#include <time.h>
 using namespace std ;
 
 //error messages
@@ -67,7 +69,7 @@ public:
     //fills a matrix with a certain value
     void fill(DataType value);//tested
     //sets current matrix as identity
-    void identity(void);//tested
+    void set_identity(void);//tested
     //check for same dimensions for 2 matrices
     bool same_shape(const matrix&)const ;//tested
     //display functionality
@@ -267,11 +269,15 @@ public:
     //and padding value by default is zero
     matrix resize(int wanted_rows = get_rows(),int wanted_cols=get_cols(),DataType padding_value=0)const ;
 
+    matrix get_pivots(matrix<int>*pivots_locations=NULL);
+
+    bool is_positive_definite(void);
 };
     //when calling do this
     //identity<DataType>
     template <typename DataType>
     matrix<DataType> identity(int);
+
 
     matrix<complex> fourier_diagonal(int dimension,int n);
 
