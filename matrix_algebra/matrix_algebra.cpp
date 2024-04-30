@@ -156,7 +156,7 @@ bool matrix<DataType>::same_shape(const matrix&mat)const{
     return ((mat.get_rows()==get_rows())&&(mat.get_cols()==get_cols())) ;
 }
 template <typename DataType>
-void matrix<DataType>:: identity(){
+void matrix<DataType>:: set_identity(){
     if(is_square()){
         for(int i = 0 ;i <rows;i++){
             for(int j = 0 ; j<cols ;j++){
@@ -627,8 +627,7 @@ matrix<DataType> matrix<DataType>::inverse(void)const {
         //copying the m matrix<DataType>into mat_cpy
         matrix<DataType>mat_cpy =*this ;
         //creating return matrix<DataType>which at first will be identity
-        matrix<DataType>ret_mat(rows,cols) ;
-        ret_mat.identity() ;
+        matrix<DataType>ret_mat=identity<DataType>(rows);
         //first do Gaussian elimination downward
         for(int up_r = 0 ; up_r<rows-1;up_r++){
                 for(int low_r = up_r+1;low_r<rows;low_r++){
@@ -906,11 +905,9 @@ void matrix<DataType>:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
         //the lower_fact matrix<DataType>is the identity matrix<DataType>(at first) in which we store
         // the constants during the gaussian elimination of the original matrix
         //after finisning the gaussian elimination the upper_fact is finished
-        lower_fact = matrix(rows,cols,0);
-        lower_fact.identity() ;
+        lower_fact = identity<DataType>(rows);
         //if permutations happen its recorded in this matrix
-        permutation = matrix(rows,cols,0);
-        permutation.identity() ;
+        permutation = identity<DataType>(rows);
         //copy original matrix<DataType>into upper_fact to performa gaussian elimination on it
         upper_fact = *this  ;
         for(int up_r = 0;up_r<rows; up_r++){
@@ -1154,8 +1151,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
     matrix<DataType> matrix<DataType>:: null_rows(matrix*e) const {
         //pivots indices are stored here
         matrix<int>pivots_indices(rows,1,-1) ;
-        matrix<DataType>elementary=matrix(rows,rows);
-        elementary.identity() ;
+        matrix<DataType>elementary=identity<DataType>(rows);
         matrix<DataType>mat_cpy = *this ;
         mat_cpy.fix_pivots();
         //when getting pivot indices we have to keep track of old pivot since
@@ -1357,6 +1353,7 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         matrix<DataType>Atrans  = transpose() ;
         matrix<DataType>AtransA= Atrans *(*this) ;
         //get inverse
+
         AtransA = AtransA.inverse() ;
         //projection matrix<DataType>for a system A
         //p  = A (AT A)^-1 AT
@@ -1406,11 +1403,10 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         //here we store each orthonormal vector
         matrix<DataType>ret_mat(rows,cols);
         //temporary storage for the resultant vector
-        matrix<DataType>res ;
+        matrix<DataType>res(rows,1) ;
         //here we store projection[i]*vec
-        matrix<DataType>p;
 
-        matrix<DataType>temp ;
+        matrix<DataType>temp(rows,1) ;
         //length of a vector variable
         DataType len = 0;
         //for each vector
@@ -1419,14 +1415,15 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
             //these projections are projections of the new obtained
             //orthogonal vectors
             //res=  v
-            res = extract_col(vec_c) ;
+            for(int i = 0 ; i<rows;i++){
+                res.at(i,0) = at(i,vec_c);
+                temp.at(i,0)=res.at(i,0) ;
+            }
             //temp storage for the column itself
-            temp = res;
             for(int proj_c = 0;proj_c<vec_c ;proj_c++){
-                //get projection of each vector * same vector
+               //get projection of each vector * same vector
                 //while subtracting it from the result
-                p   = projections_arr[proj_c]*temp;
-                res = res -p;
+                res = res - projections_arr[proj_c]*temp;
             }
             //get the length
             len=res.length();
@@ -1735,3 +1732,36 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         cout<<"Can't have dimensions less than 1 default garbage value is -1";
         return matrix<DataType>(1,1,-1) ;
     }
+
+    template <typename DataType>
+    matrix<DataType> matrix<DataType>:: get_pivots(matrix<int>*pivots_locations){
+        matrix<DataType> pivots(rows,1,0);
+        matrix<int> pivots_loc;
+        matrix<DataType> temp=gauss_down(&pivots_loc,new_locations) ;
+        int piv_c = 0  ;
+        while(piv_c<rows&&pivots_loc.at(piv_c,0)!=-1){
+            pivots.at(piv_c,0) = temp.at(piv_c,pivots_loc.at(piv_c,0)) ;
+            piv_c++;
+        }
+        if(pivots_locations){
+            *pivots_locations = pivots_loc ;
+        }
+        return pivots.resize(piv_c,1) ;
+    }
+    template <typename DataType>
+    bool matrix<DataType>::is_positive_definite(void){
+        if(is_symmetric()){
+            matrix<DataType> pivots= get_pivots();
+            if(pivots.rows==rows){
+                for(int i =  0; i<rows;i++){
+                    if(pivots.at(i,0)<=0){
+                        return false ;
+                    }
+                }
+                return true  ;
+            }
+            return false ;
+        }
+        return false  ;
+    }
+
