@@ -1,3 +1,10 @@
+
+5/1/0:
+fixed a small issue in inverse where if a row is switched during the pivoting the return matrix 
+or the inverse matrix didn't record that 
+4/30/2024 small update :
+optimized some functions 
+added get_pivots ,is_positive_definite 
 4/29/2024 small update :
 added resize which takes 3 parameters row size ,col size ,padding value (by default is zero)
 and returns the wanted matrix with the new dimensions i've integerated into the fft but the 
