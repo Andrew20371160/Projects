@@ -631,12 +631,17 @@ matrix<DataType> matrix<DataType>::inverse(void)const {
         //first do Gaussian elimination downward
         for(int up_r = 0 ; up_r<rows-1;up_r++){
                 for(int low_r = up_r+1;low_r<rows;low_r++){
-                    if(mat_cpy.is_pivot(up_r,up_r)!=-1){
-                        DataType c =(mat_cpy.at(low_r,up_r)/mat_cpy.at(up_r,up_r)) *-1  ;
-                        for(int col_c = 0 ; col_c<cols ; col_c++){
-                            mat_cpy.at(low_r,col_c)+= c*mat_cpy.at(up_r,col_c) ;
-                            ret_mat.at(low_r,col_c) += c*ret_mat.at(up_r,col_c);
+                    int pivot_condition = mat_cpy.is_pivot(up_r,up_r) ;
+                    if(pivot_condition!=-1){
+                        if(pivot_condition!=up_r){
+                            //switch occurred
+                            ret_mat.switch_rows(pivot_condition,up_r);
                         }
+                            DataType c =(mat_cpy.at(low_r,up_r)/mat_cpy.at(up_r,up_r)) *-1  ;
+                            for(int col_c = 0 ; col_c<cols ; col_c++){
+                                mat_cpy.at(low_r,col_c) += c*mat_cpy.at(up_r,col_c) ;
+                                ret_mat.at(low_r,col_c) += c*ret_mat.at(up_r,col_c);
+                            }
                     }
                     else{
                         //if the pivot is zero then its not invertible matrix
@@ -1764,4 +1769,3 @@ int matrix<DataType>:: is_pivot_up(int r_ind , int c_ind) {
         }
         return false  ;
     }
-
