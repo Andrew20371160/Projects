@@ -3,9 +3,14 @@
 #include <iostream>
 #include <math.h>
 #include <string.h>
+//tolerance is used in calculations like inverse and gram-shmidt ,gauss
+//this is sufficient for gram-shmidt since it requires a percision
+const double tolerance =1e-12;
+//check_tolerance is for is_identity , is_zero , aka every function starting with is_
+//modify this the way you want
+const double check_tolerance =1e-6;
+
 using namespace std ;
-//feel free to edit this value the way you want
-const double tolerance = 0.0001 ;
 const double to_deg =180/M_PI;
 const double to_rad = M_PI/180 ;
 class complex{
