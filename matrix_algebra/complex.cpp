@@ -5,8 +5,8 @@
         im = _im   ;
     }
     complex::complex(const complex&src){
-        re = abs(src.re)>tolerance?src.re:0  ;
-        im = abs(src.im)>tolerance?src.im:0 ;
+        re = src.re  ;
+        im = src.im ;
     }
     complex::~complex(){
     }
@@ -17,8 +17,8 @@
         return im ;
     }
     void complex:: operator=(const complex&src){
-        re = abs(src.re)>tolerance?src.re:0  ;
-        im = abs(src.im)>tolerance?src.im:0 ;
+        re = src.re  ;
+        im = src.im ;
     }
     complex complex:: operator+(const complex&c2)const{
         return complex(re+c2.re,im+c2.im) ;
@@ -140,6 +140,9 @@
     }
     unsigned long long conjugate(const unsigned long long &val){
         return val ;
+    }
+    long double conjugate(const long double&val){
+    return val ;
     }
 
     void complex ::operator=(const double & val) {
