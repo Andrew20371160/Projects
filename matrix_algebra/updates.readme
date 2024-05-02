@@ -9,10 +9,18 @@ using 2 tolerance values
   //modify this the way you want
   const double check_tolerance =1e-6;
   -both consants are found in complex.h file
-added eigne_values which calculates eigen values via an iteration method using qr factorization 
+
+-added eigne_values which calculates eigen values via an iteration method using qr factorization 
 returns eigen values of a matrix in a column matrix
 computations made by qr factorization
 doesn't generate correct results all the time due to divergence issues
+
+-removed filterization from constructors where if an element is less than a specified tolerance 
+its replaced with zero and added insted filter functions which filters caller's elements 
+these changes had to be made due to gram-shmidt process requiring a lot of percision
+tested the function on 100000 randomly generated matrix and its stable now
+
+have fun!
 
 5/1/2024:
 Important notes:
