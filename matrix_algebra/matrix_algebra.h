@@ -31,7 +31,9 @@ enum{lower_half=0,upper_half};
 
 template<typename DataType>
 class matrix{
+
 private :
+//feel free to edit this value the way you want
 //2d array for holding data
 DataType *vec ;
 //dimensions of matrix
@@ -45,7 +47,7 @@ DataType*get_vec(int r ,int c){
         return ret_vec ;
     }
     return NULL ;
-}
+}//feel free to edit this value the way you want
 public:
     //empty matrix
     matrix();//tested
@@ -62,6 +64,7 @@ public:
     int get_rows()const;//tested
     //get cols value
     int get_cols()const;//tested
+
     //accessing element at a specified index
     DataType& at(int r_ind,int c_ind);//tested
         //accessing element at a specified index
@@ -137,7 +140,7 @@ public:
     enum {old_locations =0,new_locations=1};
     matrix gauss_down(matrix<int>*pivots_indices=NULL,int pivots_locations = new_locations)const ;//tested
     //performs gaussian elimination upward
-    matrix gauss_up(matrix<int>*)const  ;//tested
+    matrix gauss_up(matrix<int>*pivots_incices=NULL)const  ;//tested
     //performs back substitution on a selected row and solution matrix is passed with it
     DataType back_sub(int selected_row,const matrix& solution_matrix)const ;//tested
     //performs forward substitution on a selected row and solution matrix is passed with it
@@ -235,23 +238,31 @@ public:
     projection = A*(AT*A)^-1 *AT
     */
     matrix projection(void)const ;
-
+    //performs least squares fit
+    //fits a data set as an input into a linear system
     matrix fit_least_squares(const matrix&data_set)const  ;
-
+    //extracts a column at a specified index
+    //and returns it as column matrix
     matrix extract_col(int index)const ;
-
+    //performs gram_shmidt algorithm and returns resultant
+    //orthonormal vectors as a matrix
     matrix gram_shmidt(void)const ;
     //returns cofactor of an element at position row_i,col_i
     DataType cofactor(int row_i, int col_i)const  ;
     //returns matrix of cofactors of all elements of the matrix
     matrix cofactors(void)const  ;
-
+    //performs A-l*identity and returns the matrix
     matrix SubLambdaI(DataType lambda)const ;
-
+    //returns eigen vectors of a matrix
+    //pass in eigen values as a column matrix
     matrix eigen_vectors(const matrix&eigen_values)const ;
-
+    //arranges rows of a matrix in a wanted sequence
+    //permutation matrix without extra usage of memory
     matrix arrange(const matrix<int>&seq)const;
-
+    //puts input matrix in a quarter
+    //upper_left,lower_right,upper_right,lower_right
+    //input matrix rows & cols must be less than or equal to caller's size by
+    //factor of 2
     void at_quarter(int,const matrix&) ;
 
     //performs fast fourier transform on one column
@@ -260,7 +271,8 @@ public:
 
     //performs fast fourier transform on the whole matrix
     matrix fft(void)const;
-
+    //splits the matrix into 2 halves upper or lower and returns
+    //the wanted size
     matrix split(int half )const;
 
     //resize the matrix into wanted dimensions
@@ -268,19 +280,36 @@ public:
     //by default the dimensions are same as caller
     //and padding value by default is zero
     matrix resize(int wanted_rows = get_rows(),int wanted_cols=get_cols(),DataType padding_value=0)const ;
-
+    //returns pivots of a matrix in column matrix
     matrix get_pivots(matrix<int>*pivots_locations=NULL);
-
+    //checks if a matrix is positive definite
     bool is_positive_definite(void);
+    //performs QR factorization on a matrix and puts them in q ,r passed in the function input
+    void qr_fact(matrix&q,matrix&r)  ;
+    //returns eigen values of a matrix in a column matrix
+    //computations made by qr factorization
+    //doesn't generate correct results all the time due to divergence issues
+    matrix eigen_values(int max_iteration,double min_diff = check_tolerance) ;
+    //filters the matrix elements from data less than a specified tolerance
+    //by default filters by check_tolerance
+    void filter(double filter_tolerance=check_tolerance);
+
 };
     //when calling do this
     //identity<DataType>
     template <typename DataType>
     matrix<DataType> identity(int);
-
-
+    //returns randomly generated matrix
+    //must specify dimensions
+    //rand<DataType>
+    template <typename DataType>
+    matrix<DataType> rand(int,int);
+    //returns a column matrix representing
+    //for i =0 to n-1 of w^i
+    //used in fft
     matrix<complex> fourier_diagonal(int dimension,int n);
-
+    //returns fourier matrix which is used in
+    //discrete fourier transform matrix
     matrix<complex> fourier_mat(int dimension);
 
 #endif // VEC_H_INCLUDED
