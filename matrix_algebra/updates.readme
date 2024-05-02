@@ -1,5 +1,23 @@
+5/2/2024 updates :
+1-fixed percision errors that lead to wrong output of gram_shmidt 
+using 2 tolerance values 
+  -tolerance that is used in calculations like inverse and gram-shmidt ,gauss_down....etc
+  this is sufficient for gram-shmidt since it requires a high degree of percision
+  const double tolerance =1e-12;better not to be changed 
+  -check_tolerance is for is_identity , is_zero , aka every function starting with is_
+  except for is_pivot since its used in calculations
+  //modify this the way you want
+  const double check_tolerance =1e-6;
+  -both consants are found in complex.h file
+added eigne_values which calculates eigen values via an iteration method using qr factorization 
+returns eigen values of a matrix in a column matrix
+computations made by qr factorization
+doesn't generate correct results all the time due to divergence issues
 
-5/1/0:
+5/1/2024:
+Important notes:
+when using gram_shmidt its better to use it with double and with very low tolerance value very close to zero
+i've noticed this alot when testing the algorithm 
 fixed a small issue in inverse where if a row is switched during the pivoting the return matrix 
 or the inverse matrix didn't record that 
 4/30/2024 small update :
@@ -118,3 +136,7 @@ elimination since some outputs might be wrong I'm not gonna force it but just so
 
 gaussian elimination downward or gauss_down now has an enum if you want the new pivots indices 
 you just passa matrix and no need to pass extra values, if you want the old pivots indices then pass old_locations.
+
+
+
+
