@@ -310,7 +310,7 @@ public:
     //must specify dimensions
     //rand<DataType>
     template <typename DataType>
-    matrix<DataType> rand(int,int);
+    matrix<DataType> rand(int,int,int max_val=INT_MAX);
 
     //returns a column matrix representing
     //for i =0 to n-1 of w^i
