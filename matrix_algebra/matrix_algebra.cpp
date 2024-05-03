@@ -41,7 +41,8 @@ matrix<DataType>::matrix(const matrix&mat){
                 at(i,j) = mat.at(i,j);
             }
         }
-}
+    }
+
 
 template <typename DataType>
 matrix<DataType>::matrix(int r,int c , DataType*arr,int size){
@@ -925,7 +926,7 @@ int matrix<DataType>:: is_pivot(int r_ind , int c_ind) {
         //find first non zero element in that row
         int pivot_index = r_ind ;
         while(pivot_index<rows){
-            if(abs(at(pivot_index,c_ind))>tolerance){
+            if(abs(at(pivot_index,c_ind))>check_tolerance){
                 //if you found a non zero element
                 //if its not the original element
                 //element at r_ind , c_ind rows are switched
@@ -1395,12 +1396,15 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
                //get projection of each vector * same vector
                 //while subtracting it from the result
                 res = res - projections_arr[proj_c]*temp;
+
             }
             //get the length
             len=res.length();
-            for(int row_c = 0 ; row_c<rows;row_c++){
-                //while filling the result column divide by the length
-                ret_mat.at(row_c,vec_c) =res.at(row_c,0)/len;
+            if(len>tolerance){
+                for(int row_c = 0 ; row_c<rows;row_c++){
+                    //while filling the result column divide by the length
+                    ret_mat.at(row_c,vec_c) =res.at(row_c,0)/len;
+                }
             }
             //get the projection of the newly created vector
             if(vec_c<cols-1){
@@ -1803,6 +1807,73 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
             }
         }
     }
+    template<typename DataType>
+    matrix<DataType> matrix<DataType>::operator^(unsigned int power){
+        /*
+        AS=S^
+        A=S^S
+        Aexp(k)=S^exp(k)S^-1
+        */
+        //S A^power S^-1
+        matrix<DataType> eig_vals = eigen_values(1000,0.0001) ;
+        matrix<DataType>eig_vecs = eigen_vectors(eig_vals);//S
+        for(int i =0;i<rows;i++){
+            eig_vals.at(i,0) = pow(eig_vals.at(i,0),power) ;
+        }
+        //get S
+        matrix<DataType>inv_eig = eig_vecs.inverse();//S^-1
+        for(int i = 0 ; i<rows;i++){
+            for(int j= 0 ; j<cols;j++){
+                eig_vecs.at(i,j)*=eig_vals.at(j,0) ;
+            }
+        }
+        return eig_vecs*inv_eig ;
+    }
+    template<typename DataType>
+    //calculates the length of a column at a specified index
+    DataType matrix<DataType>::col_length(int col_i){
+        if(col_i>=0&&col_i<cols){
+            DataType len=  0;
+            for(int i= 0;i<rows;i++){
+                len+=(at(i,col_i)*at(i,col_i));
+            }
+            return sqrt(abs(len));
+        }
+        cout<<"out of bounds default garbage value is -1";
+        return DataType(-1);
 
+    }
 
-
+    template<typename DataType>
+    //A = U S VT
+    void matrix<DataType>::svd(matrix&u,matrix&s,matrix&vt){
+        //A V=U S->A=U S VT
+        // A AT=U S^2 UT
+        //get S , then V
+        //A=U S VT ->U = A VT S^-1
+        matrix<DataType> AAT= (*this)*transpose() ;
+        s=AAT.eigen_values(100000,0.00001);//S^2
+        u =AAT.eigen_vectors(s);//U
+        //a row to store length of each column
+        for(int i = 0 ; i<u.cols;i++){
+            DataType len = u.col_length(i);
+            if(len>tolerance){
+                for(int j =  0  ; j<u.rows;j++ ){
+                    u.at(j,i)/=len;
+                }
+            }
+        }
+        vt =(transpose()*(*this)).eigen_vectors(s);
+        for(int i = 0 ; i<vt.cols;i++){
+            DataType len = vt.col_length(i) ;
+            if(len>tolerance){
+                for(int j =  0  ; j<vt.rows;j++ ){
+                    vt.at(j,i)/=len;
+                }
+            }
+        }
+        vt=vt.transpose();
+        for(int i =0 ; i<s.rows;i++){
+            s.at(i,0) =sqrt(s.at(i,0)) ;
+        }
+    }
