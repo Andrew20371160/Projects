@@ -1781,13 +1781,14 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
 
     //returns a matrix with data randomly initialized
     template <typename DataType>
-    matrix<DataType> rand(int row_size,int col_size){
+    matrix<DataType> rand(int row_size,int col_size,int max_val){
         if(row_size>0&&col_size>0){
             srand(time(0)) ;
             matrix<DataType>ret_mat(row_size,col_size) ;
             for(int i = 0  ;i<row_size;i++){
                 for(int j = 0 ; j<col_size;j++){
-                    ret_mat.at(i,j)=rand();
+                    int val=rand()%max_val;
+                    ret_mat.at(i,j)=DataType(val) ;
                 }
             }
         return ret_mat ;
@@ -1852,7 +1853,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
         //get S , then V
         //A=U S VT ->U = A VT S^-1
         matrix<DataType> AAT= (*this)*transpose() ;
-        s=AAT.eigen_values(100000,0.00001);//S^2
+        s=AAT.eigen_values(1000,0.00001);//S^2
         u =AAT.eigen_vectors(s);//U
         //a row to store length of each column
         for(int i = 0 ; i<u.cols;i++){
@@ -1877,3 +1878,4 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
             s.at(i,0) =sqrt(s.at(i,0)) ;
         }
     }
+
