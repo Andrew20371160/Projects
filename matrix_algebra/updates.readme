@@ -1,3 +1,10 @@
+5/3/2024 updates :
+-added operator^ which calculates powers of a matrix (A^K)
+sadly the results are relient on the QR algorithm to get the eigen values so the results aren't quite correct
+-added svd (singal value decomposition) which again relies on the iteration algorithm to get the eigen values
+if the eigen values are correct the results for both power ,svd are perfectly fine but due to the nature of the
+iteration algorithm thats the best i can do 
+If you have any suggestions please let me know 
 5/2/2024 updates :
 1-fixed percision errors that lead to wrong output of gram_shmidt 
 using 2 tolerance values 
@@ -10,17 +17,22 @@ using 2 tolerance values
   const double check_tolerance =1e-6;
   -both consants are found in complex.h file
 
--added eigne_values which calculates eigen values via an iteration method using qr factorization 
-returns eigen values of a matrix in a column matrix
+-added eigne_values which calculates eigen values via an iteration method using 
+qr factorization returns eigen values of a matrix in a column matrix
 computations made by qr factorization
-doesn't generate correct results all the time due to divergence issues
+doesn't generate correct results all the time due to divergence issues and the nature of the 
+numerical method itself
 
 -removed filterization from constructors where if an element is less than a specified tolerance 
 its replaced with zero and added insted filter functions which filters caller's elements 
 these changes had to be made due to gram-shmidt process requiring a lot of percision
 tested the function on 100000 randomly generated matrix and its stable now
 
+-added qr_fact(matrix q, matrix r ) whih performs qr factorization and puts the 
+reuslts in q and r input matrices
 have fun!
+
+-added rand which creates a randomly generated matrix at specified dimensions
 
 5/1/2024:
 Important notes:
