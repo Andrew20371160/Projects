@@ -8,7 +8,7 @@
 const double tolerance =1e-12;
 //check_tolerance is for is_identity , is_zero , aka every function starting with is_
 //modify this the way you want
-const double check_tolerance =1e-6;
+const double check_tolerance =1e-7;
 
 using namespace std ;
 const double to_deg =180/M_PI;
@@ -64,7 +64,7 @@ public:
     long long conjugate(const long long &val);
     unsigned long long conjugate(const unsigned long long &val);
     long double conjugate(const long double&val);
-
+    complex pow(const complex &c,int power);
     // Template specialization for your complex type
 
 #endif
