@@ -5,40 +5,42 @@
 #include <string.h>
 //tolerance is used in calculations like inverse and gram-shmidt ,gauss
 //this is sufficient for gram-shmidt since it requires a percision
-const double tolerance =1e-12;
+const long double tolerance =1e-18;
 //check_tolerance is for is_identity , is_zero , aka every function starting with is_
 //modify this the way you want
-const double check_tolerance =1e-7;
+const long double check_tolerance =1e-6;
 
 using namespace std ;
-const double to_deg =180/M_PI;
-const double to_rad = M_PI/180 ;
+const long double to_deg =180/M_PI;
+const long double to_rad = M_PI/180 ;
 class complex{
 private:
-    double re,im ;
+    long double re,im ;
 public:
-    complex(double _re=0,double _im=0);
+    complex(long double _re=0,long double _im=0);
+    complex(int);
+
     complex(const complex&);
-    double get_re(void)const;
-    double get_im(void)const;
+    long double get_re(void)const;
+    long double get_im(void)const;
     ~complex();
     complex operator+(const complex&)const ;
     complex operator-(const complex&)const ;
     complex operator*(const complex&)const ;
     complex operator/(const complex&)const ;
-    void operator=(const double & val);
+    void operator=(const long double & val);
 
     void operator+=(const complex&) ;
     void operator-=(const complex&) ;
     void operator*=(const complex&) ;
     void operator/=(const complex&) ;
-    void operator^=(const double &power);
-    complex operator*(const double &)const ;
-    complex operator/(const double &)const ;
-    void operator*=(const double &) ;
-    void operator/=(const double &) ;
-    complex operator^(const double &) const ;
-    double theta(void)const;
+    void operator^=(const long double &power);
+    complex operator*(const long double &)const ;
+    complex operator/(const long double &)const ;
+    void operator*=(const long double &) ;
+    void operator/=(const long double &) ;
+    complex operator^(const long double &) const ;
+    long double theta(void)const;
     bool operator>(const complex&)const;
     bool operator<(const complex&)const;
     bool operator==(const complex&)const;
@@ -48,7 +50,7 @@ public:
 
 };
     string to_string(complex&);
-    double abs(const complex&);
+    long double abs(const complex&);
     // General template function for all non-complex types
     complex conjugate(const complex& val);
     unsigned char conjugate(const unsigned char &val);
@@ -57,13 +59,13 @@ public:
     int conjugate(const int &val);
 
     float conjugate(const float &val);
-
     double conjugate(const double &val);
+
+    long double conjugate(const long double &val);
     unsigned long conjugate(const unsigned long &val);
     long conjugate(const long &val);
     long long conjugate(const long long &val);
     unsigned long long conjugate(const unsigned long long &val);
-    long double conjugate(const long double&val);
     complex pow(const complex &c,int power);
     // Template specialization for your complex type
 
