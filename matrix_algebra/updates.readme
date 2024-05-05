@@ -1,3 +1,9 @@
+5/5/2024 update:
+-added transformer which returns the linear transformation matrix that turns an input into an output
+both must be full basis so if you pass a matrix with independent cols as an input to that system and the output is
+the identity then the system is the inverse of that matrix check the comments on the function its pretty simple 
+actually.
+
 5/3/2024 updates :
 -added operator^ which calculates powers of a matrix (A^K)
 sadly the results are relient on the QR algorithm to get the eigen values so the results aren't quite correct
@@ -156,7 +162,3 @@ elimination since some outputs might be wrong I'm not gonna force it but just so
 
 gaussian elimination downward or gauss_down now has an enum if you want the new pivots indices 
 you just passa matrix and no need to pass extra values, if you want the old pivots indices then pass old_locations.
-
-
-
-
