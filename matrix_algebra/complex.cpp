@@ -1,6 +1,6 @@
 #include "complex.h"
 
-    complex::complex(double _re,double _im){
+    complex::complex(long double _re,long double _im){
         re =_re ;
         im = _im   ;
     }
@@ -8,12 +8,17 @@
         re = src.re  ;
         im = src.im ;
     }
+    complex::complex(const int _re){
+        re=_re ;
+        im = 0;
+        }
+
     complex::~complex(){
     }
-    double complex::get_re(void)const{
+    long double complex::get_re(void)const{
         return re ;
     }
-    double complex::get_im(void)const{
+    long double complex::get_im(void)const{
         return im ;
     }
     void complex:: operator=(const complex&src){
@@ -32,10 +37,10 @@
     complex complex:: operator/(const complex&c2)const{
         return (*this*conjugate(c2))/(abs(c2)*abs(c2)) ;
     }
-    complex complex:: operator*(const double &scalar)const{
+    complex complex:: operator*(const long double &scalar)const{
         return complex(scalar*re,scalar*im);
     }
-    complex complex::operator/(const double &scalar)const{
+    complex complex::operator/(const long double &scalar)const{
         return complex(re/scalar,im/scalar);
     }
     void complex:: operator+=(const complex&c2){
@@ -50,26 +55,25 @@
     void complex::operator/=(const complex&c2){
         *this = *this/c2 ;
     }
-    void complex::operator^=(const double &power){
+    void complex::operator^=(const long double &power){
         *this = *this^power;
     }
-    void complex::operator*=(const double &scalar){
+    void complex::operator*=(const long double &scalar){
         *this = *this*scalar;
     }
-    void complex::operator/=(const double &scalar){
+    void complex::operator/=(const long double &scalar){
         *this = *this/scalar;
     }
-    complex complex:: operator^(const double &power) const{
-        double rad = pow(abs(*this),power) ;
-        double the = power*theta() ;
+    complex complex:: operator^(const long double &power) const{
+            long double rad = pow(abs(*this),power) ;
+            long double the = power*theta() ;
+            return complex(rad*cos(the),rad*sin(the)) ;
+        }
 
-        return complex(rad*cos(the),rad*sin(the)) ;
-    }
-
-    double complex::theta(void)const{
+    long double complex::theta(void)const{
         return atan2(im,re);
     }
-    double abs(const complex&c){
+    long double abs(const complex&c){
         return sqrt(c.get_re()*c.get_re()+c.get_im()*c.get_im()) ;
     }
     bool complex::operator>(const complex&c2)const{
@@ -126,7 +130,7 @@
     float conjugate(const float &val){
         return val ;
     }
-     double conjugate(const double &val){
+     long double conjugate(const long double &val){
         return val ;
     }
     unsigned long conjugate(const unsigned long &val){
@@ -141,11 +145,14 @@
     unsigned long long conjugate(const unsigned long long &val){
         return val ;
     }
-    long double conjugate(const long double&val){
-    return val ;
-    }
 
-    void complex ::operator=(const double & val) {
+     double conjugate(const  double&val){
+        return val ;
+    }
+    complex pow(const complex &c,int power){
+        return c^power  ;
+    }
+    void complex ::operator=(const long double & val) {
         re = val ;
         im = 0;
     }
