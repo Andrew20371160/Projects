@@ -880,7 +880,7 @@ void matrix<DataType>:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
         permutation = identity<DataType>(rows);
         //copy original matrix<DataType>into upper_fact to performa gaussian elimination on it
         upper_fact = *this  ;
-        for(int up_r = 0;up_r<rows; up_r++){
+        for(int up_r = 0;up_r<rows-1; up_r++){
             int pivot_condition =upper_fact.is_pivot(up_r,up_r);
             if(pivot_condition!=-1){
                 //aka its a pivot
@@ -889,7 +889,7 @@ void matrix<DataType>:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
                   permutation.switch_rows(up_r,pivot_condition);
             }
                 //no switch happened
-            for(int low_r = up_r+1; low_r<rows-1; low_r++){
+            for(int low_r = up_r+1; low_r<rows; low_r++){
                     //check first if upper element is a pivot
                     //the constant we calculate
                     DataType c = -1*(upper_fact.at(low_r,up_r)/upper_fact.at(up_r,up_r));
@@ -900,7 +900,7 @@ void matrix<DataType>:: lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
                         upper_fact.at(low_r,i)+=c*upper_fact.at(up_r,i) ;
                     }
                 }
- }
+            }
                 else{
                 cout<<"matrix<DataType>doesn't have an inverese" ;
                 lower_fact =  matrix(1,1,-1) ;
@@ -1709,7 +1709,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     }
     //returns pivots of a matrix in column matrix
     template <typename DataType>
-    matrix<DataType> matrix<DataType>:: get_pivots(matrix<int>*pivots_locations){
+    matrix<DataType> matrix<DataType>:: get_pivots(matrix<int>*pivots_locations)const{
         matrix<DataType> pivots(rows,1,0);
         matrix<int> pivots_loc;
         matrix<DataType> temp=gauss_down(&pivots_loc,new_locations) ;
@@ -1725,7 +1725,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     }
     //checks if a matrix is positive definite
     template <typename DataType>
-    bool matrix<DataType>::is_positive_definite(void){
+    bool matrix<DataType>::is_positive_definite(void)const{
         if(is_symmetric()){
             matrix<DataType> pivots= get_pivots();
             if(pivots.rows==rows){
@@ -1742,7 +1742,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     }
     //performs QR factorization on a matrix and puts them in q ,r passed in the function input
     template<typename DataType>
-    void matrix<DataType>:: qr_fact(matrix<DataType>&q,matrix<DataType>&r){
+    void matrix<DataType>:: qr_fact(matrix<DataType>&q,matrix<DataType>&r)const{
         q= gram_shmidt() ;
         r= q.transpose() *(*this) ;
     }
@@ -1750,7 +1750,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     //computations made by qr factorization
     //doesn't generate correct results all the time due to divergence issues
     template <typename DataType>
-    matrix<DataType> matrix<DataType>::eigen_values(int max_iteration,double min_diff){
+    matrix<DataType> matrix<DataType>::eigen_values(const int&max_iteration,const double& min_diff)const{
         matrix<DataType>q,r ;
         matrix<DataType>mat_cpy = *this;
         matrix<DataType>eigen(rows,1,0);
@@ -1809,15 +1809,15 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
         }
     }
     template<typename DataType>
-    matrix<DataType> matrix<DataType>::operator^(unsigned int power){
+    matrix<DataType> matrix<DataType>::operator^(const DataType &power)const {
         /*
         AS=S^
         A=S^S
         Aexp(k)=S^exp(k)S^-1
         */
         //S A^power S^-1
-        matrix<DataType> eig_vals = eigen_values(1000,0.0001) ;
-        matrix<DataType>eig_vecs = eigen_vectors(eig_vals);//S
+        matrix<DataType> eig_vals = eigen_values(1000,0.00001) ;
+        matrix<DataType>eig_vecs  = eigen_vectors(eig_vals);//S
         for(int i =0;i<rows;i++){
             eig_vals.at(i,0) = pow(eig_vals.at(i,0),power) ;
         }
@@ -1832,7 +1832,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     }
     template<typename DataType>
     //calculates the length of a column at a specified index
-    DataType matrix<DataType>::col_length(int col_i){
+    DataType matrix<DataType>::col_length(const int& col_i)const{
         if(col_i>=0&&col_i<cols){
             DataType len=  0;
             for(int i= 0;i<rows;i++){
@@ -1847,7 +1847,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
 
     template<typename DataType>
     //A = U S VT
-    void matrix<DataType>::svd(matrix&u,matrix&s,matrix&vt){
+    void matrix<DataType>::svd(matrix&u,matrix&s,matrix&vt)const{
         //A V=U S->A=U S VT
         // A AT=U S^2 UT
         //get S , then V
@@ -1878,4 +1878,46 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
             s.at(i,0) =sqrt(s.at(i,0)) ;
         }
     }
+    //returns the linear transformation matrix that turns and input (caller) into an output (input parameter)
+    //input->system->output
+    template<typename DataType>
+    matrix<DataType> matrix<DataType>::transformer(const matrix<DataType>& output)const  {
+        //store locations of pivots
+        matrix<int> pivots_indices;
+        //augment the input with the out put and then perform gaussian elimination
+        //on that matrix
+        matrix<DataType> augmented = (this->append_cols(output)).gauss_down(&pivots_indices);
+        for(int i = 0 ;  i<pivots_indices.rows;i++){
+            if(pivots_indices.at(i,0)==-1){
+                cout<<"must pass independent cols in both input and output to get the system";
+                cout<<" default garbage value is -1";
+                return matrix<DataType>(1,1,-1) ;
+            }
+        }
+        matrix<DataType> solution(output.rows,cols);
+        //now for every col of the right side do back-substitution with the input
+        //to get a column of the system
+        //do it on paper and whole picture appeas
+        /*
+        system  input   output
+        [c1 c2] [1,2] = [1,0]
+        [c3 c4] [2,2]   [0,1]
+        c1*1+c2*2 = 1->[1 2][c1]=[1]solve and get c1 and c2 and repeat for c3 &c4
+        c1*2+c2*2 = 0->[2 2][c2] [0]
+        so perform gaussian eliminaiton on the augmented matrix once and perform that algorithm for each column
+        of the right half
+        */
+        for (int col = 0; col < output.cols; col++) {
+            for (int i = get_rows() - 1; i >= 0; i--) {
+                DataType sum = augmented.at(i, get_cols()+ col);
+                for (int j = 0 ; j < get_cols(); j++) {
+                    sum -= augmented.at(i, j) * solution.at(pivots_indices.at(j, 0), col);
+                }
+                solution.at(pivots_indices.at(i, 0), col) = sum / augmented.at(i, i);
+            }
+        }
+        return solution;
+    }
+
+
 
