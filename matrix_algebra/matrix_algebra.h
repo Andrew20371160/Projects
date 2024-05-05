@@ -282,31 +282,33 @@ public:
     //and padding value by default is zero
     matrix resize(int wanted_rows = get_rows(),int wanted_cols=get_cols(),DataType padding_value=0)const ;
     //returns pivots of a matrix in column matrix
-    matrix get_pivots(matrix<int>*pivots_locations=NULL);
+    matrix get_pivots(matrix<int>*pivots_locations=NULL)const;
     //checks if a matrix is positive definite
-    bool is_positive_definite(void);
+    bool is_positive_definite(void)const;
     //performs QR factorization on a matrix and puts them in q ,r passed in the function input
-    void qr_fact(matrix&q,matrix&r)  ;
+    void qr_fact( matrix&q, matrix&r)const;
     //returns eigen values of a matrix in a column matrix
     //computations made by qr factorization
     //doesn't generate correct results all the time due to divergence issues
-    matrix eigen_values(int max_iteration,double min_diff = check_tolerance) ;
+    matrix eigen_values(const int&max_iteration,const double&min_diff = check_tolerance)const;
     //filters the matrix elements from data less than a specified tolerance
     //by default filters by check_tolerance
     void filter(double filter_tolerance=check_tolerance);
-
-    matrix operator^(unsigned int power);
+    //matrix to the power of k A^k
+    matrix operator^(const DataType& power)const ;
     //A = U S VT
-    void svd(matrix&u,matrix&s,matrix&vt);
+    void svd(matrix&u, matrix&s, matrix&vt)const;
     //calculates the length of a column at a specified index
-    DataType col_length(int col_i);
-
+    DataType col_length(const int&col_i)const ;
+    //returns the linear transformation matrix that turns and input (caller) into an output (input parameter)
+    //input->system->output
+    matrix transformer(const matrix&output)const ;
 };
     //when calling do this
     //identity<DataType>
     template <typename DataType>
     matrix<DataType> identity(int);
-    //returns randomly generated matrix
+    //returns randomly generated mahtrix
     //must specify dimensions
     //rand<DataType>
     template <typename DataType>
@@ -319,5 +321,7 @@ public:
     //returns fourier matrix which is used in
     //discrete fourier transform matrix
     matrix<complex> fourier_mat(int dimension);
+
+
 
 #endif // VEC_H_INCLUDED
