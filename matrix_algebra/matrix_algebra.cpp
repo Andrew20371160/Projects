@@ -472,7 +472,7 @@ template <typename DataType>
 matrix<DataType> matrix<DataType>::gauss_up( matrix<int>*pivots_indices)const {
     matrix<DataType>ret_mat = *this ;
     if(pivots_indices){
-        *pivots_indices = matrix(rows,1,-1) ;
+        *pivots_indices = matrix<int>(rows,1,-1) ;
     }
     //same idea as gauss_down but instead of -1 its now rows since we look
     //for pivots from last row till first row
@@ -1910,14 +1910,13 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
         for (int col = 0; col < output.cols; col++) {
             for (int i = get_rows() - 1; i >= 0; i--) {
                 DataType sum = augmented.at(i, get_cols()+ col);
-                for (int j = 0 ; j < get_cols(); j++) {
-                    sum -= augmented.at(i, j) * solution.at(pivots_indices.at(j, 0), col);
+                for (int j = get_cols()-1 ; j >i; j--) {
+                    sum -= augmented.at(i, j) * solution.at(j, col);
                 }
-                solution.at(pivots_indices.at(i, 0), col) = sum / augmented.at(i, i);
+                solution.at(i, col) = sum / augmented.at(i,i);
             }
         }
         return solution;
     }
-
 
 
