@@ -1,3 +1,7 @@
+5/6/2024 update:
+fixed transformer now it works as intended it worked only when producing the inverse but now it works on any 
+transformation the idea is simple get a system that converts a to b so if a enters that system it turns into b 
+now its working 
 5/5/2024 update:
 -added transformer which returns the linear transformation matrix that turns an input into an output
 both must be full basis so if you pass a matrix with independent cols as an input to that system and the output is
