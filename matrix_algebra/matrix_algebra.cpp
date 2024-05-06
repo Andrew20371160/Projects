@@ -1886,9 +1886,9 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
         matrix<int> pivots_indices;
         //augment the input with the out put and then perform gaussian elimination
         //on that matrix
-        matrix<DataType> augmented = (this->append_cols(output)).gauss_down(&pivots_indices);
+        matrix<DataType> augmented = (transpose().append_cols(output.transpose())).gauss_down(&pivots_indices);
         for(int i = 0 ;  i<pivots_indices.get_rows();i++){
-            if(pivots_indices.at(i,0)==-1){
+            if(pivots_indices.at(i,0)!=i){
                 cout<<"must pass independent cols in both input and output to get the system";
                 cout<<" default garbage value is -1";
                 return matrix<DataType>(1,1,-1) ;
@@ -1916,7 +1916,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
                 solution.at(i, col) = sum / augmented.at(i,i);
             }
         }
-        return solution;
+        return solution.transpose();
     }
 
 
