@@ -1,168 +1,170 @@
+
 5/6/2024 update:
-fixed transformer now it works as intended it worked only when producing the inverse but now it works on any 
-transformation the idea is simple get a system that converts a to b so if a enters that system it turns into b 
-now its working 
+fixed transformer Now it works as intended; it worked only when producing the inverse, but now it works on any transformation.
+
+The idea is simple: get a system that converts a to b, so if a enters that system, it turns into b. 
+Now it's working. 
 5/5/2024 update:
--added transformer which returns the linear transformation matrix that turns an input into an output
-both must be full basis so if you pass a matrix with independent cols as an input to that system and the output is
-the identity then the system is the inverse of that matrix check the comments on the function its pretty simple 
+-added transformer, which returns the linear transformation matrix that turns an input into an output.
+Both must be on a on a full basis, so if you pass a matrix with independent columns as an input to that system and the output is
+the identity, then the system is the inverse of that matrix. Check the comments on the function; it's pretty simple. 
 actually.
 
-5/3/2024 updates :
--added operator^ which calculates powers of a matrix (A^K)
-sadly the results are relient on the QR algorithm to get the eigen values so the results aren't quite correct
--added svd (singal value decomposition) which again relies on the iteration algorithm to get the eigen values
-if the eigen values are correct the results for both power ,svd are perfectly fine but due to the nature of the
-iteration algorithm thats the best i can do 
-If you have any suggestions please let me know 
-5/2/2024 updates :
-1-fixed percision errors that lead to wrong output of gram_shmidt 
-using 2 tolerance values 
-  -tolerance that is used in calculations like inverse and gram-shmidt ,gauss_down....etc
-  this is sufficient for gram-shmidt since it requires a high degree of percision
-  const double tolerance =1e-12;better not to be changed 
-  -check_tolerance is for is_identity , is_zero , aka every function starting with is_
-  except for is_pivot since its used in calculations
-  //modify this the way you want
-  const double check_tolerance =1e-6;
-  -both consants are found in complex.h file
+5/3/2024 updates:
+-added operator, which calculates the powers of a matrix (A^K).
+Sadly, the results are dependent on the QR algorithm to get the eigenvalues, so the results aren't quite correct.
+-added SVD (singal value decomposition), which again relies on the iteration algorithm to get the eigen values
+If the eigen values are correct, the results for both power and SVD are perfectly fine, but due to the nature of the
+Iteration algorithm is the best I can do. 
+If you have any suggestions, please let me know. 
+5/2/2024 updates:
+1. Fixed percision errors that lead to the wrong output of gram_shmidt 
+using two tolerance values 
+  tolerance that is used in calculations like inverse, gram-shmidt, gauge_down,gauss_down....etc
+  This is sufficient for gram-shmidt since it requires a high degree of precision.
+const double tolerance = 1e-12; better not to be changed 
+  Check_tolerance is for is_identity, is_zero, aka every function starting with is_
+except for is_pivot since it is used in calculations.
+  Modify this the way you want.
+const double check_tolerance =1e-6;
+  Both consants are found in the complex.h file.
 
--added eigne_values which calculates eigen values via an iteration method using 
-qr factorization returns eigen values of a matrix in a column matrix
-computations made by qr factorization
+added eigne_values, which calculates eigen values via an iteration method using 
+QR factorization returns the eigenvalues of a matrix in a column matrix.
+computations made by QR factorization
 doesn't generate correct results all the time due to divergence issues and the nature of the 
 numerical method itself
 
--removed filterization from constructors where if an element is less than a specified tolerance 
-its replaced with zero and added insted filter functions which filters caller's elements 
-these changes had to be made due to gram-shmidt process requiring a lot of percision
-tested the function on 100000 randomly generated matrix and its stable now
+-removed filterization from constructors where an element is less than a specified tolerance 
+It was replaced with zero and added in-place filter functions that filter the caller's elements. 
+These changes had to be made due to the gram-shmidt process requiring a lot of precision.
+tested the function on a 100,000 randomly generated matrix, and it's stable now.
 
--added qr_fact(matrix q, matrix r ) whih performs qr factorization and puts the 
-reuslts in q and r input matrices
+-added qr_fact(matrix q, matrix r), which performs qr factorization and puts the 
+residues in the q and r inputmatrices
 have fun!
 
--added rand which creates a randomly generated matrix at specified dimensions
+-added rand, which creates a randomly generated matrix at specified dimensions.
 
 5/1/2024:
 Important notes:
-when using gram_shmidt its better to use it with double and with very low tolerance value very close to zero
-i've noticed this alot when testing the algorithm 
-fixed a small issue in inverse where if a row is switched during the pivoting the return matrix 
-or the inverse matrix didn't record that 
-4/30/2024 small update :
-optimized some functions 
-added get_pivots ,is_positive_definite 
-4/29/2024 small update :
-added resize which takes 3 parameters row size ,col size ,padding value (by default is zero)
-and returns the wanted matrix with the new dimensions i've integerated into the fft but the 
-results aren't correct when testing it next to matlab results though the padding is correct ,fft is correct 
-it just doesn't make any sense for me if you have suggestions please let me know maybe i missunderstodd the padding concept
-but the fft works fine when passing matrices with rows value that is a power of 2 
-4/28/2024 great news :
--FFT is officially added into the library and 
-I've put it under a lot of tests with normal fourier transform
+When using gram_shmidt, it's better to use it with a double and with a very low tolerance value, very close to zero.
+I've noticed this a lot when testing the algorithm. 
+fixed a small issue in the inverse where if a row is switched during the pivoting, the return matrix 
+or the inverse matrix didn't record that. 
+4/30/2024, small update:
+optimized some functions. 
+added get_pivots,is_positive_definite 
+4/29/2024, small update:
+added resize, which takes 3 parameters: row size, column size, and padding value (by default, zero).
+and returns the wanted matrix with the new dimensions I've integerated into the fft, but the 
+Results aren't correct when tested next to Matlab results, though the padding is correct and the fft is correct. 
+It just doesn't make any sense for me. If you have suggestions, please let me know. Maybe I misunderstood the padding concept.
+but the fft works fine when passing matrices with a row value that is a power of 2. 
+4/28/2024, great news:
+FFT is officially added to the library and 
+I've put it through a lot of tests with the normal Fourier transform.
 (aka the fourier matrix multiplied by the data set) 
 
--Also updated the complex class to work with double instead of float because of tolerance issue
+also updated the complex class to work with double instead of float because of the tolerance issue.
 
--I didn't add a padding function to make the algorithm work with non-powers of 2 
+I didn't add a padding function to make the algorithm work with non-powers of 2. 
 maybe later.
 
--note : the fft/fourier_mat are clock wise not counter clock wise 
-(thought it would be important to mention it)
+Note: The fft/fourier_mat is clockwise, not counterclockwise. 
+(I thought it would be important to mention it.)
 
--It didn't crash at 2^30 data set but almost burnt my pc so don't do it 
+It didn't crash at 2^30 data set but almost burned my PC, so don't do it. 
 Have fun :)
 
-4/27/2024 huge updates after I slept:
+4/27/2024, huge updates after I slept:
 
-1-performance boost I changed the data structure to be 1d array instead of 
-2d array (cache utilization) now the most important function is at(int row_i,int col_i)
+1-performance boost I changed the data structure to be a 1D array instead of 
+2D array (cache utilization) Now the most important function is at (int row_i,int col_i).
 
-2-updated the class to be working with any standard data types (template class) and non standard 
-data type (complex matrices and their results are tested but if there is any issue please let me 
+2: updated the class to be working with any standard data types (template class) and non-standard 
+data type (complex matrices) and their results are tested, but if there is any issue, please let me know. 
 know)
 
-3-added complex class which performs all the essintial operations on complex numbers 
+3-added complex class, which performs all the essintial operations on complex numbers 
 
-4-I didn't add complex class for the sake of complex matrices im working on adding 
+4: I didn't add complex classes for the sake of complex matrices. I'm working on adding 
 fast forier transform 
 
-5-updated transpose, dot, is_symmetric ,and others to work seamelessy with both 
-standard and non standardtypes all thanks to overloaded conjugate that 
-i added so that if the passed type is standard then it does nothing else 
-if its complex then it produces the conjugate 
+5-updated transpose, dot, is_symmetric, and others to work seamlessly with both 
+standard and non-standard types, all thanks to the overloaded conjugate that 
+I added it so that if the passed type is standard, then it does nothing else. 
+If it's complex, then it produces the conjugate. 
 
-6-there are some new functions related to forier :-
-  -forier_mat which returns forier matrix when passing a certain dimension
-  -forier_diagonal which returns the main diagonal of forier in the form of a column matrix (i will use it in fft)
-  -added some functions like arrange which arranges matrix rows at a certain sequnce you pass as an input
-  and returns the matrix (will be used in fft)
-  -at_quarter which puts a matrix at upper_left,lower_left,upper_right,lower_right quarters of a matrix
-  of the caller the passed function must be less than or equal to quarter size of the caller matrix
-  aka : if caller has 4x4 then the maximum size of passed matrix is 2x2 
+6. There are some new functions related to FORIER:
+-forier_mat, which returns a forier matrix when passing a certain dimension
+-forier_diagonal, which returns the main diagonal of forier in the form of a column matrix (I will use it in fft).
+  added some functions like arrange, which arranges matrix rows at a certain sequence you pass as an input.
+and returns the matrix (which will be used in FFT).
+-at_quarter, which puts a matrix at the upper_left, lower_left, upper_right, and lower_right quarters of a matrix
+of the caller, the passed function must be less than or equal to the quarter size of the caller matrix.
+aka:: if the caller has 4x4, then the maximum size of the passed matrix is 2x2. 
 
 7-updated other functions like fix_pivots to be more efficient in terms of memory usage and performance
-now it utilizes a simple column of sequence that is obtained from gauss_down 
+Now it utilizes a simple column of sequence that is obtained from gauss_down. 
 
-8-any functions that returns pivot indices aka gauss_down,rref,and others returns it in an <int> column matrix
-also its optional aka pass an address of a matrix if you want the extra info.
+8: Any function that returns pivot indices, aka gauss_down, ref,and others, returns them in an <int> column matrix.
+Also, it's optional to pass the address of a matrix if you want the extra information.
 
-9-matrix<int> ,matrix<complex> is how you initialize a matrix and that's probably all i have to say
+9-matrix<int> ,matrix<complex> is how you initialize a matrix, and that's probably all I have to say.
 
-10-feel free to use any code :)
+10. Feel free to use any code.
 
-11-now it doesn't crash at 500x5000 matrix matrix multiplication i'm currently running a 
-10000x10000 matrix matrix multiplication and didn't crash as i'm writing these updates.
+11: Now that it doesn't crash at 500x5000 matrix multiplication, I'm currently running a 
+10000x10000 matrix matrix multiplication and didn't crash as I'm writing these updates.
 
 have fun!
 
-4/27/2024 huge updates:
-untill i declare it when you use the class
-just do this -> matrix<data_type> mat instead of matrix
-since now it works with any data type like int ,float , etc
-and now works with non standard type complex
-im trying to implement fast forier transform wish me luck 
-also more updates tomorrow after i sleep
-have a nice day :)
-4/22/2024 small updates:
-added cofactor which returns cofactor related to an element at the matrix 
+4/27/2024: huge updates:
+until I declare it when you use the class.
+just do this: matrix<data_type> mat instead of matrix
+Since then, it has worked with any data type, like int, float , etc.
+and now works with non-standard-type complex
+Im trying to implement fast forier transform. Wish me luck. 
+Also, more updates tomorrow after I go to sleep.
+Have a nice day.
+4/22/2024: small updates:
+added cofactor, which returns a cofactor related to an element in the matrix. 
 added cofactors which returns cofactors matrix 
 
-4/18/2024 small update:
-1-added SubLambdaI which performs A-lambda *I and returns the result in more efficent manner
-2-added eigen_vectors which returns eigen vectors of a system using eigen 
- values passed as an input as a column matrix 
-3-Announcement :will try to add eigen_values in the near future since it
-requires a lot of thought and work will try my best :)
+4/18/2024: A small update:
+1-added SubLambda I, which performs A-lambda *I and returns the result in a more efficient manner.
+2-added eigen_vectors, which returns the eigen vectors of a system using eigen 
+values passed as an input as a column matrix 
+3: Announcement: We will try to add eigenvalues in the near future since
+requires a lot of thought and work. I will try my best.
 
 4/13/2024 update:
 fixed an issue that affected null space calculation if pivot positions were not in the left of rref now 
-works properly for both cases for [0 1] & [1 0] it was a stupid mistake :)
-                                  [0 0]   [0 0] 
+works properly for both cases for [0 1] and [1 0]. It was a stupid mistake.
+[0 0]   [0 0] 
 4/11/2024 update:
 very important!!!
-1-fixed original pivots loctions recording when passing a matrix with old_locations parameter to gauss_down 
-(aka you want the old locations of pivots during the elimination ),
-to be a permutation matrix instead to record every row exchange happenning 
-which fixes 2 important functions the fix_pivots , det 
-for the det it was a sign issue but for fix_pivots it was a big deal since its used in calculation of the left null space 
+1-fixed original pivot loctions recording when passing a matrix with the old_locations parameter to gauss_down 
+(Also, you want the old locations of pivots during the elimination.)
+to be a permutation matrix instead of recording every row exchange that happens. 
+which fixes two important functions the fix_pivots, det 
+For the det, it was a sign issue, but for fix_pivots, it was a big deal since it was used in the calculation of the left null space. 
 
 4/10/2024 update:
-1-added extract_col which allows you to extract a column at an index and put it in a matrix
-2-added gram_shmidt which returns orthonormal vectors in a form of a matrix from a bunch (matrix) of independent columns 
+1-added extract_col, which allows you to extract a column at an index and put it in a matrix.
+2-added gram_shmidt, which returns orthonormal vectors in the form of a matrix from a bunch (matrix) of independent columns 
 
-4/9/2024 updates : 
-1-added quality functions that allow for appending of 2 matrices one for appending 
-by cols and the other for appending by rows and optimized some functions have fun.
-2-added projection which returns projection matrix for a system of equations.
-3-added fit_least_squares which performs a least squares fit to a given set of data points and returns the matrix .
+4/9/2024 updates: 
+1-added quality functions that allow for the appending of two matrices, one for appending 
+by cols and the other for appending by rows and optimizing some functions, have fun.
+2-added projection, which returns the projection matrix for a system of equations.
+3-added fit_least_squares, which performs a least squares fit to a given set of data points and returns the matrix.
 
-older upadtes :
-very important update : fix_pivots that rearranges matrix rows so that rows containing pivots are 
-put on top and rest at the bottom function is really essintial if some functions that use gaussian 
-elimination since some outputs might be wrong I'm not gonna force it but just so you know.
+older upadtes:
+very important update: fix_pivots, which rearranges matrix rows so that rows containing pivots are 
+put on top and rest at the bottom function is really essential if some functions that use gaussian 
+elimination since some outputs might be wrong. I'm not going to force it, just so you know.
 
-gaussian elimination downward or gauss_down now has an enum if you want the new pivots indices 
-you just passa matrix and no need to pass extra values, if you want the old pivots indices then pass old_locations.
+Gaussian elimination downward, or Gauss_down, now has an enum if you want the new pivot indices. 
+You just pass a matrix, and there is no need to pass extra values. If you want the old pivot indices, then pass old_locations.
