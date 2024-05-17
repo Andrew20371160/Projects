@@ -1,11 +1,11 @@
-#ifndef COMPLEX_H_INCLUDED
-#define COMPLEX_H_INCLUDED
+#ifndef complex_H_INCLUDED
+#define complex_H_INCLUDED
 #include <iostream>
 #include <math.h>
 #include <string.h>
 //tolerance is used in calculations like inverse and gram-shmidt ,gauss
 //this is sufficient for gram-shmidt since it requires a percision
-const long double tolerance =1e-18;
+const long double tolerance =1e-32;
 //check_tolerance is for is_identity , is_zero , aka every function starting with is_
 //modify this the way you want
 const long double check_tolerance =1e-6;
