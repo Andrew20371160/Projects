@@ -1,75 +1,192 @@
 #ifndef MATRIX_ALGEBRA_H_INCLUDED
 #define MATRIX_ALGEBRA_H_INCLUDED
-/*-update : added fix_pivots() this function rearranges the matrix rows
-so that the rows contatining the pivotsare on top and the rest of rows at bottom
-its crucial when using functions like lu_fact not really since i added permutation matrix earlier
-but if you use elementary matrix from null_rows() and tried to test if elementary * matrix euqals
-rref(matrix) this sometimes isn't true since elementary matrix doesn't record the switches
-in rows that happens during the rref of the matrix its advisable to use after you initialize the matrix
-but i wouldn't force that its on you :) .
-*/
+//tolerance is used in calculations like inverse and gram-shmidt ,gauss
+//this is sufficient for gram-shmidt since it requires a percision
+//const long double tolerance =1e-18;
+//check_tolerance is for is_identity , is_zero , aka every function starting with is_
+//modify this the way you want
+//const long double check_tolerance =1e-6;
+#include "complex.h"
 #include <iostream>
 #include <math.h>
 #include <string.h>
-#include "complex.h"
 #include <random>
 #include <time.h>
+
+//feel free to change no_init its just to indicate that the matrix doesn't need to be
+//initialized with values
 using namespace std ;
+#define no_init INT_MIN
+
 
 //error messages
 string shape_error ="\nmatrices aren't the same shape default garbage value is -1\n";
 string square_error= "\nmatrix must be square to perform this operation default garbage value is -1\n";
 string uninit_error = "\nmatrix isn't initialized yet\n";
-//write efficient matrix multiplication algos aka diagonal ,upper_tri ,lower_tri  ,
-//add some variables to matrices to indicate its properties
-//write a function to test or use is_diag ,is_suare etc etc use them in one big function called
-//extract specifications of matrix for ex and this writes it into the matrix class so that
-//we won't have to do that again
-enum{upper_left=0,lower_left,lower_right,upper_right};
 
+
+//enum used in at_quarter which puts an input matrix
+//in a wanted quarter of the matrix if applicable
+enum{upper_left=0,lower_left,lower_right,upper_right};
+//enum for split which splits the matrix int o 2 halves and returns
+//the half you want (used in FFT)
 enum{lower_half=0,upper_half};
+//used in gauss_down to specify if you want the locations of the pivots
+//either the new ones or the old ones
+enum {old_locations =0,new_locations=1};
+//types of matrices
+//used in compression and at
+enum{general=0,utri,ltri,diagonal,symmetric,anti_symmetric,constant,iden,orthonormal};
+
+
+//helper function for creating a vector (allocating memory)
+template<typename DataType>
+DataType*get_vec(int  r ,int  c);
+
+//helper function for filling a vector with data
+template<typename DataType>
+void fill_vec(DataType*vec,int  size, DataType val = -1) ;
+
+//helper function for copying
+template<typename DataType>
+void copy_vec(DataType*&dest,const DataType*&src,int  size) ;
+
 
 template<typename DataType>
 class matrix{
 
 private :
-//feel free to edit this value the way you want
-//2d array for holding data
-DataType *vec ;
-//dimensions of matrix
-int rows , cols;
-//helper function for allocating memory for a 2d array
-DataType*get_vec(int r ,int c){
-    //check for passed parameters
-    if(r>0&&c>0){
-        //memory allocation
-        DataType*ret_vec =new DataType[r*c];
-        return ret_vec ;
-    }
-    return NULL ;
-}//feel free to edit this value the way you want
+    //dimensions of matrix
+    int  rows , cols;
+
+    DataType *vec ;//storage
+
+    int  *row_start,*pindex;//for mapping utri &ltri
+    /*
+    row_start mapps the start of each row into @vec since utri ,ltri are stored without zeroes
+    pindex is for pivots locations
+*/
+
+    //make sure no to compress a compressed matrix (usage of the  bool)
+    bool is_compressed;
+
+    //actual size allocated for the matrix
+    int  acutal_size ;
+
+    //dummy array of one element
+    //for utri it returns 0
+    //allows for compression of anti-symmetric since the lower part is -ve of the upper part
+    //for mutable the idea is store in empty_vec the value at upper part multiplied by -1
+    //and return the value so it can be both used in constant and non constant matrices
+    mutable DataType empty_vec[1];
+
+    mutable int  matrix_type ;//general or orthonormal or utri or etc etc?
+    //fills matrix_type and sets at_ptr ,at_ptr_c
+    void set_feature(int  matrix_t);
+
+    //sets at_ptr &&at_ptr_C according to matrix_type
+    void set_at_ptr(int  matrix_type);
+    //at_ptr & at_ptr_c are member function pointers that store the address of at
+    //there are 8 at functions one for utri,ltri,symmetric,anti-symmetric etc etc
+    //each access the data according to matrix type so at_ptr is put inside the
+    //original at that's accessible to the user and inside it it calls the specific accessor
+    //according to matrix type using the pointer
+    DataType&(matrix::*at_ptr)(int  , int  );
+    //accessing for constatnt matrices
+    const DataType&(matrix::*at_ptr_c)(int  , int  ) const;
+
+
+    /*
+    compression functions for each matrix type
+
+    */
+    //compress upper-triangular matrices
+    //pass a matrix with its pindex filled its easier to use compress
+    //it does that for you w8 its private (well its open source do what you want :)
+    //the pindex must be filled with pivots same for compress_ltri
+    /*
+    if a function returns a matrix with special features (i think i covered all of them)
+    like gauss_down ,gauss_up ,get_pivots,gram_shmidt
+    the matrix is compressed or matrix type if the matrix isn't compressable like the one from
+    gram shmidt but its efficient when calculating the inverse for example
+    since if its orthonormal then the transpose is returned instead of performing
+    gauss-jordan
+    matrices performing operations on compressed matrices (for example if you multiply a compressed matric by a non-compressed one)
+    no problems occur it's been a rough week of testing and adjusting and now its stable
+    */
+    void compress_utri(void) ;
+    void compress_ltri(void) ;
+    //compress symmetric matrices no need for pindex
+    void compress_symmetric(void) ;
+    void compress_anti_symmetric(void) ;
+    //compress diagonal,constant,identity matrices no need to fill pindex of the matrix
+    void compress_diagonal(void) ;
+    void compress_identity(void) ;
+    void compress_const(void) ;
+
+
+    /*
+    at functions for each matrix type
+    compressed matrices like utri,ltri,symmetric,anti-symmetric are stored in row major order
+    refere to at definitions to see the mapping if you are interested
+    for diagonal we just store the main diagonal
+    for constatnt we just store one element
+    for identity we just store a 1
+    */
+    //declarations of at for each matrix type
+    //for general matrices
+    DataType&at_general(int  ,int  )  ;
+    //for upper triangular matrices
+    DataType&at_utri(int  ,int  )  ;
+    //for lower triangular matrices
+    DataType&at_ltri(int  ,int  )  ;
+    //for diagonal matrices
+    DataType&at_diagonal(int  ,int  )  ;
+    //for identity matrices
+    DataType&at_identity(int  ,int  )  ;
+    //for matrices containing one element including zeroes
+    DataType&at_const(int  ,int  )  ;
+    //for symmetric matrices
+    DataType&at_symmetric(int  ,int  )  ;
+    //for anti symmetric matrices
+    //still working on them
+    DataType&at_anti_symmetric(int  ,int  )  ;
+    //declarations of at for each matrix type for matrices that are constant
+    //and just used in calculations
+    const DataType&at_general_c(int  ,int  )const  ;
+    const DataType&at_utri_c(int  ,int  )const ;
+    const DataType&at_ltri_c(int  ,int  )const  ;
+    const DataType&at_diagonal_c(int  ,int  )const  ;
+    const DataType&at_identity_c(int  ,int  )const  ;
+    const DataType&at_const_c(int  ,int  )const ;
+    const DataType&at_symmetric_c(int  ,int  )const  ;
+    const DataType&at_anti_symmetric_c(int  ,int  )const  ;
+
 public:
     //empty matrix
     matrix();//tested
-    //by default initializes the matrix with zeroes
-    matrix(int rows ,int cols ,DataType initialization_value=0);//tested
-        //initializes a matrix with specified 1d array data
-    matrix(int rows ,int cols ,DataType* initialization_array,int size_of_array) ;
-
+    //by default doesn't initialize the matrix with data
+    //by default its not compressed if you want just add 1 after the data
+    //matrix(5,5,data,1)
+    matrix(int  rows ,int  cols ,DataType initialization_value=no_init,bool compressed= false);//tested
+    //initializes a matrix with specified 1d array data by default matrix type is general
+    matrix(int  rows ,int  cols ,DataType* initialization_array,int  size_of_array) ;
     //deallocate the memory allocated by the matrix
     ~matrix();//tested
     //copy constructor
-    matrix(const matrix&);//tested
-
-    //get rows value
-    int get_rows()const;//tested
-    //get cols value
-    int get_cols()const;//tested
-
+    matrix(const matrix&);
+    //getters
+    int  get_rows()const;
+    int  get_cols()const;
+    //returns number of elements stored in the matrix
+    int  get_size()const;
+    //returns type of the matrix refer to the enum to know its type
+    int  get_type()const;
+    //accessors
     //accessing element at a specified index
-    DataType& at(int r_ind,int c_ind);//tested
-        //accessing element at a specified index
-    DataType& at(int r_ind,int c_ind)const;//tested
+    DataType& at(int  r_ind,int   c_ind);//tested
+    const DataType& at(int   r_ind,int   c_ind)const;//tested
+
     //fills a matrix with a certain value
     void fill(DataType value);//tested
     //sets current matrix as identity
@@ -88,7 +205,7 @@ public:
     matrix operator/(const matrix&)const;//tested
     // Multiply this matrix by a scalar
     matrix operator*(DataType)const;//tested
-    //turns a matrix into a string for printing
+    //turns a matrix int o a string for print ing
     string mat_to_string(void) const;//tested
     //performs dot product of 2 matrices and returns the value
     DataType dot(const matrix&)const;//tested
@@ -111,13 +228,15 @@ public:
     DataType trace(void)const;//tested
 
     // Calculate the rank of this matrix
-    int rank(void)const ;//tested
-
+    int  rank(void)const ;//tested
+    /*
+    for each is_feature function it stores the features in matrix_type if it does exist
+    */
     // Check if this matrix is symmetric
     bool is_symmetric(void)const ;//tested
 
     // Check if this matrix is skew-symmetric
-    bool is_skew_symmetric(void)const ;//tested
+    bool is_anti_symmetric(void)const ;//tested
 
     // Check if this matrix is orthogonal
     bool is_orthogonal(void)const ;//tested
@@ -130,7 +249,7 @@ public:
     //solves appended matrix using @gauss_down and then @back_sub
     matrix solve(void)const ;//tested
     //performs axpy operation between 2 rows
-    void row_axpy(DataType alpha,int x_row,int y_row) ;
+    void row_axpy(DataType alpha,int  x_row,int  y_row) ;
 
     //performs gaussian elimination downward
     //added an optional input if you want to see where are the pivots
@@ -138,26 +257,25 @@ public:
     //just leave it empty i use this functionality in other pieces of code
     //if you want to store new pivots locations in the matrix
     //pass new_locations else old locations by default it returns new locations
-    enum {old_locations =0,new_locations=1};
-    matrix gauss_down(matrix<int>*pivots_indices=NULL,int pivots_locations = new_locations)const ;//tested
+    matrix gauss_down(matrix<int >*pivots_indices=NULL,int  pivots_locations = new_locations)const ;//tested
     //performs gaussian elimination upward
-    matrix gauss_up(matrix<int>*pivots_incices=NULL)const  ;//tested
+    matrix gauss_up(matrix<int >*pivots_incices=NULL)const  ;//tested
     //performs back substitution on a selected row and solution matrix is passed with it
-    DataType back_sub(int selected_row,const matrix& solution_matrix)const ;//tested
+    DataType back_sub(int  selected_row,const matrix& solution_matrix)const ;//tested
     //performs forward substitution on a selected row and solution matrix is passed with it
-    DataType fwd_sub(int selected_row,const matrix& solution_matrix)const ;//tested
+    DataType fwd_sub(int  selected_row,const matrix& solution_matrix)const ;//tested
     //yeah name is opvious
-    bool switch_rows(int row1,int row2);//tested
+    bool switch_rows(int  row1,int  row2);//tested
     //performs lu factorization on a matrix
     //lower_fact and upper_fact have the results
     //now added permutation matrix since during the during the
     //elemination some rows could be switched so the permutation
     //matrix records that change its a simple identity with rows
     //switching as upper_fact rows switched
-    void lu_fact(matrix& lower_fact,matrix&permutation,matrix& upper_fact)const ;//tested
+     void lu_fact(matrix& lower_fact,matrix&permutation,matrix& upper_fact)const ;//tested
     //assignment function
     //allows for matrix reuse
-    void operator=(const matrix&) ;//tested
+     void operator=(const matrix&) ;//tested
     //append 2 matrices by cols aka return matrix =[mat1 mat2]
     matrix append_cols(const matrix&src)const ;
     //append 2 matrices by rows aka return matrix =[mat1]
@@ -196,26 +314,26 @@ public:
 
     //this function checks if a current element is a pivot
     //it now returns pivot's row since its used in functions like lu_fact
-    int is_pivot(int row_index , int col_index) ;//tested
+     int is_pivot(int  row_index , int  col_index) ;//tested
     //same as is_pivot but used in gauss_up
-    int is_pivot_up(int,int) ;
+     int is_pivot_up(int  ,int  ) ;
 
     //this function returns row reduced echolon form of a matrix
     //it mapps for each row the index of its pivot if found
     // if at that row there are no pivots its assigned the value -1
-    matrix rref(matrix<int> * pivots_indices =NULL)const ;//tested
+    matrix rref(matrix<int  > * pivots_indices =NULL)const ;//tested
     // Checks if the set of vectors (columns of the matrix) is linearly independent.
     bool is_independent(void)const ;//tested
     // Calculates the dimension of the null space (kernel) of the matrix.
     // The null space consists of all vectors that are mapped to the zero vector by the linear transformation represented by the matrix.
-    int dim_null_cols(void)const ;//tested
-    int dim_null_rows(void)const ;//tested
+    int  dim_null_cols(void)const ;//tested
+    int  dim_null_rows(void)const ;//tested
     // Calculates the dimension of the column space (range) of the matrix.
     // The column space consists of all possible linear combinations of the column vectors in the matrix.
-    int dim(void)const ;//tested
+    int  dim(void)const ;//tested
     // Checks if the set of vectors (columns of the matrix) forms a basis for the vector space of the given dimension.
     // A set of vectors forms a basis if they are linearly independent and span the vector space.
-    bool is_basis(int dimension)const ;//tested
+    bool is_basis(int  dimension)const ;//tested
     // Returns a set of vectors (as a matrix) that forms a basis column space
     matrix basis_cols(void)const ;//tested
     // Returns a set of vectors (as a matrix) that forms a basis for the row space
@@ -238,18 +356,18 @@ public:
     so projection matrix where p =projection b
     projection = A*(AT*A)^-1 *AT
     */
-    matrix projection(void)const ;
+     matrix projection(void)const ;
     //performs least squares fit
-    //fits a data set as an input into a linear system
+    //fits a data set as an input int o a linear system
     matrix fit_least_squares(const matrix&data_set)const  ;
     //extracts a column at a specified index
     //and returns it as column matrix
-    matrix extract_col(int index)const ;
+    matrix extract_col(int  index)const ;
     //performs gram_shmidt algorithm and returns resultant
     //orthonormal vectors as a matrix
     matrix gram_shmidt(void)const ;
     //returns cofactor of an element at position row_i,col_i
-    DataType cofactor(int row_i, int col_i)const  ;
+    DataType cofactor(int  row_i, int  col_i)const  ;
     //returns matrix of cofactors of all elements of the matrix
     matrix cofactors(void)const  ;
     //performs A-l*identity and returns the matrix
@@ -259,38 +377,38 @@ public:
     matrix eigen_vectors(const matrix&eigen_values)const ;
     //arranges rows of a matrix in a wanted sequence
     //permutation matrix without extra usage of memory
-    matrix arrange(const matrix<int>&seq)const;
+    matrix arrange(const matrix<int >&seq)const;
     //puts input matrix in a quarter
     //upper_left,lower_right,upper_right,lower_right
     //input matrix rows & cols must be less than or equal to caller's size by
     //factor of 2
-    void at_quarter(int,const matrix&) ;
+    void at_quarter(int  ,const matrix&) ;
 
     //performs fast fourier transform on one column
     //dimension is just the number of rows or size of column
-    matrix fft_col(int dimension)const ;
+    matrix fft_col(int  dimension)const ;
 
     //performs fast fourier transform on the whole matrix
     matrix fft(void)const;
-    //splits the matrix into 2 halves upper or lower and returns
+    //splits the matrix int o 2 halves upper or lower and returns
     //the wanted size
-    matrix split(int half )const;
+    matrix split(int  half )const;
 
-    //resize the matrix into wanted dimensions
+    //resize the matrix int o wanted dimensions
     //and pad rest of it with certain padding value
     //by default the dimensions are same as caller
     //and padding value by default is zero
-    matrix resize(int wanted_rows = get_rows(),int wanted_cols=get_cols(),DataType padding_value=0)const ;
+    matrix resize(int  wanted_rows = get_rows(),int  wanted_cols=get_cols(),DataType padding_value=0)const ;
     //returns pivots of a matrix in column matrix
-    matrix get_pivots(matrix<int>*pivots_locations=NULL)const;
+     matrix get_pivots(matrix<int >*pivots_locations=NULL)const;
     //checks if a matrix is positive definite
     bool is_positive_definite(void)const;
     //performs QR factorization on a matrix and puts them in q ,r passed in the function input
-    void qr_fact( matrix&q, matrix&r)const;
+     void qr_fact( matrix&q, matrix&r)const;
     //returns eigen values of a matrix in a column matrix
     //computations made by qr factorization
     //doesn't generate correct results all the time due to divergence issues
-    matrix eigen_values(const int&max_iteration,const double&min_diff = check_tolerance)const;
+     matrix eigen_values(const int &max_iteration,const double&min_diff = check_tolerance)const;
     //filters the matrix elements from data less than a specified tolerance
     //by default filters by check_tolerance
     void filter(double filter_tolerance=check_tolerance);
@@ -299,29 +417,117 @@ public:
     //A = U S VT
     void svd(matrix&u, matrix&s, matrix&vt)const;
     //calculates the length of a column at a specified index
-    DataType col_length(const int&col_i)const ;
-    //returns the linear transformation matrix that turns and input (caller) into an output (input parameter)
+    DataType col_length(const int &col_i)const ;
+    //returns the linear transformation matrix that turns and input (caller) int o an output (input parameter)
     //input->system->output
     matrix transformer(const matrix&output)const ;
+
+
+
+//here is the inherited class matrix to allow for efficient usage of memory
+//will fix naming later for now call it mat
+
+//enum of matrices types
+
+//array of point ers to function at
+/*
+gauss_down,gauss_up,rref,
+*/
+
+
+
+//here row_start is filled and pindex aswell
+//passed function must be one of those types with zeroes
+
+//no need for others since its just a parameter change
+//like compressing symmetric is same as utri but the difference is
+//in the enum value or matrix type value
+//empty matrix
+
+    //changes are
+/*
+1-add empty_vec a dummy array of one element ,pindex,row_start
+2-add matrix_type
+3-update constructors and destructors with same thing
+add compression functions u made
+add the new at
+
+the other ats' are private and the array is static
+
+add decompress if user wants to update a matrix that was previously compressed
+we'll see how it goes
+
+update inverse
+
+change  the idea of zeroes and instead make it a matrix of a constant
+with same properties
+4-give user the ability to construct a matrix with special properites utri,ltri
+5-update     void operator=(const mat&) ;//tested
+
+    bool is_valid_index(int  ,int  )const;
+
+    void set_identity(void);
+
+    matrix gauss_down(mat<int >*pivots_indices=NULL,int  pivots_locations = new_locations)const ;//tested
+    //performs gaussian elimination upward
+    matrix gauss_up(mat<int >*pivots_indices=NULL)const  ;//tested
+
+    void lu_fact(mat& lower_fact,mat&permutation,mat& upper_fact)const ;//tested
+
+    matrix rref(mat<int > * pivots_indices =NULL)const ;//tested
+
+    matrix projection(char useless_ch=0)const ;
+
+    mat<int > get_pivots_locations(void) ;
+
+    matrix get_pivots(mat<int >*pivots_locations=NULL)const;
+
+    void qr_fact( mat&q, mat&r)const;
+
+    matrix eigen_values(const int  max_iteration,const double min_diff = check_tolerance)const;
+
+    void svd(mat&u, mat&s, mat&vt)const;
+
+*/
+    //used in at
+    bool is_valid_index(int  ,int  )const;
+
+    //this works as a more efficient way to extract
+    //pivots locations of an upper triangular matrix
+    matrix<int >get_pindex(void);
+    //compress the matrix no need to do anything just pass a function
+    //and fill_features will analyze the function efficiently for speacial features
+    //and will fill the matrix_type with the feature and compress it accordingly
+    void compress(void);
+
+    void decompress(void) ;
+
+    //analyzes the function for special features and fills matrix_type
+    void fill_features(double check_tol=1e-6);
+
 };
+
+
+
     //when calling do this
     //identity<DataType>
     template <typename DataType>
-    matrix<DataType> identity(int);
+    matrix<DataType> identity(int );
     //returns randomly generated mahtrix
     //must specify dimensions
     //rand<DataType>
     template <typename DataType>
-    matrix<DataType> rand(int,int,int max_val=INT_MAX);
+    matrix<DataType> rand(int  ,int  ,int  max_val=INT_MAX);
 
     //returns a column matrix representing
     //for i =0 to n-1 of w^i
     //used in fft
-    matrix<complex> fourier_diagonal(int dimension,int n);
+    matrix<complex> fourier_diagonal(int dimension,int  n);
     //returns fourier matrix which is used in
     //discrete fourier transform matrix
-    matrix<complex> fourier_mat(int dimension);
+    matrix<complex> fourier_mat(int  dimension);
 
-
+    //fill the matrix with its features if its symmetric
+    //utri,ltri ,etc
 
 #endif // VEC_H_INCLUDED
