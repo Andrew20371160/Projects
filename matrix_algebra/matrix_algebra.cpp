@@ -124,8 +124,10 @@ matrix<DataType>::matrix(int  r,int  c,DataType value,bool compressed){
 
 template <typename DataType>
 matrix<DataType>::~matrix(){
-    delete[] vec ;
-    vec = NULL;
+    if(vec){
+        delete[]vec ;
+        vec = NULL;
+    }
     if(row_start){
         delete[]row_start ;
         row_start=NULL;
@@ -428,7 +430,7 @@ const DataType& matrix<DataType>::at_identity_c(int  row_i,int  col_i)  const {
 
     template<typename DataType>
     const DataType& matrix<DataType>:: at(int  row_i,int  col_i)const{
-        return (this->*at_ptr_c)(row_i, col_i);
+            return (this->*at_ptr_c)(row_i, col_i);
     }
 
     template<typename DataType>
@@ -788,9 +790,8 @@ template <typename DataType>
 matrix<DataType> matrix<DataType>::gauss_down( matrix<int >*pivots_indices,int  pivots_locations) const {
     if(matrix_type!=utri){
         matrix<DataType>ret_mat = *this;
-        ret_mat.pindex =get_vec<int >(rows,1) ;
-        fill_vec<int >(ret_mat.pindex,rows,-1) ;
-
+        //make a separate vector for compression of already
+        //compressed matrix
         if(pivots_indices){
             if(pivots_locations==new_locations){
                 *pivots_indices = matrix<int >(rows,1,-1) ;
@@ -820,7 +821,6 @@ matrix<DataType> matrix<DataType>::gauss_down( matrix<int >*pivots_indices,int  
             }
             //make sure you aren't out of bounds
             if(pivot_index<cols){
-                ret_mat.pindex[up_r]  =pivot_index;
                 if(pivots_indices){
                     //if user wants new locations after switching rows
                     if(pivots_locations==new_locations){
@@ -846,23 +846,24 @@ matrix<DataType> matrix<DataType>::gauss_down( matrix<int >*pivots_indices,int  
                 old_pivot = pivot_index ;
             }
         }
-        ret_mat.matrix_type=utri ;
-        ret_mat.compress_utri();
+
+        ret_mat.compress();
         return ret_mat;
     }
     matrix<DataType> ret_mat = *this;
-    ret_mat.compress_utri()  ;
+    ret_mat.compress()  ;
     return ret_mat;
 }
 //performs upward gaussian elimination producing a lower triangular matrix
 //optional if you want to know the indices of the pivots for each row
 //pass in a matrix<DataType>aka pivots_indices
 template <typename DataType>
-matrix<DataType> matrix<DataType>::gauss_up( matrix<int >*pivots_indices)const {
+matrix<DataType> matrix<DataType>::gauss_up( matrix<int>*pivots_indices)const {
     if(matrix_type!=ltri){
         matrix<DataType>ret_mat = *this ;
-        ret_mat.pindex = get_vec<int >(rows,1) ;
-        fill_vec<int >(pindex,rows,-1) ;
+        if(pivots_indices){
+            *pivots_indices=matrix<int>(rows,1,-1) ;
+        }
         //same idea as gauss_down but instead of -1 its now rows since we look
         //for pivots from last row till first row
         int  old_pivot =cols;
@@ -876,10 +877,12 @@ matrix<DataType> matrix<DataType>::gauss_up( matrix<int >*pivots_indices)const {
                 pivot_index-- ;
             }
             if(pivot_index>=0){
-                ret_mat.pindex[low_r] = pivot_index ;
+                if(pivots_indices){
+                    pivots_indices->at(low_r,0) = pivot_index ;
+                }
                 for(int  up_r = low_r-1;up_r>=0;up_r--){
                     if(abs(ret_mat.at(up_r,pivot_index))>tolerance){
-                        DataType c =(ret_mat.at(up_r,pivot_index)/ret_mat.at(low_r,pivot_index))*DataType(-1)  ;
+                        DataType c =(ret_mat.at(up_r,pivot_index)/ret_mat.at(low_r,pivot_index))*DataType(-1);
                             for(int  col_c = pivot_index ; col_c>=0; col_c--){
                                 ret_mat.at(up_r,col_c)+= c*ret_mat.at(low_r,col_c);
 
@@ -890,15 +893,11 @@ matrix<DataType> matrix<DataType>::gauss_up( matrix<int >*pivots_indices)const {
                 old_pivot = pivot_index ;
             }
         }
-        if(pivots_indices){
-            *pivots_indices=matrix<int >(rows,1,ret_mat.pindex,rows) ;
-       }
-        ret_mat.matrix_type=ltri ;
-        ret_mat.compress_ltri() ;
+        ret_mat.compress() ;
         return ret_mat;
     }
     matrix<DataType>ret_mat = *this;
-    ret_mat.compress_ltri()  ;
+    ret_mat.compress()  ;
     return ret_mat ;
 }
 //this function switches 2 rows and returns state of switching meaning the rows are valid
@@ -1076,20 +1075,28 @@ void matrix<DataType>::operator=(const matrix<DataType>&mat){
             }
             if(row_start!=NULL){
                 delete[]row_start ;
+                row_start=NULL;
             }
             if(pindex!=NULL){
                 delete[]pindex ;
+                pindex=NULL ;
             }
             //reallocate for copying
             vec= get_vec<DataType>(mat.acutal_size,1) ;
-            row_start=NULL;
-            pindex=NULL ;
-            if(mat.matrix_type==utri||mat.matrix_type==ltri){
-                copy_vec(row_start,mat.row_start,rows);
-                copy_vec(pindex,mat.pindex,rows);
-             }
-             acutal_size =mat.acutal_size;
+            acutal_size =mat.acutal_size;
         }
+        if(mat.matrix_type==utri||mat.matrix_type==ltri){
+            if(row_start!=NULL){
+                delete[]row_start ;
+                row_start=NULL;
+            }
+            if(pindex!=NULL){
+                delete[]pindex ;
+                pindex=NULL ;
+            }
+            copy_vec(row_start,mat.row_start,rows);
+            copy_vec(pindex,mat.pindex,rows);
+         }
         //copying mechanism
         for(int  i = 0 ; i <rows;i++){
             for(int  j= 0 ; j<cols ;j++){
@@ -1272,7 +1279,7 @@ void  matrix<DataType>::lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
         permutation.compress_identity() ;
         if(!is_compressed){
            upper_fact = *this;
-           upper_fact.compress_utri() ;
+           upper_fact.compress() ;
         }
         else{
             upper_fact=*this;
@@ -1288,8 +1295,6 @@ void  matrix<DataType>::lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
         //if permutations happen its recorded in this matrix
         permutation = identity<DataType>(rows);
         upper_fact = *this  ;
-        lower_fact.pindex=get_vec<int >(rows,1);
-        upper_fact.pindex=get_vec<int >(rows,1);
         //copy original matrix<DataType>int o upper_fact to performa gaussian elimination on it
         for(int  up_r = 0;up_r<rows-1; up_r++){
             int  pivot_condition =upper_fact.is_pivot(up_r,up_r);
@@ -1299,9 +1304,7 @@ void  matrix<DataType>::lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
                 if(pivot_condition!=up_r){
                     permutation.switch_rows(up_r,pivot_condition);
                 }
-                upper_fact.pindex[up_r]= up_r;
-                lower_fact.pindex[up_r] = up_r;
-                    //no switch happened
+                //no switch happened
                 for(int  low_r = up_r+1; low_r<rows; low_r++){
                     //check first if upper element is a pivot
                     //the constant we calculate
@@ -1321,12 +1324,10 @@ void  matrix<DataType>::lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
                 return ;
                 }
             }
-            upper_fact.pindex[rows-1] = rows-1;
-            lower_fact.pindex[rows-1] = rows-1;
             lower_fact.matrix_type=ltri;
             upper_fact.matrix_type=utri ;
-            lower_fact.compress_ltri();
-            upper_fact.compress_utri();
+            lower_fact.compress();
+            upper_fact.compress();
         }
     else{
         cout<<square_error;
@@ -1439,7 +1440,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
         if(pivots_indices){
             *pivots_indices = pivots_locations ;
         }
-        return ret_mat ;
+        return ret_mat.compress() ;
     }
     //checks if a set of vectors in a column space are independent
     template <typename DataType>
@@ -1638,7 +1639,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
     template <typename DataType>
     matrix<DataType> matrix<DataType>::null_cols(void)const  {
         //here the pivots indices are stored along with indices of free variables
-        matrix<int >pivots_indices =matrix<int >(cols,1,-1);
+        matrix<int >pivots_indices =matrix<int>(cols,1,-1);
         //here the pivots indices are stored
         matrix<int >p_cpy ;
         matrix<DataType>mat_rref = rref(&p_cpy) ;
@@ -2186,7 +2187,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
         q.matrix_type= orthonormal;
         r= q.transpose() *(*this) ;
         r.matrix_type =utri;
-        r.compress_utri() ;
+        r.compress() ;
     }
     //returns eigen values of a matrix in a column matrix
     //computations made by qr factorization
@@ -2377,36 +2378,31 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
 //here row_start is filled and pindex aswell
 //passed function must be one of those types with zeroes
 template<typename DataType>
-void matrix<DataType> ::compress_utri(void){
-    if(!is_compressed&&matrix_type==utri){
+void matrix<DataType> ::compress_utri(const matrix<int>&compression_vec){
+    if(matrix_type==utri){
         //first dimensions
         is_compressed=true;
         //mapping in here
-        row_start = get_vec<int >(get_rows(),1) ;
-        fill_vec<int >(row_start ,rows,-1);
-
-        if(pindex==NULL){
-            get_pindex() ;
-        }
-        row_start[0] = 0;
+        int*temp_row_start=get_vec<int>(rows,1) ;
+        fill_vec(temp_row_start,rows ,-1)  ;
+        temp_row_start[0] = 0;
         //size of acutall data in the matrix
         int  size = 0  ;
         //first calculate the size
         //mapping the data to the array
         for(int  i =0; i<get_rows();i++){
-            if(pindex[i]!=-1){
-                row_start[i]=size;
-                size+=cols-pindex[i] ;
+            if(compression_vec.at(i,0)!=-1){
+                temp_row_start[i]=size;
+                size+=cols-compression_vec.at(i,0) ;
             }
         }
         //filling data
         DataType*new_vec =  get_vec<DataType>(size,1) ;
         acutal_size = size;
-        is_compressed=true;
         int  pos = 0  ;
         for(int  i=  0 ;i<rows;i++){
-            if(pindex[i]!=-1){
-                for(int  j= pindex[i];j<cols;j++){
+            if(compression_vec.at(i,0)!=-1){
+                for(int  j= compression_vec.at(i,0);j<cols;j++){
                     new_vec[pos] = at(i,j);
                     pos++;
                 }
@@ -2414,47 +2410,69 @@ void matrix<DataType> ::compress_utri(void){
         }
         delete[]vec ; vec =NULL;
         vec= new_vec ;
+        if(pindex){
+            delete[]pindex;
+            pindex=NULL;
+        }
+        pindex= get_vec<int>(rows,1)  ;
+        for(int i= 0 ; i <rows;i++){
+            pindex[i]=compression_vec.at(i,0) ;
+        }
+        if(row_start){
+            delete[]row_start ;
+             row_start= NULL ;
+        }
+        row_start = temp_row_start;
         set_at_ptr(utri) ;
     }
 
 }
 template<typename DataType>
-void matrix<DataType> ::compress_ltri(void){
+void matrix<DataType> ::compress_ltri(const matrix<int>&compression_vec){
     //first dimensions
-    if(!is_compressed&&matrix_type==ltri){
+    if(matrix_type==ltri){
         //mapping in here
-        row_start = get_vec<int  >(get_rows(),1) ;
-        fill_vec<int  >(row_start,rows,-1);
-        if(pindex==NULL){
-            get_pindex() ;
-        }
+        int*temp_row_start = get_vec<int>(get_rows(),1) ;
+        fill_vec<int>(temp_row_start,rows,-1);
         //size of acutall data in the matrix
         int  size = 0  ;
         //first calculate the size
         //mapping the data to the array
         for(int  i =0; i<get_rows();i++){
-            if(pindex[i]!=-1){
-                row_start[i]=size;
-                size+=pindex[i]+1;
+            if(compression_vec.at(i,0)!=-1){
+                temp_row_start[i]=size;
+                size+=compression_vec.at(i,0)+1;
             }
         }
         //filling data
         DataType*new_vec = get_vec<DataType>(size,1) ;
         acutal_size = size;
         is_compressed=true;
-        int  pos = 0  ;
-        for(int  i=  0 ;i<rows;i++){
-            if(pindex[i]!=-1){
+        int  pos = 0;
+         for(int  i=  0 ;i<rows;i++){
+            if(compression_vec.at(i,0)!=-1){
             //why its reversed ?
             //if it works don't fix it
-                for(int  j=pindex[i];j>=0;j--){
+            for(int j=compression_vec.at(i,0);j>=0;j--){
                     new_vec[pos]= at(i,j);
                     pos++;
                 }
             }
         }
-        delete[]vec;vec=NULL;
+        delete[]vec;
+        vec=NULL;
         vec=new_vec;
+        if(row_start){
+            delete[]row_start;
+        }
+        row_start = temp_row_start ;
+        if(pindex){
+            delete[]pindex;
+        }
+        pindex=get_vec<int>(rows,1) ;
+        for(int i= 0 ;  i<rows;i++){
+            pindex[i] =compression_vec.at(i,0) ;
+        }
         set_at_ptr(ltri) ;
 }
 
@@ -2464,7 +2482,7 @@ void matrix<DataType> ::compress_ltri(void){
 template<typename DataType>
 void matrix<DataType> ::compress_symmetric(void){
 //first dimensions
-    if(!is_compressed&&matrix_type==symmetric){
+    if(matrix_type==symmetric){
         is_compressed=true;
         //mapping in here
         //size of acutall data in the matrix
@@ -2501,7 +2519,7 @@ void matrix<DataType> ::compress_anti_symmetric(void){
 template<typename DataType>
 void matrix<DataType> ::compress_diagonal(void){
     //first dimensions
-    if(!is_compressed&&matrix_type==diagonal){
+    if(matrix_type==diagonal){
         is_compressed=true;
         acutal_size=rows;
         //mapping in here
@@ -2522,7 +2540,7 @@ void matrix<DataType> ::compress_diagonal(void){
 template<typename DataType>
 void matrix<DataType>::compress_identity(void){
     //first dimensions
-    if(!is_compressed &&matrix_type==iden){
+    if(matrix_type==iden){
         is_compressed=true;
         acutal_size = 1;
         matrix_type =  iden ;
@@ -2540,7 +2558,7 @@ void matrix<DataType>::compress_identity(void){
 }
 template<typename DataType>
 void matrix<DataType>::compress_const(void){
-    if(!is_compressed&&matrix_type==constant){
+    if(matrix_type==constant){
         //first dimensions
         is_compressed=true;
         acutal_size= 1;
@@ -2559,19 +2577,16 @@ void matrix<DataType>::compress_const(void){
 
 template<typename DataType>
 void matrix<DataType> ::compress(void){
-    if(matrix_type==general){
         fill_features() ;
-    }
-    if(!is_compressed){
         switch(matrix_type){
             case symmetric:
                 compress_symmetric() ;break;
             case anti_symmetric:
                 compress_anti_symmetric() ;break;
             case utri:
-                compress_utri();break;
+                compress_utri(get_pindex());break;
             case ltri :
-                compress_ltri() ;break;
+                compress_ltri(get_pindex()) ;break;
             case iden:
                 compress_identity() ;break;
             case constant :
@@ -2581,47 +2596,38 @@ void matrix<DataType> ::compress(void){
         }
     }
 
-}
+
 
 
     //used for matrices that aren't compressed
     //and u want to extract pivots locations
     template<typename DataType>
     matrix<int > matrix<DataType>::get_pindex(void){
-        if(pindex==NULL){
-            pindex=  get_vec<int >(rows,1) ;
-            fill_vec<int >(pindex,rows,-1) ;
-        }
+        matrix<int>ret_pindex(rows,1,-1)  ;
         if(matrix_type==utri){
             for(int  i=0;i<rows;i++){
                 for(int  j =i ; j<cols; j++){
-                    if(at(i,j)>check_tolerance){
-                        pindex[i]=j ;
+                    if(abs(at(i,j))>check_tolerance){
+                        ret_pindex.at(i,0)=j;
                         break;
                     }
                 }
             }
-            return matrix<int >(rows,1,pindex,rows)  ;
         }
         else if(matrix_type==ltri){
             for(int  i=rows-1;i>=0;i--){
-                for(int  j =i ; j>=0; j--){
-                    if(at(i,j)>check_tolerance){
-                        pindex[i]=j ;
+                for(int j =rows-1 ; j>=i; j--){
+                    if(abs(at(i,j))>check_tolerance){
+                        ret_pindex.at(i,0)=j;
                         break;
                     }
                 }
             }
-        return matrix<int >(rows,1,pindex,rows)  ;
         }
         else{
-            matrix<int >pivots_indices;
-            gauss_down(&pivots_indices) ;
-            for(int  i = 0;i<rows;i++){
-                pindex[i]=pivots_indices.at(i,0) ;
-            }
-            return pivots_indices;
+            gauss_down(&ret_pindex) ;
         }
+        return ret_pindex ;
     }
 
 
@@ -2653,8 +2659,8 @@ void matrix<DataType> ::compress(void){
         //we walk through each element with an array of bools
         //each representing a feature
         //enum{general=0,utri,ltri,diagonal,symmetric,anti_symmetric,constant,iden,orthonormal};
-        bool features_arr[8] ;
-        for(int  i =0 ; i<8;i++){
+        bool features_arr[7] ;
+        for(int  i =0 ; i<7;i++){
            features_arr[i]=true;
         }
         //used to save processing time if 4 features realated to
@@ -2662,7 +2668,7 @@ void matrix<DataType> ::compress(void){
         DataType val = at(0,0) ;
         bool utri_search =true,ltri_search =true;
         for(int  i=0;i<get_rows()&&(utri_search||ltri_search);i++){
-        if(ltri_search){//if there is a chance
+        if(utri_search){//if there is a chance
             for(int  j= i+1; j<get_cols();j++){
                 //utri or symmtery or diagonality or constant
                 if(features_arr[ltri-1]&&abs(at(i,j))>check_tol){
@@ -2683,18 +2689,19 @@ void matrix<DataType> ::compress(void){
                     features_arr[anti_symmetric-1]= false ;
                 }
             }
-            ltri_search= features_arr[ltri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1];
+            utri_search= features_arr[ltri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1];
             }
-            if(utri_search){
+            if(ltri_search){
                 for(int  j= 0; j<i;j++){
-                    if(features_arr[utri-1]&&abs(at(i,j))>tolerance){
+                    if(features_arr[utri-1]&&abs(at(i,j))>check_tolerance){
+
                         features_arr[utri-1] = false;
                         }
                     if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tolerance){
                         features_arr[constant-1]=false;
                     }
                     }
-                    utri_search = features_arr[utri-1]||features_arr[constant-1] ;
+                    ltri_search = features_arr[utri-1]||features_arr[constant-1] ;
                 }
             }
         //now we obtained all the info we need efficiently
@@ -2746,4 +2753,4 @@ void matrix<DataType> ::compress(void){
     }
 
 
-    
+
