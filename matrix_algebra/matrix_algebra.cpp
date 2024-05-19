@@ -846,7 +846,6 @@ matrix<DataType> matrix<DataType>::gauss_down( matrix<int >*pivots_indices,int  
                 old_pivot = pivot_index ;
             }
         }
-
         ret_mat.compress();
         return ret_mat;
     }
@@ -1398,7 +1397,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
     //and saves pivots locations in the input pivots matrix<DataType>for each row containing
     //a pivot it saves that pivot location in that row index
     template <typename DataType>
-    matrix<DataType> matrix<DataType>:: rref(matrix<int  >*pivots_indices)const {
+    matrix<DataType> matrix<DataType>:: rref(matrix<int>*pivots_indices)const {
         //pivots locations will be mapped in this array
         //so if row zero contains a pivot at col index 1  for ex and so on
         //it will have the value 1 in that row and so on
@@ -1406,6 +1405,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
         //do gaussian elemination downward
         matrix<int >pivots_locations;
         matrix<DataType>ret_mat = gauss_down(&pivots_locations);
+
         //do gaussian elimination upward using the pivots_locations
         for(int  low_r = rows-1 ; low_r>0;low_r--){
             int  pivot_index = pivots_locations.at(low_r,0);
@@ -1428,7 +1428,6 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
                     for(int  j=  0 ; j<cols;j++){
                         ret_mat.at(i,j)/=val ;
                         //tolerance
-                        ret_mat.at(i,j) = (abs(ret_mat.at(i,j))<tolerance)?0:ret_mat.at(i,j);
                     }
                 }
             }
@@ -1440,7 +1439,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
         if(pivots_indices){
             *pivots_indices = pivots_locations ;
         }
-        return ret_mat.compress() ;
+       return ret_mat ;
     }
     //checks if a set of vectors in a column space are independent
     template <typename DataType>
@@ -2751,6 +2750,7 @@ void matrix<DataType> ::compress(void){
             set_at_ptr(general);
         }
     }
+
 
 
 
