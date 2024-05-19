@@ -482,6 +482,7 @@ matrix<DataType> matrix<DataType>::append_rows(const matrix&src)const {
     }
     return ret_mat ;
 }
+
 //append rows of 2 matrices and return the new matrix
 template <typename DataType>
 DataType matrix<DataType>::dot(const matrix&mat)const{
@@ -536,17 +537,17 @@ void matrix<DataType>:: set_identity(){
     cout<<square_error;
     }
 }
-    template <typename DataType>
-    void matrix<DataType>::fill(DataType value){
-        if(vec){
-            for(int  i= 0 ; i <rows;i++){
-                for(int  j =0 ; j<cols;j++){
-                    at(i,j) = value;
-                }
+template <typename DataType>
+void matrix<DataType>::fill(DataType value){
+    if(vec){
+        for(int  i= 0 ; i <rows;i++){
+            for(int  j =0 ; j<cols;j++){
+                at(i,j) = value;
             }
-            matrix_type=constant ;
         }
+        matrix_type=constant ;
     }
+}
 
 //shows the matrix<DataType>:)
 template <typename DataType>
@@ -2661,11 +2662,11 @@ void matrix<DataType> ::compress(void){
         DataType val = at(0,0) ;
         bool utri_search =true,ltri_search =true;
         for(int  i=0;i<get_rows()&&(utri_search||ltri_search);i++){
-        if(utri_search){//if there is a chance
+        if(ltri_search){//if there is a chance
             for(int  j= i+1; j<get_cols();j++){
                 //utri or symmtery or diagonality or constant
-                if(features_arr[utri-1]&&abs(at(i,j))>check_tol){
-                    features_arr[utri-1]=false;
+                if(features_arr[ltri-1]&&abs(at(i,j))>check_tol){
+                    features_arr[ltri-1]=false;
                     features_arr[diagonal-1]=false;
                     features_arr[iden-1]= false;
                 }
@@ -2682,18 +2683,18 @@ void matrix<DataType> ::compress(void){
                     features_arr[anti_symmetric-1]= false ;
                 }
             }
-            utri_search= features_arr[utri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1];
+            ltri_search= features_arr[ltri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1];
             }
-            if(ltri_search){
+            if(utri_search){
                 for(int  j= 0; j<i;j++){
-                    if(features_arr[ltri-1]&&abs(at(i,j))>tolerance){
-                        features_arr[ltri-1] = false;
+                    if(features_arr[utri-1]&&abs(at(i,j))>tolerance){
+                        features_arr[utri-1] = false;
                         }
                     if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tolerance){
                         features_arr[constant-1]=false;
                     }
                     }
-                    ltri_search = features_arr[ltri-1]||features_arr[constant-1] ;
+                    utri_search = features_arr[utri-1]||features_arr[constant-1] ;
                 }
             }
         //now we obtained all the info we need efficiently
@@ -2726,6 +2727,7 @@ void matrix<DataType> ::compress(void){
             matrix_type=anti_symmetric;
         }
     }
+
     template<typename DataType>
     void matrix<DataType>::decompress(void) {
         if(is_compressed){
@@ -2744,3 +2746,4 @@ void matrix<DataType> ::compress(void){
     }
 
 
+    
