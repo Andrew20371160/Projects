@@ -35,7 +35,7 @@ enum{lower_half=0,upper_half};
 //either the new ones or the old ones
 enum {old_locations =0,new_locations=1};
 //types of matrices
-//used in compression and at
+//used in compression and accessors
 enum{general=0,utri,ltri,diagonal,symmetric,anti_symmetric,constant,iden,orthonormal};
 
 
@@ -95,6 +95,12 @@ private :
     //accessing for constatnt matrices
     const DataType&(matrix::*at_ptr_c)(int  , int  ) const;
 
+    //according to matrix type using the pointer
+    int(matrix::*start_ptr)(int)const;
+
+    //accessing for constatnt matrices
+    int(matrix::*end_ptr)(int)const;
+
 
     /*
     compression functions for each matrix type
@@ -114,8 +120,8 @@ private :
     matrices performing operations on compressed matrices (for example if you multiply a compressed matric by a non-compressed one)
     no problems occur it's been a rough week of testing and adjusting and now its stable
     */
-    void compress_utri(void) ;
-    void compress_ltri(void) ;
+    void compress_utri(const matrix<int>&compression_vec) ;
+    void compress_ltri(const matrix<int>&compression_vec) ;
     //compress symmetric matrices no need for pindex
     void compress_symmetric(void) ;
     void compress_anti_symmetric(void) ;
@@ -161,6 +167,27 @@ private :
     const DataType&at_const_c(int  ,int  )const ;
     const DataType&at_symmetric_c(int  ,int  )const  ;
     const DataType&at_anti_symmetric_c(int  ,int  )const  ;
+
+
+
+    int start_general(int row_i )const;
+    int end_general(int row_i )const;
+    int start_constant(int row_i )const;
+    int end_constant(int row_i )const;
+    int start_utri(int row_i)const ;
+    int end_utri(int row_i) const;
+    int start_ltri(int row_i)const ;
+    int end_ltri(int row_i)const ;
+    int start_diagonal(int row_i)const;
+    int end_diagonal(int row_i)const ;
+    int start_identity(int row_i) const;
+    int end_identity(int row_i)const ;
+    int start_symmetric(int row_i)const ;
+    int end_symmetric(int row_i)const;
+    int start_anti_symmetric(int row_i) const;
+    int end_anti_symmetric(int row_i)const ;
+    void set_start_end_ptr(int  matrix_t);
+
 
 public:
     //empty matrix
@@ -489,12 +516,11 @@ with same properties
     void svd(mat&u, mat&s, mat&vt)const;
 
 */
-    //used in at
     bool is_valid_index(int  ,int  )const;
 
     //this works as a more efficient way to extract
     //pivots locations of an upper triangular matrix
-    matrix<int >get_pindex(void);
+    matrix<int>get_pindex(void);
     //compress the matrix no need to do anything just pass a function
     //and fill_features will analyze the function efficiently for speacial features
     //and will fill the matrix_type with the feature and compress it accordingly
@@ -505,6 +531,9 @@ with same properties
     //analyzes the function for special features and fills matrix_type
     void fill_features(double check_tol=1e-6);
 
+    int start(int row_i)const ; //refers to start of non zero elements in a row
+
+    int end(int row_i)const; //ends of non zero elements of a row (end of computations)
 };
 
 
