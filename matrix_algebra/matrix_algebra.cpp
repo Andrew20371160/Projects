@@ -557,9 +557,12 @@ void matrix<DataType>:: show(void)const {
     if(vec){
         for(int  row_counter=  0 ;  row_counter<rows; row_counter++){
             cout<<'\n' ;
-            for(int  col_counter = 0  ; col_counter<cols;col_counter++){
-                cout<<at(row_counter,col_counter)<<" ";
+            cout<<"[";
+            for(int  col_counter = 0  ; col_counter<cols-1;col_counter++){
+                cout<<at(row_counter,col_counter)<<" , ";
             }
+            cout<<at(row_counter,cols-1);
+            cout<<"]";
         }
     }
 }
@@ -794,7 +797,7 @@ matrix<DataType> matrix<DataType>::gauss_down( matrix<int >*pivots_indices,int  
         //compressed matrix
         if(pivots_indices){
             if(pivots_locations==new_locations){
-                *pivots_indices = matrix<int >(rows,1,-1) ;
+                *pivots_indices = matrix<int>(rows,1,-1) ;
             }
             else{
                 //here it will be permutaions matrix
@@ -872,18 +875,20 @@ matrix<DataType> matrix<DataType>::gauss_up( matrix<int>*pivots_indices)const {
             int  pivot_index =old_pivot-1 ;
             //if not a pivot then we find next pivot by decreasing the pivot index
             //aka find it in the prev column
-            while(pivot_index>=0&&ret_mat.is_pivot_up(low_r,pivot_index)==-1){
+            int  pivot_condition = ret_mat.is_pivot_up(low_r,pivot_index) ;
+            while(pivot_index>=0&&pivot_condition==-1){
                 pivot_index-- ;
+                pivot_condition = ret_mat.is_pivot(low_r,pivot_index);
             }
             if(pivot_index>=0){
                 if(pivots_indices){
-                    pivots_indices->at(low_r,0) = pivot_index ;
+                    pivots_indices->at(pivot_condition,0) = pivot_index ;
                 }
-                for(int  up_r = low_r-1;up_r>=0;up_r--){
+                for(int  up_r = pivot_condition-1;up_r>=0;up_r--){
                     if(abs(ret_mat.at(up_r,pivot_index))>tolerance){
-                        DataType c =(ret_mat.at(up_r,pivot_index)/ret_mat.at(low_r,pivot_index))*DataType(-1);
-                            for(int  col_c = pivot_index ; col_c>=0; col_c--){
-                                ret_mat.at(up_r,col_c)+= c*ret_mat.at(low_r,col_c);
+                        DataType c =(ret_mat.at(up_r,pivot_index)/ret_mat.at(pivot_condition,pivot_index))*DataType(-1);
+                            for(int  col_c = 0 ; col_c<cols; col_c++){
+                                ret_mat.at(up_r,col_c)+= c*ret_mat.at(pivot_condition,col_c);
 
                         }
                     }
@@ -1344,23 +1349,24 @@ template <typename DataType>
  int matrix<DataType>:: is_pivot(int  r_ind , int  c_ind) {
     if(r_ind<rows&&c_ind<cols){
         //find first non zero element in that row
-        int  pivot_index = r_ind ;
-        while(pivot_index<rows){
-            if(abs(at(pivot_index,c_ind))>check_tolerance){
+        int  pivot_index = c_ind ;
+        int row_c =r_ind;
+        while(row_c<rows){
+            if(abs(at(row_c,pivot_index))>check_tolerance){
                 //if you found a non zero element
                 //if its not the original element
                 //element at r_ind , c_ind rows are switched
                 //and this is the new pivot and the function ends
-                if(pivot_index!=r_ind){
-                    switch_rows(pivot_index,r_ind);
+                if(row_c!=r_ind){
+                    switch_rows(row_c,r_ind);
                     //notice we returned pivot_index not r_ind since the rows
                     //were switched
-                    return pivot_index ;
+                    return row_c ;
                 }
                 return r_ind ;
             }
             //else check for next element or col
-            pivot_index++;
+            row_c++;
         }
     return -1 ;
     }
@@ -1373,21 +1379,20 @@ template <typename DataType>
 int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
     if(r_ind<rows&&c_ind<cols){
         //find first non zero element in that row
-        int  pivot_index = r_ind ;
-        while(pivot_index>=0){
-            if(abs(at(pivot_index,c_ind))>tolerance){
+        int  row_c = r_ind ;
+        while(row_c>=0){
+            if(abs(at(row_c,c_ind))>check_tolerance){
                 //if you found a non zero element
                 //if its not the original element
                 //element at r_ind , c_ind rows are switched
                 //and this is the new pivot and the function ends
-                if(pivot_index!=r_ind){
-                    switch_rows(pivot_index,r_ind);
-                    return pivot_index ;
+                if(row_c!=r_ind){
+                    return row_c ;
                 }
                 return r_ind ;
             }
             //else chec for next element or col
-            pivot_index--;
+            row_c--;
         }
     return -1 ;
     }
@@ -2693,7 +2698,6 @@ void matrix<DataType> ::compress(void){
             if(ltri_search){
                 for(int  j= 0; j<i;j++){
                     if(features_arr[utri-1]&&abs(at(i,j))>check_tolerance){
-
                         features_arr[utri-1] = false;
                         }
                     if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tolerance){
@@ -2750,7 +2754,6 @@ void matrix<DataType> ::compress(void){
             set_at_ptr(general);
         }
     }
-
 
 
 
