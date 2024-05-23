@@ -1209,7 +1209,7 @@ template <typename DataType>
 
 bool matrix<DataType>::is_upper_tri(void)const  {
         for(int  i =0 ; i <rows;i++){
-            for(int  j=  0 ; j<i; j++){
+            for(int  j=  0 ; j<i&&j<get_cols(); j++){
                     if(abs(at(i,j))>check_tolerance){
                         return false ;
 
@@ -1223,7 +1223,7 @@ template <typename DataType>
 
 bool matrix<DataType>::is_lower_tri()const {
     for(int  i =0 ; i <rows;i++){
-        for(int  j=  i+1 ; j<rows; j++){
+        for(int  j=  i+1 ;j<get_cols(); j++){
                 if(abs(at(i,j))>check_tolerance){
                     return false ;
                 }
@@ -2746,7 +2746,7 @@ void matrix<DataType> ::compress(void){
                     features_arr[iden-1]= false;
                     features_arr[constant-1]=false;
                 }
-                if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tolerance){
+                if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tol){
                     features_arr[constant-1]=false;
                 }
                 if(features_arr[anti_symmetric-1]&&abs(at(i,j)-at(j,i)*DataType(-1))>check_tol){
@@ -2756,11 +2756,11 @@ void matrix<DataType> ::compress(void){
             utri_search= features_arr[ltri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1];
             }
             if(ltri_search){
-                for(int  j= 0; j<i;j++){
-                    if(features_arr[utri-1]&&abs(at(i,j))>check_tolerance){
+                for(int  j= 0; j<i&&j<get_cols();j++){
+                    if(features_arr[utri-1]&&abs(at(i,j))>check_tol){
                         features_arr[utri-1] = false;
                         }
-                    if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tolerance){
+                    if(features_arr[constant-1]&&abs(at(i,j)-val)>check_tol){
                         features_arr[constant-1]=false;
                     }
                     }
@@ -2769,14 +2769,16 @@ void matrix<DataType> ::compress(void){
             }
         //now we obtained all the info we need efficiently
         if(features_arr[utri-1]){
-            if(features_arr[ltri-1]){
-                for(int  i = 0 ;i<rows;i++){
-                    if(abs(at(i,i)-DataType(1))>check_tol){
-                        matrix_type= diagonal;
-                        break;
+            if(is_square()){
+                if(features_arr[ltri-1]){
+                    for(int  i = 0 ;i<rows;i++){
+                        if(abs(at(i,i)-DataType(1))>check_tol){
+                            matrix_type= diagonal;
+                            break;
+                        }
                     }
+                    matrix_type=(matrix_type==diagonal)?diagonal:iden ;
                 }
-                matrix_type=(matrix_type==diagonal)?diagonal:iden ;
             }
             else{
                 matrix_type= utri;
@@ -2897,5 +2899,3 @@ void matrix<DataType> ::compress(void){
     int matrix<DataType>::end(int row_i)const{
         return (this->*end_ptr)(row_i);
     }
-
-
