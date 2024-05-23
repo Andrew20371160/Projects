@@ -2725,7 +2725,6 @@ void matrix<DataType> ::compress(void){
             features_arr[symmetric-1]=0;
             features_arr[anti_symmetric-1]=0;
             features_arr[diagonal-1]=0;
-            features_arr[constant-1]=0;
         }
         //used to save processing time if 4 features realated to
         //the upper part of the matrix then cut the search at this area
@@ -2753,7 +2752,7 @@ void matrix<DataType> ::compress(void){
                     features_arr[anti_symmetric-1]= false ;
                 }
             }
-            utri_search= features_arr[ltri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1];
+            utri_search= features_arr[ltri-1]||features_arr[symmetric-1]||features_arr[anti_symmetric-1]||features_arr[constant-1];
             }
             if(ltri_search){
                 for(int  j= 0; j<i&&j<get_cols();j++){
@@ -2785,12 +2784,10 @@ void matrix<DataType> ::compress(void){
             }
         }
         else if(features_arr[symmetric-1]){
-            if(features_arr[constant-1]){
-                matrix_type =constant;
-            }
-            else{
                 matrix_type=symmetric ;
-            }
+        }
+        else if(features_arr[constant-1]){
+            matrix_type =constant;
         }
         else if(features_arr[ltri-1]){
             matrix_type=ltri;
@@ -2899,3 +2896,5 @@ void matrix<DataType> ::compress(void){
     int matrix<DataType>::end(int row_i)const{
         return (this->*end_ptr)(row_i);
     }
+
+
