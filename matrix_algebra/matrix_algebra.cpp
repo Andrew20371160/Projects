@@ -78,7 +78,7 @@ template<typename DataType>
 matrix<DataType>::matrix(){
         rows = 0;
         cols = 0 ;
-        acutal_size =0;
+        actual_size =0;
         vec= NULL ;
         row_start= NULL ;
         pindex=NULL ;
@@ -99,7 +99,7 @@ matrix<DataType>::matrix(int  r,int  c,DataType value,bool compressed){
         if(compressed){
             //first dimensions
             vec =  get_vec<DataType>(1,1) ;
-            acutal_size= 1;
+            actual_size= 1;
             if(value!=DataType(no_init)){
                 vec[0] =value;
             }
@@ -110,7 +110,7 @@ matrix<DataType>::matrix(int  r,int  c,DataType value,bool compressed){
             is_compressed =false;
             set_feature(general) ;
             vec=get_vec<DataType>(r,c) ;
-            acutal_size = r*c;
+            actual_size = r*c;
             if(value!=DataType(no_init)){
                 for(int  i =0 ;i<rows; i++){
                     for(int  j= 0 ;j<cols ;j++){
@@ -149,7 +149,7 @@ matrix<DataType>::matrix(const matrix&mat){
     pindex=NULL ;
     vec=NULL;
     set_feature(mat.matrix_type);
-    acutal_size=  mat.acutal_size ;
+    actual_size=  mat.actual_size ;
     empty_vec[0] =mat.empty_vec[0];
     is_compressed=mat.is_compressed;
     if(mat.matrix_type ==utri||mat.matrix_type==ltri){
@@ -157,7 +157,7 @@ matrix<DataType>::matrix(const matrix&mat){
         copy_vec(pindex, mat.pindex, rows);
     }
     //memory allocation and copy
-    vec = get_vec<DataType>(mat.acutal_size,1) ;
+    vec = get_vec<DataType>(mat.actual_size,1) ;
     for(int  i =0 ; i <rows; i++){
         for(int  j = 0; j<cols; j++){
                 at(i,j) = mat.at(i,j);
@@ -174,7 +174,7 @@ matrix<DataType>::matrix(int  r,int  c , DataType*arr,int  size){
         vec=get_vec<DataType>(r,c) ;
         row_start=NULL ;
         pindex=NULL ;
-        acutal_size= r*c;
+        actual_size= r*c;
         set_feature(general) ;
         is_compressed= false;
         empty_vec[0] =  0;
@@ -203,7 +203,7 @@ int  matrix<DataType>::get_cols()const{
 
 template <typename DataType>
 int  matrix<DataType>::get_size()const{
-    return acutal_size ;
+    return actual_size ;
 }
 
 template <typename DataType>
@@ -1124,7 +1124,7 @@ void matrix<DataType>::operator=(const matrix<DataType>&mat){
         is_compressed=mat.is_compressed;
         set_feature(matrix_type);
         //then check if they don't have same shape
-        if(acutal_size!=mat.acutal_size){
+        if(actual_size!=mat.actual_size){
             //delete[] old memeory
             if(vec!=NULL){
                 delete[]vec ;
@@ -1138,8 +1138,8 @@ void matrix<DataType>::operator=(const matrix<DataType>&mat){
                 pindex=NULL ;
             }
             //reallocate for copying
-            vec= get_vec<DataType>(mat.acutal_size,1) ;
-            acutal_size =mat.acutal_size;
+            vec= get_vec<DataType>(mat.actual_size,1) ;
+            actual_size =mat.actual_size;
         }
         if(mat.matrix_type==utri||mat.matrix_type==ltri){
             if(row_start!=NULL){
@@ -2454,7 +2454,7 @@ void matrix<DataType> ::compress_utri(const matrix<int>&compression_vec){
         }
         //filling data
         DataType*new_vec =  get_vec<DataType>(size,1) ;
-        acutal_size = size;
+        actual_size = size;
         int  pos = 0  ;
         for(int  i=  0 ;i<rows;i++){
             if(compression_vec.at(i,0)!=-1){
@@ -2502,7 +2502,7 @@ void matrix<DataType> ::compress_ltri(const matrix<int>&compression_vec){
         }
         //filling data
         DataType*new_vec = get_vec<DataType>(size,1) ;
-        acutal_size = size;
+        actual_size = size;
         is_compressed=true;
         int  pos = 0;
          for(int  i=  0 ;i<rows;i++){
@@ -2545,7 +2545,7 @@ void matrix<DataType> ::compress_symmetric(void){
         int  size = (rows*(rows+1))/2 ;
         //filling data
         DataType*new_vec =  get_vec<DataType>(size,1) ;
-        acutal_size = size;
+        actual_size = size;
         int  pos = 0  ;
         for(int  i=  0 ;i<rows;i++){
             for(int  j=i;j<cols;j++){
@@ -2577,7 +2577,7 @@ void matrix<DataType> ::compress_diagonal(void){
     //first dimensions
     if(matrix_type==diagonal){
         is_compressed=true;
-        acutal_size=rows;
+        actual_size=rows;
         //mapping in here
         //size of acutall data in the matrix
         //filling data
@@ -2598,7 +2598,7 @@ void matrix<DataType>::compress_identity(void){
     //first dimensions
     if(matrix_type==iden){
         is_compressed=true;
-        acutal_size = 1;
+        actual_size = 1;
         matrix_type =  iden ;
         //mapping in here
         //size of acutall data in the matrix
@@ -2617,7 +2617,7 @@ void matrix<DataType>::compress_const(void){
     if(matrix_type==constant){
         //first dimensions
         is_compressed=true;
-        acutal_size= 1;
+        actual_size= 1;
         matrix_type =  constant ;
         //mapping in here
         //size of acutall data in the matrix
@@ -2778,6 +2778,9 @@ void matrix<DataType> ::compress(void){
                     }
                     matrix_type=(matrix_type==diagonal)?diagonal:iden ;
                 }
+                else{
+                   matrix_type= utri;
+            }
             }
             else{
                 matrix_type= utri;
@@ -2801,7 +2804,7 @@ void matrix<DataType> ::compress(void){
     void matrix<DataType>::decompress(void) {
         if(is_compressed){
             is_compressed= false;
-            acutal_size= rows*cols;
+            actual_size= rows*cols;
             DataType *new_vec = get_vec<DataType>(rows,cols);
             for(int i = 0 ;i<rows;i++){
                 for(int j= 0 ; j<cols;j++){
@@ -2898,3 +2901,12 @@ void matrix<DataType> ::compress(void){
     }
 
 
+int main(){
+
+matrix<double>l,p,u,mat= rand<double>(1000,1000,100) ;
+mat.lu_fact(l,p,u) ;
+cout<<l.get_size();
+
+cout<<u.get_size() ;
+
+}
