@@ -2901,12 +2901,4 @@ void matrix<DataType> ::compress(void){
     }
 
 
-int main(){
 
-matrix<double>l,p,u,mat= rand<double>(1000,1000,100) ;
-mat.lu_fact(l,p,u) ;
-cout<<l.get_size();
-
-cout<<u.get_size() ;
-
-}
