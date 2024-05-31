@@ -1639,7 +1639,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
             int  pivot_index = pivots_indices.at(low_r,0);
             if(pivot_index!=-1){
                 for(int  up_r = low_r-1;up_r>=0;up_r--){
-                    DataType c = -1 * (mat_cpy.at(up_r,pivot_index) /mat_cpy.at(low_r,pivot_index));
+                    DataType c = (mat_cpy.at(up_r,pivot_index) /mat_cpy.at(low_r,pivot_index))*DataType(-1);
                     for(int  col_c = cols-1 ; col_c>=pivot_index; col_c--){
                         mat_cpy.at(up_r,col_c)+=c*mat_cpy.at(low_r,col_c) ;
                     }
@@ -1657,7 +1657,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
             //if the following row contains a pivot then we divide the whole row by that pivot
             if(pivot_index!=-1){
                 DataType val = mat_cpy.at(pivot_c,pivot_index);
-                if(val){
+                if(abs(val)>check_tolerance){
                     //do that for each element in the row
                     for(int  j=  0 ; j<rows;j++){
                         elementary.at(pivot_c,j)/=val ;
@@ -2900,5 +2900,85 @@ void matrix<DataType> ::compress(void){
         return (this->*end_ptr)(row_i);
     }
 
+#include <chrono>
 
 
+int main() {
+    matrix<double> ns, lns, rs, cs, mat = rand<double>(10, 20, 1000);
+
+
+    cout << "\nMatrix A:\n";
+    mat.show();
+    cout << "\n";
+
+    ns = mat.null_cols();
+    cout << "\nNull Space of A:\n";
+    ns.show();
+        ns = mat * ns;
+
+    cout << "\nVerifying that A * ns is zero: " << ns.is_zero() << "\n\n";
+
+    ns.filter() ;
+    ns.show();
+
+    lns = mat.transpose().null_rows();
+    cout << "\nLeft Null Space of A transpose:\n";
+    lns.show();
+    lns = lns * mat.transpose();
+    cout << "\nVerifying that lns * A transpose is zero: " << lns.is_zero() << "\n\n";
+    lns.filter() ; //1e-6
+    lns.show() ;
+
+    cs = mat.basis_cols();
+    cout << "\nColumn Space of A:\n";
+    cs.show();
+    cout << "\n";
+
+    rs = mat.basis_rows();
+    cout << "\nRow Space of A:\n";
+    rs.show();
+    cout << "\n";
+
+    cout<<"check rref\n" ;
+    mat.rref().show() ;
+
+    cout<<"\n\nCompression test after performing gaussian elimination\n\n";
+        //compression
+    matrix<double>comp_test = rand<double>(1500,1000,1000);
+
+    comp_test = comp_test.gauss_down();
+    cout<<"\nExpected size is 1500*1000 =1500000\nactual size ";
+    cout<<comp_test.get_size() ;
+
+
+    matrix<complex>f8 = fourier_mat(8);
+    matrix<complex>c= rand<complex>(8,8)  ;
+    cout<<"\n\nfourer transform\n\n" ;
+    f8.show();
+    cout<<endl;
+    cout<<"\nare they equal?";
+    cout<<((f8*c)==c.fft());
+
+
+    //for fun
+
+    matrix<complex>mat2 = rand<complex>(1024,1024);
+
+    // Get the start time
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // Perform the FFT
+    mat2.fft();
+
+    // Get the end time
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // Compute the difference between the end time and start time
+    std::chrono::duration<double> diff = end - start;
+
+    // Print the time taken
+    std::cout << "\nTime taken by fft: " << diff.count() << " s\n";
+
+
+    return 0;
+}
