@@ -488,9 +488,9 @@ string filling_string = "NULL" ;
 
     //this function puts traverser pointer on the node containing data if found
     //and returns true
-    template <typename DataType>    //no recursion
-    bool bst<DataType>::search(const DataType&_data)const{
-         traverser=root;
+template <typename DataType>    //no recursion
+    bool bst<DataType>::search(const DataType&_data,node<DataType>*ptr)const{
+         traverser=(ptr==NULL)?root:ptr;
          if(traverser==NULL){
              return 0 ;
          }
@@ -579,10 +579,10 @@ string filling_string = "NULL" ;
 
     //deletes a node from a bst
     template <typename DataType>//no recursion
-    bool bst<DataType>::remove(const DataType&data){
+    bool bst<DataType>::remove(const DataType&data,node<DataType>*ptr){
         if(root){
             //if data exists traverser sits on it now
-            if(search(data)){
+            if(search(data,ptr)){
                 size--;//decrement if data is found
                 //leaf node condition
                 if(traverser->left==NULL&&traverser->right==NULL){
@@ -597,7 +597,6 @@ string filling_string = "NULL" ;
                         delete traverser ;
                         traverser = NULL;
                     }
-
                 }
                 //no right child condition
                 else if(traverser->right==NULL){
@@ -632,7 +631,7 @@ string filling_string = "NULL" ;
                     //the temp_ptr is assigned the value
                     DataType temp_data=temp->data;
                     node<DataType>*temp_ptr= traverser;
-                    remove(temp_data);
+                    remove(temp_data,temp);
                     temp_ptr->data=temp_data ;
                 }
                 traverser=root;
@@ -644,7 +643,6 @@ string filling_string = "NULL" ;
             }
             return 0;
         }
-
     //copies a tree where ptr is the root of that tree
     template <typename DataType>    //no recursion
     node<DataType>*bst<DataType>::copy_bst(const node<DataType>* ptr) {
