@@ -1,4 +1,3 @@
-
 /*Includes*/
 #include <iostream>
 #include <conio.h>
@@ -178,10 +177,10 @@ public:
     bool insert(const DataType&data) ;//passed
     //this function puts traverser on the node containing data if found
     //and returns true
-    bool search(const DataType&data)const  ;//passed
+    bool search(const DataType&data,node<DataType>*ptr=NULL)const  ;//passed
     //this function removes node contatining data if found
     //returns true if node is found
-    bool remove(const DataType&data) ;
+    bool remove(const DataType&data,node<DataType>*ptr=NULL) ;
 
     //this function removes the whole bst
     bool remove_tree(void);//passed
