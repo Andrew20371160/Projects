@@ -1,3 +1,4 @@
+
 #ifndef complex_H_INCLUDED
 #define complex_H_INCLUDED
 #include <iostream>
@@ -67,6 +68,5 @@ public:
     long long conjugate(const long long &val);
     unsigned long long conjugate(const unsigned long long &val);
     complex pow(const complex &c,int power);
-    // Template specialization for your complex type
 
 #endif
