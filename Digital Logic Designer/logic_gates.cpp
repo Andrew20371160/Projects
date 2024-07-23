@@ -1,48 +1,56 @@
 #include "logic_gates.h"
 
-/*
-array of strings where each gate is mapped to its enum value
-*/
-const string gates[8] {"NOT","BUFFER","AND" ,"OR" ,"NOR" , "NAND" ,"XNOR","XOR"};
+    /*
+    array of strings where each gate is mapped to its enum value
+    */
+    const int gate_count =8 ;
 
-gate *get_gate(short g_type,int in_size){
+    const string gates[8] {"NOT","BUFFER","AND" ,"OR" ,"NOR" , "NAND" ,"XNOR","XOR"};
 
-    if(in_size>0&&g_type>=NOT&&g_type<=XOR){
-        //allocate memory
-       gate *new_gate = new gate ;
-
-        //set links to null
-       new_gate->parent = NULL ;
-       new_gate->next = NULL ;
-       new_gate->prev = NULL ;
-       new_gate->children =NULL ;
-
-       new_gate->self_input=NULL ;
-
-       new_gate->output = false ;
-
-       //assign gate type and input size
-       new_gate->gate_type = g_type ;
-       if(new_gate->gate_type==NOT||new_gate->gate_type==BUFFER){
-            new_gate->input_size = 1 ;
-            new_gate->self_input = new bool[1] ;
-            new_gate->self_input[0] = 0;
-
-       }
-       else{
-           new_gate->input_size = in_size ;
-
-           new_gate->self_input = new bool[in_size] ;
-           for(int i = 0 ;  i<in_size;i++){
-                new_gate->self_input[i]  = 0  ;
-            }
-       }
-        return new_gate  ;
+    void print_gates(int start= 0){
+        for(int i = start ; i <gate_count ; i++){
+            cout<<"\n("<<i<<":"<<gates[i]<<")";
+        }
     }
-    return NULL ;
-}
 
-    bool is_leaf(gate*g){
+    gate *graph::get_gate(short g_type,int in_size){
+
+        if(in_size>0&&g_type>=NOT&&g_type<=XOR){
+            //allocate memory
+           gate *new_gate = new gate ;
+
+            //set links to null
+           new_gate->parent = NULL ;
+           new_gate->next = NULL ;
+           new_gate->prev = NULL ;
+           new_gate->children =NULL ;
+
+           new_gate->self_input=NULL ;
+
+           new_gate->output = false ;
+
+           //assign gate type and input size
+           new_gate->gate_type = g_type ;
+           if(new_gate->gate_type==NOT||new_gate->gate_type==BUFFER){
+                new_gate->input_size = 1 ;
+                new_gate->self_input = new bool[1] ;
+                new_gate->self_input[0] = 0;
+
+           }
+           else{
+               new_gate->input_size = in_size ;
+
+               new_gate->self_input = new bool[in_size] ;
+               for(int i = 0 ;  i<in_size;i++){
+                    new_gate->self_input[i]  = 0  ;
+                }
+           }
+            return new_gate  ;
+        }
+        return NULL ;
+    }
+
+    bool graph::is_leaf(gate*g){
         if(g){
            return g->children==NULL;
         }
@@ -279,7 +287,9 @@ gate *get_gate(short g_type,int in_size){
         //untill you move() to the gate and append the new gate
         short gate_type ;
         cout<<"\nChoose gate type";
-        cout<<"\n(0:NOT)\n(1:AND)\n(2:OR)\n(3:NOR)\n(4:NAND)\n(5:XOR)\n(6:quit)\n";
+
+        print_gates(NOT);
+
         cin>>gate_type ;
         cin.ignore()  ;
         int gate_size ;
@@ -377,7 +387,7 @@ gate *get_gate(short g_type,int in_size){
                 case 1:{
                     short gate_type ;
                     cout<<"\nChoose gate type";
-                    cout<<"\n(1:AND)\n(2:OR)\n(3:NOR)\n(4:NAND)\n(5:XOR)\n(6:quit)\n";
+                    print_gates(AND);
                     cin.ignore() ;
                     cin>>gate_type ;
                     if(gate_type>=AND&&gate_type<=XOR){
@@ -472,11 +482,8 @@ gate *get_gate(short g_type,int in_size){
             else if(ptr->gate_type==XOR){
                 evaluate_xor_xnor(ptr) ;
             }
-            else if(ptr->gate_type==NOT){
-                evaluate_not(ptr);
-            }
-            else{
-                evaluate_buffer(ptr) ;
+            else {
+                evaluate_buffer_not(ptr);
             }
         }
     }
@@ -552,7 +559,7 @@ gate *get_gate(short g_type,int in_size){
 
     void graph::evaluate_xor_xnor(gate*ptr) {
         if(ptr){
-            int ones_counter = 0;
+           int ones_counter = 0;
            if(is_leaf(ptr)){
                 for(int i = 0 ; i<ptr->input_size;i++){
                     if(ptr->self_input[i]==1){
@@ -576,38 +583,23 @@ gate *get_gate(short g_type,int in_size){
             }
         }
     }
-
-    void graph::evaluate_not(gate*ptr) {
-        if(ptr){
-           if(is_leaf(ptr)){
-                ptr->output = !ptr->self_input[0] ;
-           }
-       else{
-            gate*temp=ptr->children ;
-            if(temp){
-                ptr->output = !ptr->children->output ;
-
-                }
-            }
-        }
-    }
     //BUFFER isn't used to connect gates or anything
     //you can just extend the input of the gate if it has children gates
-
-    void graph::evaluate_buffer(gate*ptr) {
+    void graph::evaluate_buffer_not(gate*ptr) {
         if(ptr){
            if(is_leaf(ptr)){
-                ptr->output = ptr->self_input[0] ;
+                ptr->output =(ptr->gate_type==BUFFER)?ptr->self_input[0]:!ptr->self_input[0] ;
            }
        else{
             gate*temp=ptr->children ;
             if(temp){
-                ptr->output = ptr->children->output ;
+                ptr->output =(ptr->gate_type==BUFFER) ?ptr->children->output:!ptr->children->output ;
 
                 }
             }
         }
     }
+
 
     void graph::view_logic(void) {
         if(root){
