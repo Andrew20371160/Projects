@@ -23,7 +23,7 @@ not gate  and BUFFER only has one input if you try to assign more your input is 
 (no short circuits)
 */
 enum{
-    NOT =0,BUFFER,AND ,OR ,NOR , NAND ,XOR
+    NOT =0,BUFFER,AND ,OR ,NOR , NAND ,XNOR,XOR
 };
 
 /*
@@ -163,7 +163,7 @@ class graph{
         */
         void evaluate_and_nand(gate*ptr) ;
         void evaluate_or_nor(gate*ptr) ;
-        void evaluate_xor(gate*ptr) ;
+        void evaluate_xor_xnor(gate*ptr) ;
         void evaluate_not(gate*ptr) ;
         void evaluate_buffer(gate*ptr) ;
 
