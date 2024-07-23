@@ -195,9 +195,12 @@ gate *get_gate(short g_type,int in_size){
     void graph::remove(void){
         if(root){
             if(move()){
+                //if it's the root go right
                 if(traverser==root){
                     root = root->next;
                 }
+                //if traverser is the head of the children list
+                //update the head to point to right child
                 if(traverser->parent){
                     //if head of the children list is traverser
                     if(traverser->parent->children==traverser){
@@ -227,8 +230,9 @@ gate *get_gate(short g_type,int in_size){
 
     void graph::remove_graph(gate*ptr ){
         if(root){
-           bool is_root=(ptr==root);
+           bool is_root=(ptr==root);// bool to check if root is deleted to update it to null after deletion
             queue<gate*>q ;
+
             if(ptr==NULL){
                 q.push(root)  ;
                 is_root=true ;
@@ -236,22 +240,26 @@ gate *get_gate(short g_type,int in_size){
             else{
                 q.push(ptr) ;
             }
+
             while(!q.empty()){
                 gate*temp = q.front() ;
                 q.pop() ;
-
+                //for every node in the current list
                 while(temp){
                     //if it has children push it
                     if(temp->children){
                         q.push(temp->children) ;
                     }
-
+                    //keep track of prev pointer
+                    //and move temp to next ptr
                     gate* prev_temp = temp ;
                     temp=temp->next;
+                    //then delete prev temp array of booleans (if exists)
                     if(prev_temp->self_input){
                         delete[]prev_temp->self_input ;
                         prev_temp->self_input=NULL ;
                     }
+                    //then delete prev_temp and set it to null
                     delete prev_temp ;
                     size-- ;
                     prev_temp= NULL ;
