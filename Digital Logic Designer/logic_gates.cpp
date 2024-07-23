@@ -195,6 +195,9 @@ gate *get_gate(short g_type,int in_size){
     void graph::remove(void){
         if(root){
             if(move()){
+                if(traverser==root){
+                    root = root->next;
+                }
                 if(traverser->parent){
                     //if head of the children list is traverser
                     if(traverser->parent->children==traverser){
@@ -205,6 +208,7 @@ gate *get_gate(short g_type,int in_size){
                     }
                     traverser->parent=NULL;
                 }
+
                 if(traverser->next){
                     traverser->next->prev=traverser->prev;
                 }
@@ -241,7 +245,6 @@ gate *get_gate(short g_type,int in_size){
                     if(temp->children){
                         q.push(temp->children) ;
                     }
-
 
                     gate* prev_temp = temp ;
                     temp=temp->next;
