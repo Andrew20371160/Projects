@@ -23,7 +23,7 @@ not gate  and BUFFER only has one input if you try to assign more your input is 
 (no short circuits)
 */
 enum{
-    NOT =0,BUFFER,AND ,OR ,NOR , NAND ,XNOR,XOR
+    NOT =0,BUFFER,AND ,NAND,OR ,NOR ,XNOR,XOR
 };
 
 /*
@@ -88,16 +88,7 @@ struct gate
 };
 
 
-//function to allocate memory for a gate
-/*
-since gates are added to the board then at that moment of time they are leaves
-hence this function always allocates memory for a gate of g_Type with No. of pins (in_size)
 
-*/
-gate *get_gate(short g_type,int in_size);
-
-//helper function to specify if a gate is leaf
-bool is_leaf(gate*);
 
 
 /*
@@ -125,6 +116,16 @@ and their connections.
 class graph{
 
     private:
+        //function to allocate memory for a gate
+        /*
+        since gates are added to the board then at that moment of time they are leaves
+        hence this function always allocates memory for a gate of g_Type with No. of pins (in_size)
+
+        */
+        gate *get_gate(short g_type,int in_size);
+
+        //helper function to specify if a gate is leaf
+        bool is_leaf(gate*);
         /*
         this is where you constructing the board
         root can be in a list aswell
@@ -164,9 +165,7 @@ class graph{
         void evaluate_and_nand(gate*ptr) ;
         void evaluate_or_nor(gate*ptr) ;
         void evaluate_xor_xnor(gate*ptr) ;
-        void evaluate_not(gate*ptr) ;
-        void evaluate_buffer(gate*ptr) ;
-
+        void evaluate_buffer_not(gate*ptr) ;
 
         /*
         visit all children evaluate them
@@ -234,8 +233,8 @@ class graph{
         if as input to xor
              |
            xor
-        |  |  |
-      and or  not
+         |  |  |
+       and or  not
                |
 
         */
