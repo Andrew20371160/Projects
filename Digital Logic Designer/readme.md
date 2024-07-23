@@ -1,5 +1,6 @@
 7/23/2024 update :
 1-fixed a memory leak that would be caused if you removed the root node
+2-added xnor and buffer gates
 
 
 The idea of the project revolves around digital logic design. It aims to provide a board or graph where you can design some complex logic components (as close as it can to real-life).
