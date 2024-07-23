@@ -3,7 +3,7 @@
 /*
 array of strings where each gate is mapped to its enum value
 */
-const string gates[7] {"NOT","BUFFER","AND" ,"OR" ,"NOR" , "NAND" ,"XOR"};
+const string gates[8] {"NOT","BUFFER","AND" ,"OR" ,"NOR" , "NAND" ,"XNOR","XOR"};
 
 gate *get_gate(short g_type,int in_size){
 
@@ -446,7 +446,8 @@ gate *get_gate(short g_type,int in_size){
 
 
     /*
-    evalutaion functions
+    evalutaion functions (for a single tree)
+    in view logic it's called on each node or gate next to the root
     */
     void graph::evaluate(gate*ptr) {
         if(root){
@@ -469,10 +470,13 @@ gate *get_gate(short g_type,int in_size){
                 evaluate_or_nor(ptr) ;
             }
             else if(ptr->gate_type==XOR){
-                evaluate_xor(ptr) ;
+                evaluate_xor_xnor(ptr) ;
+            }
+            else if(ptr->gate_type==NOT){
+                evaluate_not(ptr);
             }
             else{
-                evaluate_not(ptr);
+                evaluate_buffer(ptr) ;
             }
         }
     }
@@ -546,18 +550,16 @@ gate *get_gate(short g_type,int in_size){
         }
     }
 
-    void graph::evaluate_xor(gate*ptr) {
+    void graph::evaluate_xor_xnor(gate*ptr) {
         if(ptr){
             int ones_counter = 0;
            if(is_leaf(ptr)){
                 for(int i = 0 ; i<ptr->input_size;i++){
                     if(ptr->self_input[i]==1){
-
                         ones_counter++ ;
                     }
                 }
-
-                ptr->output =  ones_counter&1 ;
+                ptr->output =  (ptr->gate_type==XOR)?ones_counter&1:!(ones_counter&1) ;
            }
            else{
                 gate*temp=ptr->children ;
@@ -569,7 +571,7 @@ gate *get_gate(short g_type,int in_size){
                         }
                         temp=temp->next ;
                     }
-                    ptr->output =   ones_counter&1 ;
+                ptr->output =  (ptr->gate_type==XOR)?ones_counter&1:!(ones_counter&1) ;
                 }
             }
         }
