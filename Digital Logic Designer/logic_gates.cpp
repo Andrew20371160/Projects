@@ -345,7 +345,7 @@
                             }
                         }
                         else{
-                            //if the gate is not you can't put anothre input gate to it
+                            //if the gate is "not" you can't put another input gate to it
                             //short circuit
                             if(!(traverser->gate_type==NOT||traverser->gate_type==BUFFER)){
 
@@ -619,7 +619,7 @@ int main(){
     char choice ='y';
 
     while(choice!='n'){
-        board.insert()  ;
+        board.insert();
 
         cout<<"\nagain?(y/n)";
 
