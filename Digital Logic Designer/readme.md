@@ -1,3 +1,7 @@
+7/25/2024 update :
+1-fixed an issue where if you append a gate from the right if there is a parent gate it's array of booeans wasn't deleted
+(it gets deleted anyway in the remove function)
+
 7/23/2024 update :
 1-fixed a memory leak that would be caused if you removed the root node
 2-added xnor and buffer gates
