@@ -1,5 +1,6 @@
 #include "logic_gates.h"
 
+
     /*
     array of strings where each gate is mapped to its enum value
     */
@@ -56,6 +57,7 @@
         }
         return  false ;
     }
+
 
 
     graph ::graph(void){
@@ -210,6 +212,7 @@
                 //if traverser is the head of the children list
                 //update the head to point to right child
                 if(traverser->parent){
+                    traverser->input_size--;
                     //if head of the children list is traverser
                     if(traverser->parent->children==traverser){
                         traverser->parent->children= traverser->next ;
@@ -325,6 +328,17 @@
                                 traverser->next = new_gate ;
 
                                 new_gate->parent= traverser->parent ;
+
+                                if(new_gate->parent){
+
+                                    if(new_gate->parent->self_input){
+                                        delete[]new_gate->parent->self_input;
+                                        new_gate->parent->self_input=NULL ;
+                                        new_gate->parent->input_size= 0 ;
+                                    }
+
+                                    new_gate->parent->input_size++;
+                                }
                             }
                         }
                     }
@@ -611,6 +625,25 @@
             move() ;
         }
     }
+    // Function to open a file for writing
+    bool openFileForWriting(const string& filePath) {
+        ofstream file(filePath);
+        if (!file) {
+            return false;  // Failed to open the file
+        }
+        // File is now open for writing
+        return true;
+    }
+
+    // Function to open a file for reading
+    bool openFileForReading(const string& filePath) {
+        std::ifstream file(filePath);
+        if (!file) {
+            return false;  // Failed to open the file
+        }
+        // File is now open for reading
+        return true;
+    }
 
 int main(){
 
@@ -627,10 +660,5 @@ int main(){
         cin.ignore() ;
     }
 
-    string str="" ;
-    cout<<"\nEnter input";
-    cin>>str;
-    board.set_input(str) ;
-    board.view_logic() ;
     return 0  ;
 }
