@@ -625,25 +625,7 @@
             move() ;
         }
     }
-    // Function to open a file for writing
-    bool openFileForWriting(const string& filePath) {
-        ofstream file(filePath);
-        if (!file) {
-            return false;  // Failed to open the file
-        }
-        // File is now open for writing
-        return true;
-    }
 
-    // Function to open a file for reading
-    bool openFileForReading(const string& filePath) {
-        std::ifstream file(filePath);
-        if (!file) {
-            return false;  // Failed to open the file
-        }
-        // File is now open for reading
-        return true;
-    }
 
 int main(){
 
