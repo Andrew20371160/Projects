@@ -73,33 +73,40 @@
         size=0 ;
    }
 
+
     void graph::edit_input_size(gate*ptr) {
-         if(ptr){
+
+         if(ptr&&is_leaf(ptr)){
+            //if it's a gate other than not,buffer
             if(!(ptr->gate_type==NOT||ptr->gate_type==BUFFER)){
+
                 cout<<"\n"<<gates[ptr->gate_type]<<" is a leaf gate and you must specify the number of input pins\n>>" ;
-                if(ptr->children==NULL){
-                    if(ptr->self_input){
-                        delete[]ptr->self_input ;
-                        ptr->self_input=NULL;
-                    }
-                    ptr->input_size =-1 ;
-                    while(ptr->input_size<=0){
-                        cout<<"\nEnter No. of input pins\n>>" ;
-                        cin>>ptr->input_size;
-                    }
-                    ptr->self_input= new bool[ptr->input_size] ;
-                    for(int i =0;  i <ptr->input_size; i++){
-                        ptr->self_input[i]=0;
-                    }
+
+                if(ptr->self_input){
+                    delete[]ptr->self_input ;
+                    ptr->self_input=NULL;
+                }
+
+                //while user input is less than or equal to zero
+                ptr->input_size =-1 ;
+                while(ptr->input_size<=0){
+                    cout<<"\nEnter No. of input pins\n>>" ;
+                    cin>>ptr->input_size;
+                }
+                //allocate memory and initialize with zeroes
+                ptr->self_input= new bool[ptr->input_size] ;
+                for(int i =0;  i <ptr->input_size; i++){
+                    ptr->self_input[i]=0;
                 }
             }
             else{
                 if(ptr->self_input==NULL){
                     ptr->self_input=new bool[1] ;
                     ptr->input_size =1 ;
+                    ptr->self_input[0] = 0 ;
                 }
             }
-         }
+        }
     }
 
     bool graph::move(void)const{
@@ -212,11 +219,14 @@
                 //if traverser is the head of the children list
                 //update the head to point to right child
                 if(traverser->parent){
-                    traverser->input_size--;
+
+                    traverser->parent->input_size--;
+
                     //if head of the children list is traverser
                     if(traverser->parent->children==traverser){
                         traverser->parent->children= traverser->next ;
                     }
+                    //if last node or child is deleted
                     if(traverser->parent->children==NULL){
                         edit_input_size(traverser->parent) ;
                     }
@@ -283,7 +293,75 @@
         }
     }
 
+    void graph::append_right(short gate_type,int gate_size) {
 
+        if(traverser->parent==NULL||!(traverser->parent->gate_type==NOT||traverser->parent->gate_type==BUFFER)){
+            gate*new_gate = get_gate(gate_type,gate_size) ;
+            //if allocation worked
+            //link the links
+            if(new_gate){
+                size++;
+
+                new_gate->prev = traverser ;
+                new_gate->next= traverser->next ;
+
+                if(traverser->next){
+                    traverser->next->prev = new_gate;
+                }
+
+                traverser->next = new_gate ;
+
+                new_gate->parent= traverser->parent ;
+
+                if(new_gate->parent){
+                    new_gate->parent->input_size++;
+                }
+            }
+        }
+    }
+
+    void graph::append_child(short gate_type,int gate_size) {
+        //if it's first child
+        if(traverser->children==NULL){
+            //then parent or traverser was a leaf
+            //so we delete allocated memory for the array of booleans
+            if(traverser->self_input){
+                delete[]traverser->self_input;
+                traverser->self_input=NULL ;
+                traverser->input_size= 0 ;
+            }
+
+            traverser->children= get_gate(gate_type,gate_size);
+
+            if(traverser->children){
+                traverser->children->parent=traverser ;
+                size++;
+                traverser->input_size++;
+            }
+        }
+        else{
+            //if the gate is "not" you can't put another input gate to it
+            //short circuit
+            if(!(traverser->gate_type==NOT||traverser->gate_type==BUFFER)){
+
+                gate*new_gate= get_gate(gate_type,gate_size) ;
+
+                if(new_gate){
+                   size++ ;
+                   gate*ptr = traverser->children;
+                    //go to max right then append the new gate
+                    while(ptr->next){
+                        ptr = ptr->next ;
+                    }
+                    new_gate->prev= ptr;
+
+                    new_gate->parent= ptr->parent;
+
+                    ptr->next= new_gate ;
+                    }
+                }
+            }
+        }
     void graph::insert(void){
         //specify gate type and input size
         //memory isn't allcated
@@ -312,74 +390,11 @@
                 cin>>choice ;
                 if(choice==1||choice==2){
                     if(choice==1){
-                        if(traverser->parent==NULL||!(traverser->parent->gate_type==NOT||traverser->parent->gate_type==BUFFER)){
-                            gate*new_gate = get_gate(gate_type,gate_size) ;
-                            //if allocation worked
-                            //link the links
-                            if(new_gate){
-                                size++;
-
-                                new_gate->prev = traverser ;
-                                new_gate->next= traverser->next ;
-                                if(traverser->next){
-                                    traverser->next->prev = new_gate;
-                                }
-
-                                traverser->next = new_gate ;
-
-                                new_gate->parent= traverser->parent ;
-
-                                if(new_gate->parent){
-
-                                    if(new_gate->parent->self_input){
-                                        delete[]new_gate->parent->self_input;
-                                        new_gate->parent->self_input=NULL ;
-                                        new_gate->parent->input_size= 0 ;
-                                    }
-
-                                    new_gate->parent->input_size++;
-                                }
-                            }
-                        }
+                        append_right(gate_type,gate_size);
                     }
                     else{
-                        if(traverser->children==NULL){
-                            //then parent or traverser was a leaf
-                            //so we delete allocated memory for the array of booleans
-                            if(traverser->self_input){
-                                delete[]traverser->self_input;
-                                traverser->self_input=NULL ;
-                            }
+                        append_child(gate_type,gate_size);
 
-                            traverser->children= get_gate(gate_type,gate_size);
-
-                            if(traverser->children){
-                                traverser->children->parent=traverser ;
-                                size++;
-                            }
-                        }
-                        else{
-                            //if the gate is "not" you can't put another input gate to it
-                            //short circuit
-                            if(!(traverser->gate_type==NOT||traverser->gate_type==BUFFER)){
-
-                                gate*new_gate= get_gate(gate_type,gate_size) ;
-
-                                if(new_gate){
-                                   size++ ;
-                                   gate*ptr = traverser->children;
-                                    //go to max right then append the new gate
-                                    while(ptr->next){
-                                        ptr = ptr->next ;
-                                    }
-                                    new_gate->prev= ptr;
-
-                                    new_gate->parent= ptr->parent;
-
-                                    ptr->next= new_gate ;
-                                    }
-                                }
-                            }
                         }
                     }
                 }
