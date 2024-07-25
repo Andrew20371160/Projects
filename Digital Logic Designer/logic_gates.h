@@ -179,6 +179,9 @@ class graph{
 
         void edit_input_size(gate*ptr=NULL) ;
 
+        void append_right(short gate_type,int gate_size) ;
+
+        void append_child(short gate_type,int gate_size) ;
 
     public:
         //empty board or graph
