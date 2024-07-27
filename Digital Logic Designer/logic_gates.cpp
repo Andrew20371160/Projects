@@ -1,4 +1,24 @@
 #include "logic_gates.h"
+ // Function to open a file for writing
+    bool openFileForWriting(const std::string& filePath) {
+        std::ofstream file(filePath);
+        if (!file) {
+            return false;  // Failed to open the file
+        }
+
+        // File is now open for writing
+        return true;
+    }
+
+    // Function to open a file for reading
+    bool openFileForReading(const std::string& filePath) {
+        std::ifstream file(filePath);
+        if (!file) {
+            return false;  // Failed to open the file
+        }
+        // File is now open for reading
+        return true;
+    }
 
 
     /*
@@ -319,6 +339,31 @@
             }
         }
     }
+    bool graph::append_right(gate*component) {
+
+        if(component&&traverser->parent==NULL||!(traverser->parent->gate_type==NOT||traverser->parent->gate_type==BUFFER)){
+                size++;
+
+                component->prev = traverser ;
+                component->next= traverser->next ;
+
+                if(traverser->next){
+                    traverser->next->prev = component;
+                }
+
+                traverser->next = component ;
+
+                component->parent= traverser->parent ;
+
+                if(component->parent){
+                    component->parent->input_size++;
+                }
+                return true  ;
+            }
+            else{
+                return false;
+            }
+        }
 
     void graph::append_child(short gate_type,int gate_size) {
         //if it's first child
@@ -358,10 +403,62 @@
                     new_gate->parent= ptr->parent;
 
                     ptr->next= new_gate ;
+
+                    traverser->input_size++;
                     }
                 }
             }
         }
+    bool graph::append_child(gate*component) {
+        //if it's first child
+        if(component){
+            if(traverser->children==NULL){
+                //then parent or traverser was a leaf
+                //so we delete allocated memory for the array of booleans
+                if(traverser->self_input){
+                    delete[]traverser->self_input;
+                    traverser->self_input=NULL ;
+                    traverser->input_size= 0 ;
+                }
+
+                traverser->children= component;
+
+                if(traverser->children){
+                    traverser->children->parent=traverser ;
+                    size++;
+                    traverser->input_size++;
+                }
+                                return true  ;
+
+            }
+            else{
+                //if the gate is "not" you can't put another input gate to it
+                //short circuit
+                if(!(traverser->gate_type==NOT||traverser->gate_type==BUFFER)){
+
+                       size++ ;
+                       gate*ptr = traverser->children;
+                        //go to max right then append the new gate
+                        while(ptr->next){
+                            ptr = ptr->next ;
+                        }
+                        component->prev= ptr;
+
+                        component->parent= ptr->parent;
+
+                        ptr->next= component ;
+
+                        traverser->input_size++;
+                        return true  ;
+
+                    }
+                    else{
+                        return false;
+                    }
+                }
+            }
+        }
+
     void graph::insert(void){
         //specify gate type and input size
         //memory isn't allcated
@@ -641,7 +738,136 @@
         }
     }
 
+    void graph::save(void)const{
+         if(root){
+            string file_path="";
+            cout << "\nEnter file's path please make sure the file is created\n";
+            cout<<">>";
+            getline(cin,file_path);
+            file_path+="0.txt";
+            if (openFileForWriting(file_path)){ //if file exists
+                gate*current = root ;
+                int counter = 0  ;
+                while(current){
+                    file_path[file_path.size()-5]=counter+'0';
 
+                    std::ofstream file(file_path, std::ios::trunc); // Open file in write mode, which clears it
+                    queue<gate*> q;
+                    if (current) {
+                        q.push(current);
+                //when saving a tree since is can be incomplete we have to keep track of nulls
+                //so that logic of the decision tree isn't altred
+                //when finding an empty node we add 2 nulls into the queue
+                //to keep track of the nulls but this could lead to open loop
+                //so tree is done saving when the queue is full of nulls
+                //draw an incomplete tree and it will be understood why its used
+                        while (!q.empty()) {
+                            gate* ptr = q.front();
+                            q.pop();
+                            while(ptr){
+                                file << ptr->gate_type << ":"<<ptr->input_size; // Write the line directly to the file
+
+                                if(ptr->children){
+                                    q.push(ptr->children);
+                                    file<<":"<<not_leaf <<"\n";
+                                }
+                                else{
+                                    file<<":"<<leaf<<"\n" ;
+                                }
+                                ptr = ptr->next ;
+                            }
+                        }
+                    }
+                    file.close(); // Close the file when done
+                    cout<<"\nSaved!";
+                    current = current->next ;
+                    counter++;
+                    }
+                }
+            }
+        }
+
+        void graph::load(void){
+            gate*component = NULL ;
+            string file_path;
+            cout << "\nEnter file's path please make sure the file is created\n";
+            cout<<">>";
+            getline(cin,file_path);
+            if (openFileForReading(file_path)){ //if file exists
+                std::ifstream file(file_path);
+                string current_gate;
+                getline(file, current_gate);
+                if(!current_gate.empty()){
+                    component = get_gate(current_gate[0]-'0',current_gate[2]-'0') ;
+                    size  =1;
+                    if(current_gate[2]-'0'!=leaf){
+                        delete[]component->self_input ;
+                        component->self_input=NULL;
+                        queue<gate*>q  ;
+                        q.push(component)  ;
+                        while(!q.empty()){
+                            gate*current_parent = q.front() ;
+                            q.pop() ;
+                            for(int i = 0 ; i<current_parent->input_size;i++){
+                                //read current child
+                                getline(file, current_gate);
+                                if(current_gate.empty()){
+                                    traverser= root ;
+                                }
+                                if(current_parent->children==NULL){
+                                    current_parent->children=get_gate(current_gate[0]-'0',current_gate[2]-'0');
+                                    current_parent->children->parent=current_parent ;
+                                    traverser = current_parent->children ;
+                                }
+                                else{
+                                    traverser->next=get_gate(current_gate[0]-'0',current_gate[2]-'0') ;
+                                    traverser->next->prev=traverser ;
+                                    traverser->next->parent = traverser->parent ;
+                                    traverser =traverser->next ;
+                                }
+                                size++ ;
+                                if(current_gate[4]-'0'==not_leaf){
+                                    q.push(traverser) ;
+                                    delete[]traverser->self_input ;
+                                    traverser->self_input = NULL;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                file.close(); // Close the file when done
+                cout<<"\nloaded!";
+                if(root){
+                    traverser =root;
+                    cout<<"\nMove to the gate where you want to insert the child either on the right or as an input to that gate\n" ;
+                    if(move()){
+                        int choice ;
+                        cout<<"\n(1:append gate to the right)\n(2:append gate as an input to the current gate)\n(3:quit)\n>>";
+                        cin>>choice ;
+                        if(choice==1||choice==2){
+                            if(choice==1){
+                                while(!append_right(component)){
+                                    cout<<"\nInsertion failed retry again!\n" ;
+                                }
+                            }
+                            else{
+                                while(!append_child(component)){
+                                    cout<<"\nInsertion failed retry again!\n" ;
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        remove_graph(component);
+                        component=NULL;
+                    }
+                    }
+                else{
+                    root= component ;
+                    traverser=root;
+                }
+            }
+        }
 int main(){
 
     graph board;
