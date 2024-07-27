@@ -10,7 +10,8 @@ Includes
 #include <string>
 #include <conio.h>
 #include <queue>
-
+#include <fstream>
+#include <limits>
 using namespace std ;
 
 
@@ -182,6 +183,8 @@ class graph{
         void append_right(short gate_type,int gate_size) ;
 
         void append_child(short gate_type,int gate_size) ;
+        bool append_right(gate*component) ;
+        bool append_child(gate*component) ;
 
     public:
         //empty board or graph
@@ -257,6 +260,31 @@ class graph{
         then by defaulty they are filled with zeroes
         */
         void set_input(const string&) ;
+
+        /*
+        save and loading features are still in beta if you find any bugs please let me know
+        will start uploading a yt series of videos where i will try to implement a design
+        of a 4 bit microprocessor which was a task i had at college
+
+        */
+        /*
+        saves each tree at a file from 0 to n-1
+        say you have a graph like this
+        tree1 tree2 tree3
+        so you have 3 trees that their output is independent from the other
+        each one is saved in a file (you don't have to number it just name the file)
+        also no need to write extension its .txt anyway
+        */
+        void save(void)const;
+        //loads a component only (one tree at a time)
+        //so if you have files with tree0 tree1  ......tree n-1
+        /*
+        it loads one component at a time
+        if tree is empty this component is root of the tree
+        else the component's root is appened to a gate of your choice
+        */
+        void load(void);
+
     };
 
 #endif
