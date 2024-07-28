@@ -26,7 +26,7 @@
     */
     const int gate_count =8 ;
 
-    const string gates[8] {"NOT","BUFFER","AND" ,"OR" ,"NOR" , "NAND" ,"XNOR","XOR"};
+    const string gates[8] {"NOT","BUFFER","AND" ,"NAND","OR" ,"NOR"  ,"XNOR","XOR"};
 
     void print_gates(int start= 0){
         for(int i = start ; i <gate_count ; i++){
@@ -605,7 +605,7 @@
             else if(ptr->gate_type==OR||ptr->gate_type==NOR){
                 evaluate_or_nor(ptr) ;
             }
-            else if(ptr->gate_type==XOR){
+            else if(ptr->gate_type==XOR||ptr->gate_type==XNOR){
                 evaluate_xor_xnor(ptr) ;
             }
             else {
@@ -800,7 +800,7 @@
                 if(!current_gate.empty()){
                     component = get_gate(current_gate[0]-'0',current_gate[2]-'0') ;
                     size  =1;
-                    if(current_gate[2]-'0'!=leaf){
+                    if(current_gate[4]-'0'!=leaf){
                         delete[]component->self_input ;
                         component->self_input=NULL;
                         queue<gate*>q  ;
@@ -868,10 +868,10 @@
                 }
             }
         }
+
 int main(){
 
     graph board;
-
     char choice ='y';
 
     while(choice!='n'){
@@ -882,6 +882,37 @@ int main(){
         cin>>choice;
         cin.ignore() ;
     }
+    string input="" ;
 
+for(int i =0 ; i<4 ;i++){
+    cin.ignore() ;
+
+        cout<<"\nEnter input" ;
+        cin>>input ;
+        board.set_input(input) ;
+
+
+        board.view_logic() ;
+    }
+            cin.ignore() ;
+            board.save() ;
+
+    cin.ignore() ;
+    board.load() ;
+    cin.ignore() ;
+    board.load() ;
+
+
+for(int i =0 ; i<4 ;i++){
+    cin.ignore() ;
+
+        cout<<"\nEnter input" ;
+        cin>>input ;
+        board.set_input(input) ;
+
+
+        board.view_logic() ;
+    }
     return 0  ;
+
 }
