@@ -747,8 +747,11 @@
             file_path+="0.txt";
             if (openFileForWriting(file_path)){ //if file exists
                 gate*current = root ;
+                gate*next_node = root->next;
                 int counter = 0  ;
                 while(current){
+                    current->next=NULL ;
+
                     file_path[file_path.size()-5]=counter+'0';
 
                     std::ofstream file(file_path, std::ios::trunc); // Open file in write mode, which clears it
@@ -780,7 +783,12 @@
                     }
                     file.close(); // Close the file when done
                     cout<<"\nSaved!";
+                    current->next= next_node ;
+
                     current = current->next ;
+                    if(next_node){
+                        next_node=next_node->next;
+                    }
                     counter++;
                     }
                 }
@@ -873,7 +881,6 @@ int main(){
 
     graph board;
     char choice ='y';
-
     while(choice!='n'){
         board.insert();
 
@@ -882,8 +889,8 @@ int main(){
         cin>>choice;
         cin.ignore() ;
     }
-    string input="" ;
-
+    //string input="" ;
+/*
 for(int i =0 ; i<4 ;i++){
     cin.ignore() ;
 
@@ -893,11 +900,12 @@ for(int i =0 ; i<4 ;i++){
 
 
         board.view_logic() ;
-    }
-            cin.ignore() ;
-            board.save() ;
-
+    }*/
+    //cin.ignore() ;
+   board.save() ;
+    board.remove_graph() ;
     cin.ignore() ;
+    string input;
     board.load() ;
     cin.ignore() ;
     board.load() ;
