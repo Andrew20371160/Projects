@@ -5,8 +5,10 @@
   will be adding a series of youtube videos where i try to implement a desing of a 4-bit microprocessor 
   which was a task I had in college 
   this would be the ultimate test of the software 
-  
+
+2-fixed a bug in load which caused a segmentation fault if you load one leaf (my bad)
 2-if you found any bugs please let me know 
+
 
 3-feel free to use any code :)
 
