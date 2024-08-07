@@ -1,4 +1,5 @@
-    #include "logic_gates.h"
+    #include "graph.h"
+
     // Function to open a file for writing
     bool openFileForWriting(const std::string& filePath) {
         std::ofstream file(filePath);
@@ -257,32 +258,7 @@
         }
         return false;
     }
-    bool graph::connect(void){
-        traverser =root ;
-        cout<<"\nConnect Output of :";
-        if(move()){
-            gate*from = traverser;
-            cout<<"\nTo Input of :";
-            if(move()){
-                traverser->connect_wire(from);
-                return true;
-            }
-        }
-        return false;
-    }
-    bool graph::disconnect(void){
-        traverser =root ;
-        cout<<"\nDisconnect wire from Output of :";
-        if(move()){
-            gate*from = traverser;
-            cout<<"\nFrom Input of :";
-            if(move()){
-                traverser->disconnect_wire(from);
-                return true;
-            }
-        }
-        return false ;
-    }
+
     //returns pointer to first gate without any source of input
     //no wires attatched to it as an input , no input , no children
     gate* gate::first_no_input(void){
@@ -803,6 +779,32 @@
     get_path returns a string representing path leading to wanted gate
     made by a simulation on a piece of paper :)
     */
+        bool graph::connect(void){
+        traverser =root ;
+        cout<<"\nConnect Output of :";
+        if(move()){
+            gate*from = traverser;
+            cout<<"\nTo Input of :";
+            if(move()){
+                traverser->connect_wire(from);
+                return true;
+            }
+        }
+        return false;
+    }
+    bool graph::disconnect(void){
+        traverser =root ;
+        cout<<"\nDisconnect wire from Output of :";
+        if(move()){
+            gate*from = traverser;
+            cout<<"\nFrom Input of :";
+            if(move()){
+                traverser->disconnect_wire(from);
+                return true;
+            }
+        }
+        return false ;
+    }
     //it worked XD
     string graph::get_path(gate* wanted){
         if(wanted){
@@ -828,7 +830,7 @@
 
                     while(ptr!=dest){
                         ptr=ptr->prev ;
-                        node_path+='l';
+                        node_path+='r';
                     }
 
                     level = temp ;
@@ -867,7 +869,7 @@
         gate *ptr = this;
         for(uint32_t i = 0 ; i <gate_path.size();i++){
             if(ptr){
-                if(gate_path[i]=='l'){
+                if(gate_path[i]=='r'){
                     ptr = ptr->next;
                 }
                 else if(gate_path[i]=='c'){
