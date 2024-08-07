@@ -1,4 +1,4 @@
-    #include "logic_gates.h"
+    #include "graph.h"
 
     // Function to open a file for writing
     bool openFileForWriting(const std::string& filePath) {
@@ -184,11 +184,10 @@
              }
              //set new input
              else{
-
-                if(input_size>0){
+                if(new_in>0){
                     input_size =new_in ;
-                    input = new bool[input_size];
-                    for(uint32_t i = 0 ; i<input_size;i++){
+                    input = new bool[new_in];
+                    for(uint32_t i = 0 ; i<new_in;i++){
                         input[i] = 0 ;
                     }
                 }
@@ -579,33 +578,39 @@
 
 
     void graph::set_input(const string&input_logic ,uint32_t &logic_counter,gate*ptr){
-        if(ptr->children){
-            gate*temp = ptr->children;
-            while(temp){
-                set_input(input_logic,logic_counter,temp) ;
-                temp=temp->next;
-            }
-        }
-        else{
-            if(logic_counter<input_logic.size()){
-                uint32_t i =0 ;
-                for(i = 0 ; i<ptr->input_size&&logic_counter<input_logic.size();i++){
-                    if(input_logic[logic_counter]=='1'||input_logic[logic_counter]=='0'){
-                        ptr->input[i] = input_logic[logic_counter]-'0' ;
-                    }
-                    else{
-                        i--;
-                    }
-                    logic_counter++ ;
-                }
-                while(i<ptr->input_size){
-                    ptr->input[i]=0 ;
-                    i++;
+        if(ptr){
+            if(ptr->children){
+                gate*temp = ptr->children;
+                while(temp){
+                    set_input(input_logic,logic_counter,temp) ;
+                    temp=temp->next;
                 }
             }
             else{
-                for(uint32_t i =0 ; i <ptr->input_size;i++){
-                    ptr->input[i]=0 ;
+                if(ptr->input){
+                    if(logic_counter<input_logic.size()){
+                        uint32_t i =0 ;
+                        for(i = 0 ; i<ptr->input_size&&logic_counter<input_logic.size();i++){
+                            if(input_logic[logic_counter]=='1'||input_logic[logic_counter]=='0'){
+                                ptr->input[i] = input_logic[logic_counter]-'0' ;
+                            }
+                            else{
+                                i--;
+                            }
+                            logic_counter++ ;
+                        }
+                        while(i<ptr->input_size){
+                            ptr->input[i]=0 ;
+                            i++;
+                        }
+                    }
+                    else{
+                        if(ptr->input){
+                            for(uint32_t i =0 ; i <ptr->input_size;i++){
+                                ptr->input[i]=0 ;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1278,9 +1283,9 @@
             }
             return true ;
         }
-            else{
-                return false;
-            }
+        else{
+            return false;
+        }
     }
 int main(){
 
@@ -1296,6 +1301,8 @@ int main(){
             case 3:board.disconnect() ; break ;
 
             case 4:{
+                cin.ignore() ; //what caused the bug is that when i hit enter
+                //no input is set and yeah cin.ignore should solve it
                 string input = "";
                 cin>>input;
                 board.set_input(input);
