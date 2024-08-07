@@ -1,4 +1,4 @@
-    #include "graph.h"
+    #include "logic_gates.h"
 
     // Function to open a file for writing
     bool openFileForWriting(const std::string& filePath) {
