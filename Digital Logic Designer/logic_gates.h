@@ -1,7 +1,7 @@
 
-#ifndef _graph_h_
+#ifndef _logic_gates_h_
 
-#define _graph_h_
+#define _logic_gates_h_
 
 #include <iostream>
 #include <conio.h>
