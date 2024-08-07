@@ -1,3 +1,17 @@
+8/7/2024 updates :
+1-introduced a wiring system so that you don't have to repeat a component
+for ex : in the half_adder you have "OR" which is the sum and "and" which is the carry 
+now you can connect the wire from "a" ,"b" to the carry and it behaves as normal logic gates.
+
+2-made a separation between gate ,graph classes so that gate issues are handled in a separate class and now the code is way better , readable and most importantly maintainable.
+
+3-save,load say you made a component with its wiring now the whole component is saved into files ,and 
+the wiring of the whole system 
+-save function saves each major tree of the graph into a list of .txt files and then saves the wiring (if exists) into a separate file.
+-load function now loads the whole component (from each file with same name for ex: path\ha0.txt ,path\ha1.txt...etc) where from each file it loads the major tree and then append it to the right of the component's root and it handles the wiring of the loaded component, if the board is empty then root of the graph is assigned the new component else you can append the component as a child or to the right of an existing node in the board.
+4-you can have a gate with no input but wires connected to it as a source of input.
+5-I've tried it last night it was too good.
+
 8/7/2024 (thesse aren't upadtes I've redesigned the whole project)
 will post updates tomorrow.
 if you are intested you can run and test for yourself 
