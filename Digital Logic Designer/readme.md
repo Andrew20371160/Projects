@@ -1,3 +1,11 @@
+8/7/2024 (thesse aren't upadtes I've redesigned the whole project)
+will post updates tomorrow.
+if you are intested you can run and test for yourself 
+I've introduced a wiring system so all previous problems are gone.
+saving and loading with wiring of the whole system saved aswell.
+
+feel free to use any code.
+
 7/28/2024 huge updates:
 1-added save and load 
   save allows you to save the whole board in a series of trees (check the documentation)
