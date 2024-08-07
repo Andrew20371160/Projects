@@ -9,8 +9,12 @@ now you can connect the wire from "a" ,"b" to the carry and it behaves as normal
 the wiring of the whole system 
 -save function saves each major tree of the graph into a list of .txt files and then saves the wiring (if exists) into a separate file.
 -load function now loads the whole component (from each file with same name for ex: path\ha0.txt ,path\ha1.txt...etc) where from each file it loads the major tree and then append it to the right of the component's root and it handles the wiring of the loaded component, if the board is empty then root of the graph is assigned the new component else you can append the component as a child or to the right of an existing node in the board.
+
 4-you can have a gate with no input but wires connected to it as a source of input.
-5-I've tried it last night it was too good.
+
+5-I've tried it last night it was so good.
+
+6-added documentation to header 
 
 8/7/2024 (thesse aren't upadtes I've redesigned the whole project)
 will post updates tomorrow.
