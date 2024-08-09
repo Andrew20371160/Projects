@@ -1287,20 +1287,53 @@
             return false;
         }
     }
+    void graph::edit(void){
+        cout<<"\nMove to gate you want to edit";
+        if(move()){
+            cin.ignore() ;
+            int choice ;
+            cout<<"\n(1---edit input size)\n(2---edit gate type)\n(3---cancel)\n>>" ;
+            cin>>choice ;
+            switch(choice){
+                case 1:{
+                    if(traverser->children==NULL&&traverser->wire_input.size()==0){
+                       uint32_t in_size;
+                       cout<<"\nEnter new size";
+                       cin>>in_size;
+                       traverser->resize_input(in_size);
+                    }
+                }break;
+                case 2:{
+                    if(traverser->gate_type>BUFFER){
+                        uint16_t g_type;
+                        cout<<"\nChoose gate type:" ;
+                        print_gates(NAND);
+                        cin>>g_type;
+                        if(is_valid_gate(g_type,1)&&g_type>BUFFER){
+                            traverser->gate_type = g_type;
+                        }
+                    }
+                }break;
+
+            }
+        }
+        traverser= root ;
+    }
+
 int main(){
 
     graph board;
 
     int choice ;
     while(1){
-        cout<<"\n1-Insert\n2-Connect\n3-Disconnect\n4-test\n5-remove\n6-remove graph\n7-save\n8-load\n9-move\n10-quit";
+        cout<<"\n1-Insert\n2-Connect\n3-Disconnect\n4-edit\n5-test logic\n6-remove\n7-remove graph\n8-save\n9-load\n10-move\n11-quit";
         cin>>choice ;
         switch(choice){
             case 1:board.insert() ; break ;
             case 2:board.connect() ; break ;
             case 3:board.disconnect() ; break ;
-
-            case 4:{
+            case 4:board.edit();break;
+            case 5:{
                 cin.ignore() ; //what caused the bug is that when i hit enter
                 //no input is set and yeah cin.ignore should solve it
                 string input = "";
@@ -1308,23 +1341,23 @@ int main(){
                 board.set_input(input);
                 board.view_logic() ;
             }break ;
-            case 5:board.remove() ; break ;
-            case 6:board.remove_graph() ; break ;
-            case 7:{
+            case 6:board.remove() ; break ;
+            case 7:board.remove_graph() ; break ;
+            case 8:{
                 cin.ignore();
                 board.save() ;
             }break ;
-            case 8:{
+            case 9:{
 
                 cin.ignore();
                 board.load();
             }break;
-            case 9:{
+            case 10:{
 
                 cin.ignore();
                 board.move();
             }break;
-            case 10:return 0;
+            case 11:return 0;
 
         }
     }
