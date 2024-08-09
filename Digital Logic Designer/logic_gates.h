@@ -1,7 +1,7 @@
 
-#ifndef _logic_gates_h_
+#ifndef _graph_h_
 
-#define _logic_gates_h_
+#define _graph_h_
 /*
 Includes
 */
@@ -411,7 +411,7 @@ class graph{
 
         */
         string get_wiring(void);
-
+        void edit(void);
 
     };
 
