@@ -1,3 +1,6 @@
+8/9/2024 updates : added edit which allows you to resize input size or edit gate type.
+also yesterday I've eliminated some bugs which caused unsuccessful loading of the system now works fine.
+
 8/7/2024 updates :
 1-introduced a wiring system so that you don't have to repeat a component
 for ex : in the half_adder you have "OR" which is the sum and "and" which is the carry 
