@@ -1,3 +1,6 @@
+8/10/2024 : Posted the first video in the series of creating a 4-bit microprocessor check it out here:
+https://www.youtube.com/watch?v=gNgUllowSiA&list=PLbDnyrrfgzH4v5_NiBz46QS6W0CPb2-qB
+
 8/9/2024 updates : added edit which allows you to resize input size or edit gate type.
 also yesterday I've eliminated some bugs which caused unsuccessful loading of the system now works fine.
 
