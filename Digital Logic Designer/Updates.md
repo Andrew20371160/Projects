@@ -1,3 +1,6 @@
+8/12/2024 small update:
+added some input validation so that the system doesn't crash due to minor reasons.
+
 8/10/2024 : Posted the first video in the series of creating a 4-bit microprocessor ALU check it out here:
 https://www.youtube.com/watch?v=gNgUllowSiA&list=PLbDnyrrfgzH4v5_NiBz46QS6W0CPb2-qB
 
