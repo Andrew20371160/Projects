@@ -1,7 +1,7 @@
 
-#ifndef _graph_h_
+#ifndef _logic_gates_h_
 
-#define _graph_h_
+#define _logic_gates_h_
 /*
 Includes
 */
@@ -11,9 +11,11 @@ Includes
 #include <list>
 #include <fstream>
 #include <queue>
+#include <limits>
 using namespace std ;
 
-
+template<typename DataType>
+void get_input(DataType&);
 
 /*
 enum for leaves
