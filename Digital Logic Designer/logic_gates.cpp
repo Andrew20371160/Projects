@@ -1,5 +1,19 @@
     #include "graph.h"
 
+template<typename DataType>
+    void get_input(DataType& input){
+        bool false_input = true;
+        while(false_input){
+            std::cin >> input;
+            if(std::cin.fail()){
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                false_input = true;
+            } else {
+                false_input = false;
+            }
+        }
+    }
     // Function to open a file for writing
     bool openFileForWriting(const std::string& filePath) {
         std::ofstream file(filePath);
@@ -458,7 +472,7 @@
             cout<<"\nThis action will remove : "<<gates[traverser->gate_type];
             cout<<"\nand all it's children and disconnect all the wires related to them";
             cout<<"\n(0:Cancel)\n(1:Confirm)\n>>";
-            cin>>choice;
+            get_input<uint16_t>(choice);
             if(choice==1){
                 remove_gate(traverser);
                 traverser=root;
@@ -529,12 +543,10 @@
         cout<<"\nChoose gate type";
 
         print_gates(NOT);
-
-        cin>>gate_type ;
-        cin.ignore()  ;
+        get_input<uint16_t>(gate_type) ;
         uint32_t in_size ;
         cout<<"\nEnter size of the new gate(No. of input pins)";
-        cin>>in_size  ;
+        get_input<uint32_t>(in_size)  ;
         //make sure it's within the range of gates
         if(is_valid_gate(gate_type,in_size)){
             if(root==NULL){
@@ -546,7 +558,7 @@
             if(move()){
                 uint32_t choice ;
                 cout<<"\n(1:append gate to the right)\n(2:append gate as an input to the current gate)\n(3:quit)\n>>";
-                cin>>choice ;
+                get_input<uint32_t>(choice);
                 if(choice==1||choice==2){
                     if(choice==1){
                         traverser->append_right(gate_type,in_size);
@@ -1171,7 +1183,7 @@
                         cout<<"\n1--append to the right";
                         cout<<"\n2--append as a child";
                         cout<<"\n3--cancel";
-                        cin>>choice;
+                        get_input<int>(choice);
                         if(choice==1){
 
                             if(append_right(component)){
@@ -1293,13 +1305,13 @@
             cin.ignore() ;
             int choice ;
             cout<<"\n(1---edit input size)\n(2---edit gate type)\n(3---cancel)\n>>" ;
-            cin>>choice ;
+            get_input<int>(choice) ;
             switch(choice){
                 case 1:{
                     if(traverser->children==NULL&&traverser->wire_input.size()==0){
                        uint32_t in_size;
                        cout<<"\nEnter new size";
-                       cin>>in_size;
+                       get_input<uint32_t>(in_size);
                        traverser->resize_input(in_size);
                     }
                 }break;
@@ -1308,7 +1320,7 @@
                         uint16_t g_type;
                         cout<<"\nChoose gate type:" ;
                         print_gates(NAND);
-                        cin>>g_type;
+                        get_input<uint16_t>(g_type);
                         if(is_valid_gate(g_type,1)&&g_type>BUFFER){
                             traverser->gate_type = g_type;
                         }
@@ -1327,40 +1339,41 @@ int main(){
     int choice ;
     while(1){
         cout<<"\n1-Insert\n2-Connect\n3-Disconnect\n4-edit\n5-test logic\n6-remove\n7-remove graph\n8-save\n9-load\n10-move\n11-quit";
-        cin>>choice ;
-        switch(choice){
-            case 1:board.insert() ; break ;
-            case 2:board.connect() ; break ;
-            case 3:board.disconnect() ; break ;
-            case 4:board.edit();break;
-            case 5:{
-                cin.ignore() ; //what caused the bug is that when i hit enter
-                //no input is set and yeah cin.ignore should solve it
-                string input = "";
-                cin>>input;
-                board.set_input(input);
-                board.view_logic() ;
-            }break ;
-            case 6:board.remove() ; break ;
-            case 7:board.remove_graph() ; break ;
-            case 8:{
-                cin.ignore();
-                board.save() ;
-            }break ;
-            case 9:{
+            get_input(choice);
+            switch(choice){
+                case 1:board.insert() ; break ;
+                case 2:board.connect() ; break ;
+                case 3:board.disconnect() ; break ;
+                case 4:board.edit();break;
+                case 5:{
+                    cin.ignore() ; //what caused the bug is that when i hit enter
+                    //no input is set and yeah cin.ignore should solve it
+                    string input = "";
+                    get_input<string>(input);
+                    board.set_input(input);
+                    board.view_logic() ;
+                }break ;
+                case 6:board.remove() ; break ;
+                case 7:board.remove_graph() ; break ;
+                case 8:{
+                    cin.ignore();
+                    board.save() ;
+                }break ;
+                case 9:{
 
-                cin.ignore();
-                board.load();
-            }break;
-            case 10:{
+                    cin.ignore();
+                    board.load();
+                }break;
+                case 10:{
 
-                cin.ignore();
-                board.move();
-            }break;
-            case 11:return 0;
+                    cin.ignore();
+                    board.move();
+                }break;
+                case 11:return 0;
 
+            }
         }
-    }
+
 
     return 0  ;
 
