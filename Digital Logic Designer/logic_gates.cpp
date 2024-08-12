@@ -1,4 +1,4 @@
-    #include "graph.h"
+#include "logic_gates.h"
 
 template<typename DataType>
     void get_input(DataType& input){
