@@ -385,8 +385,8 @@ public:
     */
      matrix projection(void)const ;
     //performs least squares fit
-    //fits a data set as an input int o a linear system
-    matrix fit_least_squares(const matrix&data_set)const  ;
+    //fits an output to a linear system
+    matrix fit_least_squares(const matrix&output)const  ;
     //extracts a column at a specified index
     //and returns it as column matrix
     matrix extract_col(int  index)const ;
