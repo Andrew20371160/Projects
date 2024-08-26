@@ -1808,18 +1808,18 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
         AtransA.compress_symmetric() ;
         return AtransA;
     }
-    //fit a data set int o a linear system
+    //fit an output column into a linear system
     //Ax=b can't be solved
     //AT*A* x* = AT*b
     //now solvable
     template <typename DataType>
-    matrix<DataType> matrix<DataType>::fit_least_squares(const matrix<DataType>&data_set) const {
-        if(rows==data_set.rows){
+    matrix<DataType> matrix<DataType>::fit_least_squares(const matrix<DataType>&output) const {
+        if(rows==output.rows){
             matrix<DataType>Atrans = transpose() ;
             //AT *A
             matrix<DataType>ret_mat = Atrans*(*this);
             //append and solve [AT*A|AT*b]
-            Atrans= Atrans*data_set;
+            Atrans= Atrans*output;
 
             ret_mat = ret_mat.append_cols(Atrans) ;
             return ret_mat.solve();
