@@ -1,4 +1,4 @@
-#include "logic_gates.h"
+    #include "graph.h"
 
 template<typename DataType>
     void get_input(DataType& input){
@@ -741,7 +741,7 @@ template<typename DataType>
            }
            else if(ptr->children){
                 gate*temp=ptr->children ;
-                    while(temp->next){
+                    while(temp){
                         if(temp->output==1){
 
                             ones_counter++ ;
