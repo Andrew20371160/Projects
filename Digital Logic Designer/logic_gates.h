@@ -292,6 +292,7 @@ class graph{
     bool append_right(gate*component) ;
 
 
+
     public :
         //empty graph constructor
         graph(void);//good
@@ -414,7 +415,8 @@ class graph{
         */
         string get_wiring(void);
         void edit(void);
-
+        void disconnect_all_wires(void);
+        void resize_all_input(void);
     };
 
 #endif
