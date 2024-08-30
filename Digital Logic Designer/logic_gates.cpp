@@ -1,4 +1,4 @@
-    #include "graph.h"
+    #include "logic_gates.h"
 
 template<typename DataType>
     void get_input(DataType& input){
@@ -63,7 +63,7 @@ template<typename DataType>
             if(new_gate){
                 new_gate->gate_type=g_type;
                 new_gate->output = 0 ;
-
+                new_gate->input_size=0;
 
                 //array of booleans
                 new_gate->input=NULL ;
@@ -1034,7 +1034,6 @@ template<typename DataType>
                         }
                         else{
                             file<<ptr->input_size;
-                         // Write the line directly to the file
                         }
                         if(ptr->children){
                             gate*ch_ptr = ptr->children ;
@@ -1332,20 +1331,70 @@ template<typename DataType>
         traverser= root ;
     }
 
+    void graph::disconnect_all_wires(void){
+        if(root){
+            gate*trav = root ;
+            queue<gate*> q;
+            while(trav){
+                q.push(trav);
+                while(!q.empty()){
+                    gate *temp= q.front() ;
+                    q.pop();
+                    temp->disconnect_wires_in();
+                    temp->disconnect_wires_out();
+                    gate*ch_ptr = temp->children;
+                    while(ch_ptr){
+                        q.push(ch_ptr);
+                        ch_ptr=ch_ptr->next;
+                    }
+                }
+                trav=trav->next ;
+            }
+        }
+    }
+    void graph::resize_all_input(void){
+        if(root){
+            gate*trav = root ;
+            queue<gate*> q;
+            while(trav){
+                q.push(trav);
+                while(!q.empty()){
+                    gate *temp= q.front() ;
+                    q.pop();
+                    if(temp->children==NULL&&temp->wire_input.size()==0){
+                       uint32_t in_size;
+                       cout<<"\nEnter new size";
+                       get_input<uint32_t>(in_size);
+                       temp->resize_input(in_size);
+                    }
+                    gate*ch_ptr = temp->children;
+                    while(ch_ptr){
+                        q.push(ch_ptr);
+                        ch_ptr=ch_ptr->next;
+                    }
+                }
+                trav=trav->next ;
+            }
+        }
+    }
 int main(){
 
     graph board;
 
     int choice ;
     while(1){
-        cout<<"\n1-Insert\n2-Connect\n3-Disconnect\n4-edit\n5-test logic\n6-remove\n7-remove graph\n8-save\n9-load\n10-move\n11-quit";
+        cout<<"\n1-Insert\n2-Connect\n3-Disconnect\n4-edit a gate\n5-remove wiring\n6-resize each 0 input gate"
+        "\n7-test logic\n8-remove\n9-remove graph\n10-save\n11-load\n12-move\n13-quit";
             get_input(choice);
             switch(choice){
                 case 1:board.insert() ; break ;
                 case 2:board.connect() ; break ;
                 case 3:board.disconnect() ; break ;
                 case 4:board.edit();break;
-                case 5:{
+                case 5:board.disconnect_all_wires();break;
+                case 6:board.resize_all_input();break;
+
+                case 7:{
                     cin.ignore() ; //what caused the bug is that when i hit enter
                     //no input is set and yeah cin.ignore should solve it
                     string input = "";
@@ -1353,23 +1402,23 @@ int main(){
                     board.set_input(input);
                     board.view_logic() ;
                 }break ;
-                case 6:board.remove() ; break ;
-                case 7:board.remove_graph() ; break ;
-                case 8:{
+                case 8:board.remove() ; break ;
+                case 9:board.remove_graph() ; break ;
+                case 10:{
                     cin.ignore();
                     board.save() ;
                 }break ;
-                case 9:{
+                case 11:{
 
                     cin.ignore();
                     board.load();
                 }break;
-                case 10:{
+                case 12:{
 
                     cin.ignore();
                     board.move();
                 }break;
-                case 11:return 0;
+                case 13:return 0;
 
             }
         }
