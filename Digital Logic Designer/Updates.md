@@ -1,4 +1,6 @@
 8/31/2024 fixed a major bug where gates initialized with zero number of pins would take a garbage value as input size
+also fixed some issues regarding evaluating input of certain gates
+
 
 8/12/2024 small update:
 added some input validation so that the system doesn't crash due to minor reasons.
