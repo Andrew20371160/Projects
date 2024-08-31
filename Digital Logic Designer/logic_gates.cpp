@@ -674,7 +674,7 @@ template<typename DataType>
                 //if all are ones then if and it's true
                 //else it's false
            }
-           else if(ptr->children){
+           if(ptr->children){
                 gate*temp=ptr->children ;
                     while(temp){
                         if(temp->output==0){
@@ -687,14 +687,19 @@ template<typename DataType>
                 //if all are ones then if and it's true
                 //else it's false
                 }
-            else if(ptr->wire_input.size()){
+            if(ptr->wire_input.size()){
                 for(list<gate*>::iterator i = ptr->wire_input.begin() ; i!=ptr->wire_input.end();++i){
                     if((*i)->output==0){
                         found_zero =true;
                     }
                 }
             }
-            ptr->output = found_zero? ptr->gate_type==NAND:ptr->gate_type==AND ;
+            if (ptr->gate_type == AND) {
+                ptr->output = !found_zero;
+            }
+            else {
+                ptr->output = found_zero;
+            }
         }
     }
     void graph::evaluate_or_nor(gate*ptr) {
@@ -709,7 +714,7 @@ template<typename DataType>
                     }
                 }
            }
-           else if(ptr->children){
+           if(ptr->children){
                 gate*temp=ptr->children ;
                     while(temp){
                         if(temp->output==1){
@@ -718,14 +723,19 @@ template<typename DataType>
                         temp=temp->next ;
                     }
                 }
-            else if(ptr->wire_input.size()){
+            if(ptr->wire_input.size()){
                 for(list<gate*>::iterator i = ptr->wire_input.begin() ; i!=ptr->wire_input.end();++i){
                     if((*i)->output==1){
                         found_one =true;
                     }
                 }
             }
-            ptr->output=(found_one)?ptr->gate_type==OR: ptr->gate_type==NOR ;
+            if(ptr->gate_type=OR){
+                ptr->output = found_one;
+            }
+            else{
+                ptr->output = !found_one;
+            }
         }
     }
 
@@ -739,7 +749,7 @@ template<typename DataType>
                     }
                 }
            }
-           else if(ptr->children){
+           if(ptr->children){
                 gate*temp=ptr->children ;
                     while(temp){
                         if(temp->output==1){
@@ -749,7 +759,7 @@ template<typename DataType>
                         temp=temp->next ;
                     }
                 }
-            else if(ptr->wire_input.size()){
+            if(ptr->wire_input.size()){
                 for(list<gate*>::iterator i = ptr->wire_input.begin() ; i!=ptr->wire_input.end();++i){
                     if((*i)->output==1){
                         ones_counter++;
@@ -766,14 +776,11 @@ template<typename DataType>
            if(ptr->input){
                 ptr->output =(ptr->gate_type==BUFFER)?ptr->input[0]:!ptr->input[0] ;
            }
-           else if(ptr->children){
+           if(ptr->children){
                     ptr->output =(ptr->gate_type==BUFFER) ?ptr->children->output:!ptr->children->output ;
                 }
-            else if(ptr->wire_input.size()){
+            if(ptr->wire_input.size()){
                 ptr->output =(ptr->gate_type==BUFFER) ?ptr->wire_input.front()->output:!ptr->wire_input.front()->output;
-            }
-            else{
-                ptr->output=0 ;
             }
         }
     }
