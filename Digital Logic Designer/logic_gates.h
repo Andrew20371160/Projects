@@ -1,4 +1,3 @@
-
 #ifndef _logic_gates_h_
 
 #define _logic_gates_h_
