@@ -1,4 +1,4 @@
-    #include "logic_gates.h"
+    #include "graph.h"
 
 template<typename DataType>
     void get_input(DataType& input){
@@ -1011,6 +1011,13 @@ template<typename DataType>
     then the wiring of the component (if exists) is saved into another file with wiring appended to component's name
     for ex: path\half_adderwiring
     */
+    /*
+// Before the while loop
+size_t base_path_length = file_path.length() - 5; // Subtract 5 for the "0.txt" part
+
+// Inside the while loop
+file_path = file_path.substr(0, base_path_length) + std::to_string(counter) + ".txt";
+    */
     void graph::save(void){
         if(root){
             //get file path
@@ -1018,6 +1025,7 @@ template<typename DataType>
             cout << "\nEnter file's path without extensions(.txt,.bin...etc)\n";
             cout<<">>";
             getline(cin,file_path);
+            string base_file_path = file_path;
             //first file for first major subtree
             file_path+="0.txt";
             //if file is oppened successfully
@@ -1027,7 +1035,7 @@ template<typename DataType>
                 uint32_t counter = 0  ;
                 while(current){
                     //append file index
-                    file_path = file_path.substr(0, file_path.size()-5) + std::to_string(counter) + ".txt";
+                    string file_path = base_file_path + std::to_string(counter) + ".txt";
                     ofstream file(file_path, std::ios::trunc); // Open file in write mode, which clears it
                     //breadth first
                     queue<gate*> q;
@@ -1063,8 +1071,7 @@ template<typename DataType>
                     counter++;
                 }
                 //then save the wiring if exists
-                file_path = file_path.substr(0, file_path.size()-5);
-                file_path += "wiring.txt";
+                file_path = base_file_path+ "wiring.txt";
                 ofstream file(file_path, std::ios::trunc);
                 file << get_wiring();
                 file.close();
@@ -1088,6 +1095,8 @@ template<typename DataType>
 
         cout<<"\nEnter file path witout indexing or extension: ";
         getline(cin,file_path);
+        string base_file_path = file_path; // Save the base file path
+
         file_path+="0.txt";
         while(openFileForReading(file_path)){
             cout<<"\noppened: "<<file_path;
@@ -1150,7 +1159,7 @@ template<typename DataType>
             //close current file
             file.close() ;
             file_counter++;
-            file_path = file_path.substr(0, file_path.size()-5) +to_string(file_counter) + ".txt";
+            file_path = base_file_path + to_string(file_counter) + ".txt";
 
             //component is treated as a root
             if(component==NULL){
@@ -1167,7 +1176,7 @@ template<typename DataType>
             }
         }
         if(file_found){
-            file_path = file_path.substr(0, file_path.size()-5) +"wiring.txt";
+            file_path = base_file_path + "wiring.txt";
             if(openFileForReading(file_path)){
                 ifstream file(file_path); // Open file in read mode
                 string wiring="";
