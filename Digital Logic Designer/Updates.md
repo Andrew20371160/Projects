@@ -1,3 +1,5 @@
+9/1/2024 fixed issues regarding indexing of files while saving and loading 
+added new components will upload the new video soon.
 8/31/2024 fixed a major bug where gates initialized with zero number of pins would take a garbage value as input size
 also fixed some issues regarding evaluating input of certain gates
 
