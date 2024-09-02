@@ -1,3 +1,4 @@
+9/2/2024 posted second video of the series feel free to watch [https://youtu.be/rwwIutS21xk?si=d6iMzC7m5Kp-pXNJ]
 9/1/2024 fixed issues regarding indexing of files while saving and loading 
 added new components will upload the new video soon.
 8/31/2024 fixed a major bug where gates initialized with zero number of pins would take a garbage value as input size
