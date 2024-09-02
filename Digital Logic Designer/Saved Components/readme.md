@@ -1,5 +1,6 @@
 Here I will add files for components Built through out the series.
-Link to the series: https://www.youtube.com/watch?v=gNgUllowSiA&list=PLbDnyrrfgzH4v5_NiBz46QS6W0CPb2-qB
+
+Link to the series: [https://www.youtube.com/playlist?list=PLbDnyrrfgzH6rByhw83TfR-hEWR1vLolN]
 
 when loading a component just type the path and then component's name as you typed it like this:
 path\ha
