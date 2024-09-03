@@ -198,7 +198,7 @@ and their connections.
 this is the class used in interfacing with the user
 */
 /*
-the data structure used is a general graph but you can attatch gates right to the root
+the data structure used is a general Tree but you can attatch gates right to the root
 it's a graph where at the same level there could be a list of gates
 and each gate can hold a list of gates or be a leaf
 */
