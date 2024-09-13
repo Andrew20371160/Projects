@@ -1,3 +1,8 @@
+9/13/2024 update:
+I've pushed the system through its limits but sadly its too complicated to use without a gui 
+you can build some basic components like the ones made in the saved_components directory but more complicated than that is too complicated and not worth it.
+this have been a fun experience and i've learned alot so with this I declare the end of the series.
+
 9/2/2024 posted second video of the series feel free to watch [https://youtu.be/rwwIutS21xk?si=d6iMzC7m5Kp-pXNJ]
 
 9/1/2024 fixed issues regarding indexing of files while saving and loading 
