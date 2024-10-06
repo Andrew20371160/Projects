@@ -747,6 +747,7 @@ void set<DataType>::set_function_ptr(bool (set<DataType>::*ptr)( node<DataType>*
     bool set<DataType>::independence(const set&s1,const set&s2)const{
         return prob(s1)*prob(s2)==prob(s1.intersect(s2));
     }
+
     /*
     in sample space(phantom ) check independence of events s1,s2,......sn
     */
@@ -758,6 +759,17 @@ void set<DataType>::set_function_ptr(bool (set<DataType>::*ptr)( node<DataType>*
         }
         return res==prob_intersect(set_arr,n) ;
 
+    }
+        /*
+    in sample space(phantom ) check independence of events s1,s2,......sn
+    */
+    template<typename DataType>
+    bool set<DataType>::independence(const vector<set<DataType>>&set_arr)const{
+        double res =1;
+        for(int i =0 ; i<set_arr.size();i++){
+            res *=prob(set_arr[i]) ;
+        }
+        return res==prob_intersect(set_arr) ;
     }
     //returns set of elements that are in phantom and not in src
     //different than comp that phantom doesn't have to contain src set
@@ -809,6 +821,18 @@ void set<DataType>::set_function_ptr(bool (set<DataType>::*ptr)( node<DataType>*
     double  set<DataType>::prob_intersect(const set*set_arr,int n)const{
         set s =set_arr[0];
         for(int i =1; i<n; i++){
+            s= s.intersect(set_arr[i]);
+        }
+        return prob(s);
+    }
+    /*
+    retunrs p(s1 intersects s2 intersects s3 ........intersects sN)
+    in the sample space (phantom)
+    */
+    template<typename DataType>
+    double  set<DataType>::prob_intersect(const vector<set<DataType>>&set_arr)const{
+        set s =set_arr[0];
+        for(int i =1; i<set_arr.size(); i++){
             s= s.intersect(set_arr[i]);
         }
         return prob(s);
@@ -1315,7 +1339,12 @@ int main(){
     set<string>a(aev,2);
     set<string>b(bev,2);
     set<string>c(cev,2);
-    cout<<sample_space.prob_cond(c,a.intersect(b));
+    vector<set<string>>v1;
+    v1.push_back(a);
+    v1.push_back(b);
+    v1.push_back(c);
+
+    cout<<sample_space.independence(v1);
     system("pause");
 
 /*
