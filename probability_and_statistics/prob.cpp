@@ -719,7 +719,7 @@ void set<DataType>::set_function_ptr(bool (set<DataType>::*ptr)( node<DataType>*
     double set<DataType>::prob_cond(const set&src,const set&condition)const{
         if(contain(src)){
             double p_cond = prob(condition) ;
-            if(condition.size()>=src.size()&&p_cond>0){
+            if(p_cond>0){
                 return prob(condition.intersect(src))/p_cond;
            }
             cout<<"\nConditioning event can't be drawn from the sample-space\n" ;
