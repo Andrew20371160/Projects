@@ -282,6 +282,8 @@ public:
     in sample space (phantom) returns true if group of sets are independent
     */
     bool independence(const set*,int n)const;
+    bool independence(const vector<set<DataType>>&set)const;
+
     /*
     in sample-space phantom calculate the probability of union of events
     */
@@ -290,7 +292,7 @@ public:
     in sample-space phantom calculate the probability of intersection of events
     */
     double prob_intersect(const set*,int n)const;
-
+    double prob_intersect(const vector<set<DataType>>&set_arr)const;
 
 
     /*
