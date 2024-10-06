@@ -753,18 +753,35 @@ void set<DataType>::set_function_ptr(bool (set<DataType>::*ptr)( node<DataType>*
     */
     template<typename DataType>
     bool set<DataType>::independence(const set*set_arr,int n)const{
+        //first pairwise independence
+        for(int i=0;i<n-1;i++){
+            for(int j=i+1;j<n;j++){
+                if(!independence(set_arr[i],set_arr[j])){
+                    return false;
+                }
+            }
+        }
+        //then independence for the whole set of events
         double res =1;
         for(int i =0 ; i<n;i++){
             res *=prob(set_arr[i]) ;
         }
         return res==prob_intersect(set_arr,n) ;
-
     }
         /*
     in sample space(phantom ) check independence of events s1,s2,......sn
     */
     template<typename DataType>
     bool set<DataType>::independence(const vector<set<DataType>>&set_arr)const{
+        //first pairwise independence
+        for(int i=0;i<set_arr.size()-1;i++){
+            for(int j=i+1;j<set_arr.size();j++){
+                if(!independence(set_arr[i],set_arr[j])){
+                    return false;
+                }
+            }
+        }
+        //then independence for the whole set of events
         double res =1;
         for(int i =0 ; i<set_arr.size();i++){
             res *=prob(set_arr[i]) ;
