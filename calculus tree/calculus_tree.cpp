@@ -1781,9 +1781,47 @@
         }
         return vector<DataType>(0);
     }
-int main(){
-    calculus_tree<long double>tree("x^2+1");
 
-    cout<<tree.simpson_rule_3_8("x",-2,1,10);
-    system("pause");
-}
+
+    template<typename DataType>
+    bool calculus_tree<DataType>::random_equivalence(calculus_tree&other_tree,unsigned int trial_count){
+        vector<string>ind_vars1 = independent_variables();
+        vector<string>ind_vars2 = other_tree.independent_variables();
+        if(ind_vars1.size()==ind_vars2.size()){
+            if(ind_vars1.size()>0){
+                //if same independent variables
+                for(unsigned int i =0 ;  i<ind_vars1.size();i++){
+                    if(ind_vars1[i]!=ind_vars2[i]){
+                        return false ;
+                    }
+                }
+                unsigned int old_size = ind_vars2.size();
+                ind_vars1.resize(2*ind_vars1.size());
+                for(unsigned int i=0; i<old_size;i++){
+                    ind_vars1[2*i]=ind_vars2[i] ;
+                }
+                long double e =exp(1);
+                srand(time(0)) ;
+                for(unsigned i = 0  ;i<=trial_count/2;i++){
+                    for(unsigned int j =0;j<old_size;j++){
+                        ind_vars1[2*j+1] =to_string((M_PI*static_cast<long double>(rand()))/e);
+                    }
+                    if(abs(evaluate_at(ind_vars1)-other_tree.evaluate_at(ind_vars1))>threshold){
+                        return false ;
+                    }
+                    for(unsigned int j =0;j<old_size;j++){
+                        ind_vars1[2*j+1] =to_string(-1*(M_PI*static_cast<long double>(rand()))/e);
+                    }
+                    if(abs(evaluate_at(ind_vars1)-other_tree.evaluate_at(ind_vars1))>threshold){
+                        return false ;
+                    }
+                }
+                return true ;
+            }
+            else{
+                return abs(evaluate_at()-other_tree.evaluate_at())<=threshold;
+            }
+        }
+        return false;
+    }
+
