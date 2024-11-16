@@ -7,7 +7,8 @@
 #include <fstream>
 #include "preprocessor.h"
 #include "node.h"
-
+#include <random>
+#include <time.h>
 const long double threshold = 10e-6 ;
 
 
@@ -365,6 +366,8 @@ class calculus_tree
         vector<DataType> table(vector<string>& variables_and_values,
                                                         const unsigned int &fx_size, const vector<DataType> &step_size,
                                                         unsigned int traversal_array_size=0) const ;
+
+        bool random_equivalence(calculus_tree&,unsigned int trial_count);
     };
 
 #endif
