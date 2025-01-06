@@ -37,7 +37,8 @@ enum {old_locations =0,new_locations=1};
 //types of matrices
 //used in compression and accessors
 enum{general=0,utri,ltri,diagonal,symmetric,anti_symmetric,constant,iden,orthonormal};
-
+enum{general_compress,utri_compress,ltri_compress,diagonal_compress,symmetric_compress,
+anti_symmetric_compress,constant_compress,iden_compress,orthonormal_compress};
 
 //helper function for creating a vector (allocating memory)
 template<typename DataType>
@@ -67,11 +68,12 @@ private :
     pindex is for pivots locations
 */
 
-    //make sure no to compress a compressed matrix (usage of the  bool)
+    //make sure not to compress a compressed matrix (usage of the  bool)
     bool is_compressed;
-
+    //type of compression of the matrix
+    int compression_type ;
     //actual size allocated for the matrix
-    int  acutal_size ;
+    int  actual_size ;
 
     //dummy array of one element
     //for utri it returns 0
@@ -449,73 +451,6 @@ public:
     //input->system->output
     matrix transformer(const matrix&output)const ;
 
-
-
-//here is the inherited class matrix to allow for efficient usage of memory
-//will fix naming later for now call it mat
-
-//enum of matrices types
-
-//array of point ers to function at
-/*
-gauss_down,gauss_up,rref,
-*/
-
-
-
-//here row_start is filled and pindex aswell
-//passed function must be one of those types with zeroes
-
-//no need for others since its just a parameter change
-//like compressing symmetric is same as utri but the difference is
-//in the enum value or matrix type value
-//empty matrix
-
-    //changes are
-/*
-1-add empty_vec a dummy array of one element ,pindex,row_start
-2-add matrix_type
-3-update constructors and destructors with same thing
-add compression functions u made
-add the new at
-
-the other ats' are private and the array is static
-
-add decompress if user wants to update a matrix that was previously compressed
-we'll see how it goes
-
-update inverse
-
-change  the idea of zeroes and instead make it a matrix of a constant
-with same properties
-4-give user the ability to construct a matrix with special properites utri,ltri
-5-update     void operator=(const mat&) ;//tested
-
-    bool is_valid_index(int  ,int  )const;
-
-    void set_identity(void);
-
-    matrix gauss_down(mat<int >*pivots_indices=NULL,int  pivots_locations = new_locations)const ;//tested
-    //performs gaussian elimination upward
-    matrix gauss_up(mat<int >*pivots_indices=NULL)const  ;//tested
-
-    void lu_fact(mat& lower_fact,mat&permutation,mat& upper_fact)const ;//tested
-
-    matrix rref(mat<int > * pivots_indices =NULL)const ;//tested
-
-    matrix projection(char useless_ch=0)const ;
-
-    mat<int > get_pivots_locations(void) ;
-
-    matrix get_pivots(mat<int >*pivots_locations=NULL)const;
-
-    void qr_fact( mat&q, mat&r)const;
-
-    matrix eigen_values(const int  max_iteration,const double min_diff = check_tolerance)const;
-
-    void svd(mat&u, mat&s, mat&vt)const;
-
-*/
     bool is_valid_index(int  ,int  )const;
 
     //this works as a more efficient way to extract
