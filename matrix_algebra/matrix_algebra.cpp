@@ -1,30 +1,5 @@
 #include "matrix_algebra.h"
 
-/*bool operator>(const complex& a, const complex& b) {
-    return std::norm(a) > std::norm(b);
-}
-
-bool operator<(const complex& a, const complex& b) {
-    return std::norm(a) < std::norm(b);
-}
-
-bool operator>=(const complex& a, const complex& b) {
-    return std::norm(a) >= std::norm(b);
-}
-
-bool operator<=(const complex& a, const complex& b) {
-    return std::norm(a) <= std::norm(b);
-}
-
-bool operator==(const complex& a, const complex& b) {
-    return a.real() == b.real() && a.imag() == b.imag();
-}
-
-bool operator!=(const complex& a, const complex& b) {
-    return !(a == b);
-}
-*/
-
 //this assigns the matrix_type variable and sets the at_ptr ,at_ptr_c
 template<typename DataType>
 void matrix<DataType>::set_feature(int  matrix_t){
@@ -84,6 +59,7 @@ matrix<DataType>::matrix(){
         pindex=NULL ;
         empty_vec[0]=0;
         is_compressed = false;
+        compression_type = general_compress ;
         set_feature(general);
     }
 
@@ -103,11 +79,13 @@ matrix<DataType>::matrix(int  r,int  c,DataType value,bool compressed){
             if(value!=DataType(no_init)){
                 vec[0] =value;
             }
+            compression_type = constant_compress;
             is_compressed=true;
             set_feature(constant) ;
         }
         else{
             is_compressed =false;
+            compression_type = general_compress;
             set_feature(general) ;
             vec=get_vec<DataType>(r,c) ;
             actual_size = r*c;
@@ -148,10 +126,11 @@ matrix<DataType>::matrix(const matrix&mat){
     row_start=NULL ;
     pindex=NULL ;
     vec=NULL;
+    is_compressed = mat.is_compressed ;
+    compression_type = mat.compression_type ;
     set_feature(mat.matrix_type);
     actual_size=  mat.actual_size ;
     empty_vec[0] =mat.empty_vec[0];
-    is_compressed=mat.is_compressed;
     if(mat.matrix_type ==utri||mat.matrix_type==ltri){
         copy_vec(row_start, mat.row_start, rows);
         copy_vec(pindex, mat.pindex, rows);
@@ -175,8 +154,9 @@ matrix<DataType>::matrix(int  r,int  c , DataType*arr,int  size){
         row_start=NULL ;
         pindex=NULL ;
         actual_size= r*c;
+        is_compressed=false;
+        compression_type = general_compress;
         set_feature(general) ;
-        is_compressed= false;
         empty_vec[0] =  0;
             for(int  i =0 ;i<rows; i++){
                 for(int  j= 0 ;j<cols ;j++){
@@ -210,102 +190,120 @@ template <typename DataType>
 int  matrix<DataType>::get_type()const{
     return matrix_type ;
 }
-
+//compression type of matrix must match matrix_t
+//if not then the matrix is decompressed and set to be general
 template<typename DataType>
 void matrix<DataType>:: set_at_ptr(int  matrix_t){
-    switch(matrix_t){
-        case symmetric :{
-            at_ptr_c  = at_symmetric_c;
-            at_ptr= at_symmetric ;
-        }break ;
-        case diagonal :{
-            at_ptr_c  = at_diagonal_c;
-            at_ptr= at_diagonal ;
-            empty_vec[0]  =0;
-        }break ;
-        case utri :{
-             at_ptr_c= at_utri_c;
-             at_ptr= at_utri ;
-             empty_vec[0]  =0;
-        }break;
-        case ltri :{
-             at_ptr_c= at_ltri_c;
-             at_ptr= at_ltri ;
-             empty_vec[0]  =0;
-        }break;
-        case general :{
-            at_ptr_c  = at_general_c;
-            at_ptr= at_general ;
-        }break ;
-        case orthonormal :{
-            at_ptr_c  = at_general_c;
-            at_ptr= at_general ;
-        }break ;
-       case anti_symmetric :{
-            at_ptr_c  = at_anti_symmetric_c;
-            at_ptr= at_anti_symmetric ;
-        }break ;
-        case iden :{
-             at_ptr_c= at_identity_c;
-             at_ptr= at_identity ;
-             empty_vec[0]  =0;
-        }break;
-        case constant:{
-             at_ptr_c= at_const_c;
-             at_ptr= at_const ;
-        }break ;
-    default:{
-            at_ptr_c  = at_general_c;
-            at_ptr= at_general ;
-        }break;
-    }
+        if(compression_type ==matrix_t){
+            switch(matrix_t){
+                case symmetric :{
+                    at_ptr_c  = at_symmetric_c;
+                    at_ptr= at_symmetric ;
+
+                }break ;
+                case diagonal :{
+                    at_ptr_c  = at_diagonal_c;
+                    at_ptr= at_diagonal ;
+                    empty_vec[0]  =0;
+                }break ;
+                case utri :{
+                     at_ptr_c= at_utri_c;
+                     at_ptr= at_utri ;
+                     empty_vec[0]  =0;
+                }break;
+                case ltri :{
+                     at_ptr_c= at_ltri_c;
+                     at_ptr= at_ltri ;
+                     empty_vec[0]  =0;
+                }break;
+                case general :{
+                    at_ptr_c  = at_general_c;
+                    at_ptr= at_general ;
+                }break ;
+                case orthonormal :{
+                    at_ptr_c  = at_general_c;
+                    at_ptr= at_general ;
+                }break ;
+               case anti_symmetric :{
+                    at_ptr_c  = at_anti_symmetric_c;
+                    at_ptr= at_anti_symmetric ;
+                }break ;
+                case iden :{
+                     at_ptr_c= at_identity_c;
+                     at_ptr= at_identity ;
+                     empty_vec[0]  =0;
+                }break;
+                case constant:{
+                     at_ptr_c= at_const_c;
+                     at_ptr= at_const ;
+                }break ;
+            default:{
+                    at_ptr_c  = at_general_c;
+                    at_ptr= at_general ;
+                }break;
+            }
+        }
+        else{
+            decompress();
+            compression_type=general_compress;
+            at_ptr=at_general;
+            at_ptr_c = at_general_c;
+            is_compressed=false;
+        }
+
 }
 
 
 template<typename DataType>
 void matrix<DataType>:: set_start_end_ptr(int  matrix_t){
-    switch(matrix_t){
-        case symmetric :{
-            start_ptr  = start_symmetric;
-            end_ptr= end_symmetric ;
-        }break ;
-        case diagonal :{
-            start_ptr  = start_diagonal;
-            end_ptr= end_diagonal ;
-        }break ;
+    if(compression_type!=matrix_t){
+        start_ptr = start_general;
+        end_ptr = end_general;
+    }
+    else{
+        switch(matrix_t){
+            case symmetric :{
+                start_ptr  = start_symmetric;
+                end_ptr= end_symmetric ;
+            }break ;
+            case diagonal :{
+                start_ptr  = start_diagonal;
+                end_ptr= end_diagonal ;
+            }break ;
 
-        case utri :{
-             start_ptr= start_utri;
-             end_ptr= end_utri ;
-        }break;
-        case ltri :{
-             start_ptr= start_ltri;
-             end_ptr= end_ltri ;
-        }break;
-        case general :{
-              start_ptr= start_general;
-            end_ptr= end_general ;
-        }break ;
-        case orthonormal :{
-            start_ptr  = start_general;
-            end_ptr= end_general ;
-        }break ;
-       case anti_symmetric :{
-            start_ptr  = start_symmetric;
-            end_ptr= end_symmetric ;
-        }break ;
-        case iden :{
-             start_ptr= start_identity;
-             end_ptr= end_identity ;
-        }break;
-        case constant:{
-             start_ptr= start_constant;
-             end_ptr= end_constant ;
-        }break ;
-    default:{
-            start_ptr  = start_general;
-            end_ptr= end_general ;
-        }break;
+            case utri :{
+                 start_ptr= start_utri;
+                 end_ptr= end_utri ;
+            }break;
+            case ltri :{
+                 start_ptr= start_ltri;
+                 end_ptr= end_ltri ;
+            }break;
+            case general :{
+                  start_ptr= start_general;
+                end_ptr= end_general ;
+            }break ;
+            case orthonormal :{
+                start_ptr  = start_general;
+                end_ptr= end_general ;
+            }break ;
+           case anti_symmetric :{
+                start_ptr  = start_symmetric;
+                end_ptr= end_symmetric ;
+            }break ;
+            case iden :{
+                 start_ptr= start_identity;
+                 end_ptr= end_identity ;
+            }break;
+            case constant:{
+                 start_ptr= start_constant;
+                 end_ptr= end_constant ;
+            }break ;
+        default:{
+                start_ptr  = start_general;
+                end_ptr= end_general ;
+            }break;
+        }
     }
 }
 
@@ -333,6 +331,7 @@ template<typename DataType>
         return vec[row_start[row_i]+(col_i-pindex[row_i])] ;
     }
     else{
+        empty_vec[0]=0;
         return empty_vec[0];
     }
     }
@@ -345,6 +344,7 @@ template<typename DataType>
             return vec[row_start[row_i]+pindex[row_i]-col_i] ;
             }
         else{
+            empty_vec[0]=0;
             return empty_vec[0];
         }
     }
@@ -355,6 +355,7 @@ DataType& matrix<DataType>:: at_diagonal(int  row_i,int  col_i)  {
             return vec[row_i];
         }
         else{
+            empty_vec[0]=0;
             return empty_vec[0] ;
         }
     }
@@ -368,6 +369,7 @@ DataType& matrix<DataType>::at_identity(int  row_i,int  col_i)  {
         return vec[0];
     }
     else{
+        empty_vec[0] = 0 ;
         return empty_vec[0] ;
     }
 }
@@ -426,8 +428,9 @@ const DataType& matrix<DataType>:: at_utri_c(int  row_i,int  col_i)  const{
         return vec[row_start[row_i]+(col_i-pindex[row_i])] ;
     }
     else{
+        empty_vec[0]=0;
         return empty_vec[0];
-    }
+        }
     }
 //for lower triangular matrices
 template<typename DataType>
@@ -438,16 +441,17 @@ template<typename DataType>
         return vec[row_start[row_i]+pindex[row_i]-col_i] ;
         }
     else{
-        return empty_vec[0];
+        empty_vec[0]=0;
+        return empty_vec[0];    }
     }
-    }
-//for diagonal matrices
-template<typename DataType>
- const DataType& matrix<DataType>:: at_diagonal_c(int  row_i,int  col_i)  const {
+    //for diagonal matrices
+    template<typename DataType>
+     const DataType& matrix<DataType>:: at_diagonal_c(int  row_i,int  col_i)  const {
         if(row_i==col_i){
             return vec[row_i];
         }
         else{
+            empty_vec[0] = 0;
             return empty_vec[0] ;
         }
     }
@@ -462,6 +466,7 @@ const DataType& matrix<DataType>::at_identity_c(int  row_i,int  col_i)  const {
             return vec[0];
         }
         else{
+            empty_vec[0] = 0;
             return empty_vec[0] ;
         }
     }
@@ -579,6 +584,7 @@ void matrix<DataType>:: set_identity(){
                 }
            }
         }
+        matrix_type = iden;
     }
     else{
         cout<<square_error;
@@ -592,7 +598,7 @@ void matrix<DataType>::fill(DataType value){
                 at(i,j) = value;
             }
         }
-        matrix_type=constant ;
+        matrix_type = constant;
     }
 }
 
@@ -640,7 +646,7 @@ matrix<DataType> matrix<DataType>:: operator+(const matrix&mat)const{
         return ret_mat ;
     }
     cout<<shape_error ;
-     matrix<DataType>error_mat(1,1,-1);
+    matrix<DataType>error_mat(1,1,-1);
     return error_mat  ;
 }
 // Subtract a matrix<DataType>from caller
@@ -739,7 +745,7 @@ bool matrix<DataType>::is_symmetric(void)const {
                 }
             }
         }
-    matrix_type =symmetric;
+    matrix_type = symmetric;
     return true ;
     }
     return false ;
@@ -749,7 +755,7 @@ template <typename DataType>
 bool matrix<DataType>::is_diagonal(void) const {
     bool logic= is_upper_tri()&&is_lower_tri();
     if(logic){
-        matrix_type==diagonal ;
+    matrix_type = diagonal;
     }
     return logic ;
 }
@@ -791,7 +797,7 @@ bool matrix<DataType>::is_orthogonal(void)const {
     trans_mat = *this *trans_mat ;
     bool logic =trans_mat.is_identity() ;
     if(logic){
-        matrix_type= orthonormal;
+    matrix_type = orthonormal;
     }
     return logic;
 }
@@ -895,15 +901,13 @@ matrix<DataType> matrix<DataType>::gauss_down( matrix<int>*pivots_indices,int  p
                 old_pivot = pivot_index ;
             }
         }
-        ret_mat.compress();
+        ret_mat.set_feature(utri);
         return ret_mat;
     }
     if(pivots_indices!=NULL){
         *pivots_indices=matrix<int>(rows,1,pindex,rows);
     }
-    matrix<DataType> ret_mat = *this;
-    ret_mat.compress()  ;
-    return ret_mat;
+    return *this;
 }
 //performs upward gaussian elimination producing a lower triangular matrix
 //optional if you want to know the indices of the pivots for each row
@@ -946,26 +950,24 @@ matrix<DataType> matrix<DataType>::gauss_up( matrix<int>*pivots_indices)const {
                 old_pivot = pivot_index ;
             }
         }
-        ret_mat.compress() ;
+        ret_mat.set_feature(ltri);
         return ret_mat;
     }
-    matrix<DataType>ret_mat = *this;
     if(pivots_indices!=NULL){
         *pivots_indices=matrix<int>(rows,1,pindex,rows);
     }
-    ret_mat.compress()  ;
-    return ret_mat ;
+    return *this ;
 }
 //this function switches 2 rows and returns state of switching meaning the rows are valid
 template <typename DataType>
 bool matrix<DataType>::switch_rows(int  r1 ,int  r2 ){
     if(r1>=0&&r1<get_rows()&&r2>=0&&r2<get_rows()&&r1!=r2){
-    for(int  i = 0 ; i <get_cols();i++){
-        swap(at(r1,i),at(r2,i));
-    }
-    return true ;
-}
-return false  ;
+        for(int  i = 0 ; i <get_cols();i++){
+            swap(at(r1,i),at(r2,i));
+        }
+        return true ;
+        }
+        return false  ;
 }
 //performs back substitution on lower triangular invertible matrix
 template <typename DataType>
@@ -1172,24 +1174,24 @@ bool matrix<DataType>:: is_idempotent(void)const {
 // Check if this matrix<DataType>is identity
 template <typename DataType>
 bool matrix<DataType>:: is_identity(void)const {
-        if(is_square()){
-    for(int  i = 0 ; i<rows;i++){
-        for(int  j= 0 ; j<cols; j++){
-            if(i==j){
-                if(abs(at(i,j)-1)>check_tolerance) {
-                    return false ;
+    if(is_square()){
+        for(int  i = 0 ; i<rows;i++){
+            for(int  j= 0 ; j<cols; j++){
+                if(i==j){
+                    if(abs(at(i,j)-1)>check_tolerance) {
+                        return false ;
+                    }
+                }
+                else{
+                    if(abs(at(i,j))>check_tolerance){
+                        return false ;
+                    }
                 }
             }
-            else{
-                if(abs(at(i,j))>check_tolerance){
-                    return false ;
-                }
-            }
+        }
+        set_feature(iden);
+        return true ;
     }
-}
-matrix_type= iden;
-return true ;
-}
 return false ;
 }//tested
     // Check if this matrix<DataType>is the zero matrix
@@ -1208,16 +1210,16 @@ bool matrix<DataType>::is_zero(void)const {
 template <typename DataType>
 
 bool matrix<DataType>::is_upper_tri(void)const  {
-        for(int  i =0 ; i <rows;i++){
-            for(int  j=  0 ; j<i&&j<get_cols(); j++){
-                    if(abs(at(i,j))>check_tolerance){
-                        return false ;
+    for(int  i =0 ; i <rows;i++){
+        for(int  j=  0 ; j<i&&j<get_cols(); j++){
+                if(abs(at(i,j))>check_tolerance){
+                    return false ;
 
-                    }
                 }
             }
-            matrix_type = utri;
-            return true ;
+        }
+        set_feature(utri);
+        return true ;
 }
 template <typename DataType>
 
@@ -1229,7 +1231,7 @@ bool matrix<DataType>::is_lower_tri()const {
                 }
             }
         }
-        matrix_type =ltri ;
+        set_feature(ltri);
         return true ;
 }
 // Check if this matrix<DataType>is scalar
@@ -1286,7 +1288,7 @@ bool matrix<DataType>::is_anti_symmetric(void)const {
         }
 
     }
-    matrix_type =anti_symmetric ;
+    set_feature(anti_symmetric);
     return true ;
     }
     return false ;
@@ -1328,18 +1330,10 @@ template <typename DataType>
 void  matrix<DataType>::lu_fact(matrix&lower_fact,matrix&permutation,matrix&upper_fact) const {
     if(matrix_type==utri){
         lower_fact=identity<DataType>(rows) ;
-        lower_fact.matrix_type=iden ;
-        lower_fact.compress_identity() ;
+        lower_fact.set_feature(iden);
         permutation=identity<DataType>(rows) ;
-        permutation.matrix_type=iden ;
-        permutation.compress_identity() ;
-        if(!is_compressed){
-           upper_fact = *this;
-           upper_fact.compress() ;
-        }
-        else{
-            upper_fact=*this;
-        }
+        permutation.set_feature(iden);
+        upper_fact=*this;
     }
     else{
     //first check if its square matrix
@@ -1380,10 +1374,8 @@ void  matrix<DataType>::lu_fact(matrix&lower_fact,matrix&permutation,matrix&uppe
                 return ;
                 }
             }
-            lower_fact.matrix_type=ltri;
-            upper_fact.matrix_type=utri ;
-            lower_fact.compress();
-            upper_fact.compress();
+            lower_fact.set_feature(ltri);
+            upper_fact.set_feature(utri) ;
         }
     else{
         cout<<square_error;
@@ -1495,7 +1487,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
         if(pivots_indices){
             *pivots_indices = pivots_locations ;
         }
-        ret_mat.compress();
+        ret_mat.set_feature(utri);
         return ret_mat ;
     }
     //checks if a set of vectors in a column space are independent
@@ -1804,8 +1796,7 @@ int matrix<DataType>:: is_pivot_up(int  r_ind , int  c_ind) {
         //projection matrix<DataType>for a system A
         //p  = A (AT A)^-1 AT
         AtransA = *this *AtransA* Atrans ;
-        AtransA.matrix_type= symmetric;
-        AtransA.compress_symmetric() ;
+        AtransA.set_feature(symmetric);
         return AtransA;
     }
     //fit an output column into a linear system
@@ -1892,7 +1883,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
                 projections_arr[vec_c] = res.projection();
             }
         }
-        ret_mat.matrix_type = orthonormal ;
+        ret_mat.set_feature(orthonormal);
         return ret_mat ;
     }
     //performs A -lambda * I
@@ -2040,7 +2031,6 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
                    ret_mat.at(j,i) =temp;
                 }
             }
-            ret_mat.compress() ;
             return ret_mat ;
         }
         cout<<"can't have 0 or -ve dimensions default garbage value is -1";
@@ -2204,7 +2194,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     //returns pivots of a matrix in column matrix
     template <typename DataType>
     matrix<DataType> matrix<DataType>:: get_pivots(matrix<int >*pivots_locations)const{
-        matrix<DataType> pivots(rows,1,0);
+        matrix<DataType> pivots(rows,rows,0);
         matrix<int > pivots_loc;
         matrix<DataType> temp=gauss_down(&pivots_loc,new_locations) ;
         int  piv_c = 0  ;
@@ -2216,7 +2206,6 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
             *pivots_locations = pivots_loc ;
         }
         pivots.set_feature(diagonal) ;
-        pivots.is_compressed=true;
         return pivots ;
     }
 
@@ -2224,7 +2213,7 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     template <typename DataType>
     bool matrix<DataType>::is_positive_definite(void)const{
         if(is_symmetric()){
-            matrix_type = symmetric ;
+            set_feature(symmetric);
             matrix<DataType> pivots= get_pivots();
                 for(int  i =  0; i<rows;i++){
                     if(abs(pivots.at(i,i))<=check_tolerance){
@@ -2240,10 +2229,9 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
     template<typename DataType>
     void matrix<DataType>:: qr_fact(matrix<DataType>&q,matrix<DataType>&r)const{
         q= gram_shmidt() ;
-        q.matrix_type= orthonormal;
+        q.set_feature(orthonormal);
         r= q.transpose() *(*this) ;
-        r.matrix_type =utri;
-        r.compress() ;
+        r.set_feature(utri);
     }
     //returns eigen values of a matrix in a column matrix
     //computations made by qr factorization
@@ -2272,12 +2260,11 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
             }
             iter++ ;
         }
+        eigen.resize(rows,rows);
         for(int  i=  0 ; i<mat_cpy.rows;i++){
-            eigen.at(i,0) = mat_cpy.at(i,i) ;
+            eigen.at(i,i) = mat_cpy.at(i,i) ;
         }
-        eigen.cols=rows;
         eigen.set_feature(diagonal);
-        eigen.is_compressed=true;
         return eigen ;
     }
 
@@ -2380,10 +2367,9 @@ i've noticed it produces wrong answers due to those 2 problems when testing the 
         for(int  i =0 ; i<s.rows;i++){
             s.at(i,i) =sqrt(s.at(i,i)) ;
         }
-        u.matrix_type=orthonormal;
-        s.matrix_type=diagonal;
-        s.cols= rows ;
-        vt.matrix_type=orthonormal;
+        u.set_feature(orthonormal);
+        s.set_feature(diagonal);
+        vt.set_feature(orthonormal);
     }
     //returns the linear transformation matrix that turns and input (caller) int o an output (input parameter)
     //input->system->output
@@ -2438,6 +2424,7 @@ void matrix<DataType> ::compress_utri(const matrix<int>&compression_vec){
     if(matrix_type==utri){
         //first dimensions
         is_compressed=true;
+        compression_type= utri_compress ;
         //mapping in here
         int*temp_row_start=get_vec<int>(rows,1) ;
         fill_vec(temp_row_start,rows ,-1)  ;
@@ -2504,6 +2491,7 @@ void matrix<DataType> ::compress_ltri(const matrix<int>&compression_vec){
         DataType*new_vec = get_vec<DataType>(size,1) ;
         actual_size = size;
         is_compressed=true;
+        compression_type= ltri_compress;
         int  pos = 0;
          for(int  i=  0 ;i<rows;i++){
             if(compression_vec.at(i,0)!=-1){
@@ -2540,6 +2528,7 @@ void matrix<DataType> ::compress_symmetric(void){
 //first dimensions
     if(matrix_type==symmetric){
         is_compressed=true;
+        compression_type = symmetric_compress;
         //mapping in here
         //size of acutall data in the matrix
         int  size = (rows*(rows+1))/2 ;
@@ -2577,6 +2566,7 @@ void matrix<DataType> ::compress_diagonal(void){
     //first dimensions
     if(matrix_type==diagonal){
         is_compressed=true;
+        compression_type = diagonal_compress;
         actual_size=rows;
         //mapping in here
         //size of acutall data in the matrix
@@ -2598,6 +2588,7 @@ void matrix<DataType>::compress_identity(void){
     //first dimensions
     if(matrix_type==iden){
         is_compressed=true;
+        compression_type = iden_compress;
         actual_size = 1;
         matrix_type =  iden ;
         //mapping in here
@@ -2617,6 +2608,7 @@ void matrix<DataType>::compress_const(void){
     if(matrix_type==constant){
         //first dimensions
         is_compressed=true;
+        compression_type = constant_compress;
         actual_size= 1;
         matrix_type =  constant ;
         //mapping in here
@@ -2813,6 +2805,7 @@ void matrix<DataType> ::compress(void){
             }
             delete[]vec;
             vec=new_vec;
+            compression_type= general_compress ;
             set_at_ptr(general);
         }
     }
@@ -2891,7 +2884,6 @@ void matrix<DataType> ::compress(void){
         return cols;
     }
     template<typename DataType>
-
     int matrix<DataType>::start(int row_i)const{
         return (this->*start_ptr)(row_i);
     }
@@ -2899,3 +2891,4 @@ void matrix<DataType> ::compress(void){
     int matrix<DataType>::end(int row_i)const{
         return (this->*end_ptr)(row_i);
     }
+
