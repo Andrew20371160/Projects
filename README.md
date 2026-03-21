@@ -1,5 +1,4 @@
 # Projects
-This repo contains references to every major project I built & will build
 
 # Matrix Library: https://github.com/Andrew20371160/Matrix-Library
 # Calculus Tree Library : https://github.com/Andrew20371160/Calculus-Tree-Library
